@@ -1,0 +1,25 @@
+{% extends "outreach/base.html" %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media }}
+{% endblock %}
+
+{% block page %}
+  <div class="view">
+    {% block breadcrumbs %}{% endblock %}
+    {% block head %}
+      <div class="head">
+        <div>
+          {% block pretitle %}{% endblock %}
+          <h2>{% block page_title %}{{ title }}{% endblock %}</h2>
+          {% block page_subtitle %}{% if subtitle %}<p>{{ subtitle }}</p>{% endif %}{% endblock %}
+        </div>
+        <div class="actions">
+          {% block object-tools %}{% endblock %}
+        </div>
+      </div>
+    {% endblock %}
+    {% block content %}{% endblock %}
+  </div>
+{% endblock %}

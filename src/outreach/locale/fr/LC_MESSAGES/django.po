@@ -1,0 +1,1227 @@
+# French translations for django-outreach.
+msgid ""
+msgstr ""
+"Project-Id-Version: django-outreach\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-08 18:19+0000\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Member"
+msgstr "Membre"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "No"
+msgstr "Non"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Send a mail to the selected prospects"
+msgstr "Envoyer un e-mail aux prospects sélectionnés"
+
+msgid "OUTREACH_BASE_URL is not set, sending is disabled."
+msgstr "OUTREACH_BASE_URL n’est pas défini, l’envoi est désactivé."
+
+msgid "None of the selected prospects can be mailed."
+msgstr "Aucun des prospects sélectionnés ne peut être contacté."
+
+#, python-format
+msgid "%(sent)d sent, %(skipped)d skipped, %(failed)d failed."
+msgstr "%(sent)d envoyés, %(skipped)d ignorés, %(failed)d en échec."
+
+msgid "Send a mail"
+msgstr "Envoyer un e-mail"
+
+msgid "That template is not available."
+msgstr "Ce modèle n’est pas disponible."
+
+#, python-format
+msgid ""
+"A template named “%(name)s” already exists. Tick the box to replace it."
+msgstr ""
+"Un modèle nommé « %(name)s » existe déjà. Cochez la case pour le remplacer."
+
+#, python-format
+msgid "A template named “%(name)s” already exists."
+msgstr "Un modèle nommé « %(name)s » existe déjà."
+
+msgid "You may not add templates."
+msgstr "Vous n’avez pas le droit d’ajouter des modèles."
+
+msgid "You may not replace templates."
+msgstr "Vous n’avez pas le droit de remplacer des modèles."
+
+msgid "Template saved."
+msgstr "Modèle enregistré."
+
+msgid "Unsubscribe the selected prospects"
+msgstr "Désinscrire les prospects sélectionnés"
+
+#, python-format
+msgid "%(count)d prospect unsubscribed."
+msgid_plural "%(count)d prospects unsubscribed."
+msgstr[0] "%(count)d prospect désinscrit."
+msgstr[1] "%(count)d prospects désinscrits."
+
+msgid "Link to user accounts"
+msgstr "Lier aux comptes utilisateurs"
+
+#, python-format
+msgid "%(count)d prospect linked."
+msgid_plural "%(count)d prospects linked."
+msgstr[0] "%(count)d prospect lié."
+msgstr[1] "%(count)d prospects liés."
+
+msgid "Individual"
+msgstr "Particulier"
+
+msgid "Organization"
+msgstr "Organisation"
+
+msgid "Prospect"
+msgstr "Prospect"
+
+msgid "Contacted"
+msgstr "Contacté"
+
+msgid "Unsubscribed"
+msgstr "Désinscrit"
+
+msgid "Added"
+msgstr "Ajouté"
+
+msgid "Imported"
+msgstr "Importé"
+
+msgid "Edited"
+msgstr "Modifié"
+
+msgid "Linked to an account"
+msgstr "Lié à un compte"
+
+msgid "Mail sent"
+msgstr "E-mail envoyé"
+
+msgid "Mail failed"
+msgstr "Échec de l’envoi"
+
+msgid "Suppressed"
+msgstr "Supprimé"
+
+msgid "Contacted recently"
+msgstr "Contacté récemment"
+
+msgid "Over the send limit"
+msgstr "Au-delà de la limite d’envoi"
+
+#, python-format
+msgid "Unknown variable(s): %(unknown)s. Use one of: %(allowed)s."
+msgstr ""
+"Variable(s) inconnue(s) : %(unknown)s. Utilisez l’une de : %(allowed)s."
+
+msgid "Malformed variable: check the braces around {{ ... }}."
+msgstr "Variable mal formée : vérifiez les accolades autour de {{ ... }}."
+
+msgid "The subject must be on a single line."
+msgstr "L’objet doit tenir sur une seule ligne."
+
+msgid "The message is empty."
+msgstr "Le message est vide."
+
+msgid "Subject"
+msgstr "Objet"
+
+msgid "Message"
+msgstr "Message"
+
+msgid "A template with this name already exists."
+msgstr "Un modèle portant ce nom existe déjà."
+
+msgid "Template name"
+msgstr "Nom du modèle"
+
+msgid "Replace the template if it exists"
+msgstr "Remplacer le modèle s’il existe"
+
+msgid "uuid"
+msgstr "identifiant"
+
+msgid "email"
+msgstr "e-mail"
+
+msgid "kind"
+msgstr "type"
+
+msgid "first name"
+msgstr "prénom"
+
+msgid "last name"
+msgstr "nom"
+
+msgid "organization"
+msgstr "organisation"
+
+msgid "status"
+msgstr "statut"
+
+msgid "user"
+msgstr "compte"
+
+msgid "city"
+msgstr "ville"
+
+msgid "country"
+msgstr "pays"
+
+msgid "last mailed at"
+msgstr "dernier envoi"
+
+msgid "created at"
+msgstr "créé le"
+
+msgid "updated at"
+msgstr "modifié le"
+
+msgid "prospect"
+msgstr "prospect"
+
+msgid "prospects"
+msgstr "prospects"
+
+msgid "subject"
+msgstr "objet"
+
+msgid "message"
+msgstr "message"
+
+msgid "sender"
+msgstr "expéditeur"
+
+msgid "sent"
+msgstr "envoyés"
+
+msgid "failed"
+msgstr "échecs"
+
+msgid "skipped"
+msgstr "ignoré"
+
+msgid "skipped reasons"
+msgstr "motifs d’exclusion"
+
+msgid "mailing"
+msgstr "envoi"
+
+msgid "mailings"
+msgstr "envois"
+
+msgid "name"
+msgstr "nom"
+
+msgid "created by"
+msgstr "créé par"
+
+msgid "email template"
+msgstr "modèle d’e-mail"
+
+msgid "email templates"
+msgstr "modèles d’e-mail"
+
+msgid "detail"
+msgstr "détail"
+
+msgid "actor"
+msgstr "auteur"
+
+msgid "prospect event"
+msgstr "événement du prospect"
+
+msgid "prospect events"
+msgstr "événements du prospect"
+
+msgid "email hash"
+msgstr "empreinte de l’e-mail"
+
+msgid "suppression"
+msgstr "suppression"
+
+msgid "suppressions"
+msgstr "suppressions"
+
+#, python-format
+msgid "The file has %(count)d rows, the limit is %(limit)d."
+msgstr "Le fichier contient %(count)d lignes, la limite est de %(limit)d."
+
+msgctxt "mail variable"
+msgid "First name"
+msgstr "Prénom"
+
+msgctxt "mail variable example"
+msgid "Alex"
+msgstr "Camille"
+
+msgctxt "mail variable"
+msgid "Last name"
+msgstr "Nom"
+
+msgctxt "mail variable example"
+msgid "Morgan"
+msgstr "Laurent"
+
+msgctxt "mail variable"
+msgid "Full name"
+msgstr "Nom complet"
+
+msgctxt "mail variable example"
+msgid "Alex Morgan"
+msgstr "Camille Laurent"
+
+msgctxt "mail variable"
+msgid "Organization"
+msgstr "Organisation"
+
+msgctxt "mail variable example"
+msgid "Acme Inc."
+msgstr "Cabinet Verdier"
+
+msgctxt "mail variable"
+msgid "Email"
+msgstr "E-mail"
+
+msgctxt "mail variable example"
+msgid "alex@example.org"
+msgstr "camille@example.org"
+
+msgctxt "mail variable"
+msgid "City"
+msgstr "Ville"
+
+msgctxt "mail variable example"
+msgid "Springfield"
+msgstr "Lyon"
+
+msgctxt "mail variable"
+msgid "Country"
+msgstr "Pays"
+
+msgctxt "mail variable example"
+msgid "United Kingdom"
+msgstr "France"
+
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "How to use"
+msgstr "Mode d’emploi"
+
+msgid "Error:"
+msgstr "Erreur :"
+
+msgid "Add prospect"
+msgstr "Ajouter un prospect"
+
+#, python-format
+msgid "%(name)s member"
+msgstr "Membre %(name)s"
+
+msgid "Prospects"
+msgstr "Prospects"
+
+msgid "Details"
+msgstr "Détails"
+
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] "Corrigez l’erreur ci-dessous."
+msgstr[1] "Corrigez les erreurs ci-dessous."
+
+msgid "The address cannot change. Add a new prospect instead."
+msgstr "L’adresse ne peut pas changer. Ajoutez plutôt un nouveau prospect."
+
+#, python-format
+msgid "%(name)s account"
+msgstr "Compte %(name)s"
+
+#, python-format
+msgid "Member since %(joined)s"
+msgstr "Membre depuis le %(joined)s"
+
+msgid "Linked automatically because the email matches."
+msgstr "Lié automatiquement car l’adresse e-mail correspond."
+
+msgid ""
+"Not linked to an account yet. The link is made when a member signs up with "
+"this email."
+msgstr ""
+"Pas encore lié à un compte. Le lien se fait quand un membre s’inscrit avec "
+"cette adresse."
+
+msgid "Timeline"
+msgstr "Historique"
+
+msgid "Nothing has happened yet."
+msgstr "Rien ne s’est encore passé."
+
+msgid "People and organisations, members or not yet enrolled."
+msgstr "Personnes et organisations, membres ou pas encore inscrites."
+
+msgid "Filter"
+msgstr "Filtrer"
+
+msgid "Clear all filters"
+msgstr "Effacer tous les filtres"
+
+#, python-format
+msgid "Step %(current)s of %(total)s"
+msgstr "Étape %(current)s sur %(total)s"
+
+msgid "Write a message"
+msgstr "Rédiger un message"
+
+msgid "Every message ends with an unsubscribe link."
+msgstr "Chaque message se termine par un lien de désinscription."
+
+msgid "Template"
+msgstr "Modèle"
+
+msgid "No template"
+msgstr "Aucun modèle"
+
+msgid "No templates yet"
+msgstr "Aucun modèle pour l’instant"
+
+msgid "Use template"
+msgstr "Utiliser le modèle"
+
+#, python-format
+msgid ""
+"Using the template <strong>%(name)s</strong>. Your previous text was "
+"replaced."
+msgstr ""
+"Modèle <strong>%(name)s</strong> utilisé. Votre texte précédent a été "
+"remplacé."
+
+#, python-format
+msgid ""
+"Variables are replaced for each recipient. Add a fallback after a pipe, for "
+"example <code>%(example)s</code> sends “there” when the name is empty."
+msgstr ""
+"Les variables sont remplacées pour chaque destinataire. Ajoutez une valeur "
+"de repli après une barre verticale, par exemple <code>%(example)s</code> "
+"écrit « there » quand le prénom est vide."
+
+msgid "Need help?"
+msgstr "Besoin d’aide ?"
+
+msgid "Preview message"
+msgstr "Aperçu du message"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Save this message as a template"
+msgstr "Enregistrer ce message comme modèle"
+
+msgid "Save as template"
+msgstr "Enregistrer comme modèle"
+
+msgid "Replace the template if the name already exists"
+msgstr "Remplacer le modèle si le nom existe déjà"
+
+msgid ""
+"You need permission to add templates. Replacing needs permission to change "
+"them."
+msgstr ""
+"Il faut l’autorisation d’ajouter des modèles. Remplacer demande "
+"l’autorisation de les modifier."
+
+msgid "Recipients"
+msgstr "Destinataires"
+
+msgid "will receive this message"
+msgstr "recevront ce message"
+
+#, python-format
+msgid "%(selected)s selected, %(skipped_count)s skipped"
+msgstr "%(selected)s sélectionnés, %(skipped_count)s ignorés"
+
+#, python-format
+msgid "At most %(maximum)s messages are sent at once."
+msgstr "Au plus %(maximum)s messages sont envoyés à la fois."
+
+#, python-format
+msgid "Mailed %(ago)s ago"
+msgstr "Contacté il y a %(ago)s"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
+"related objects, but your account doesn't have permission to delete the "
+"following types of objects:"
+msgstr ""
+"Supprimer l’objet %(object_name)s « %(escaped_object)s » provoquerait la "
+"suppression des objets qui lui sont liés, mais votre compte ne possède pas "
+"la permission de supprimer les types d’objets suivants :"
+
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the"
+" following protected related objects:"
+msgstr ""
+"Supprimer l’objet %(object_name)s « %(escaped_object)s » provoquerait la "
+"suppression des objets liés et protégés suivants :"
+
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
+"All of the following related items will be deleted:"
+msgstr ""
+"Voulez-vous vraiment supprimer l’objet %(object_name)s "
+"« %(escaped_object)s » ? Les éléments suivants sont liés à celui-ci et "
+"seront aussi supprimés :"
+
+msgid "Objects"
+msgstr "Objets"
+
+msgid "Yes, I’m sure"
+msgstr "Oui, je suis sûr"
+
+msgid "No, take me back"
+msgstr "Non, revenir à la page précédente"
+
+msgid "Delete multiple objects"
+msgstr "Supprimer plusieurs objets"
+
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would result in deleting related "
+"objects, but your account doesn't have permission to delete the following "
+"types of objects:"
+msgstr ""
+"La suppression des objets %(objects_name)s sélectionnés provoquerait la "
+"suppression d’objets liés, mais votre compte n’est pas autorisé à supprimer "
+"les types d’objet suivants :"
+
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would require deleting the following "
+"protected related objects:"
+msgstr ""
+"La suppression des objets %(objects_name)s sélectionnés provoquerait la "
+"suppression des objets liés et protégés suivants :"
+
+#, python-format
+msgid ""
+"Are you sure you want to delete the selected %(objects_name)s? All of the "
+"following objects and their related items will be deleted:"
+msgstr ""
+"Voulez-vous vraiment supprimer les objets %(objects_name)s sélectionnés ? "
+"Tous les objets suivants et les éléments liés seront supprimés :"
+
+msgid "Add template"
+msgstr "Ajouter un modèle"
+
+msgid ""
+"Changes apply to the next message that uses this template. Messages already "
+"sent are not touched."
+msgstr ""
+"Les modifications s’appliquent au prochain message qui utilise ce modèle. "
+"Les messages déjà envoyés ne sont pas modifiés."
+
+msgid "Templates"
+msgstr "Modèles"
+
+msgid "Message as written"
+msgstr "Message tel qu’écrit"
+
+msgid "Preview with sample values"
+msgstr "Aperçu avec des valeurs d’exemple"
+
+msgid "Saved subjects and messages anyone allowed to send can reuse."
+msgstr ""
+"Objets et messages enregistrés que toute personne autorisée à envoyer peut "
+"réutiliser."
+
+msgid ""
+"Write a message once, save it as a template, and pick it again the next time"
+" you send. You can also add one here."
+msgstr ""
+"Rédigez un message une fois, enregistrez-le comme modèle et choisissez-le à "
+"nouveau lors d’un prochain envoi. Vous pouvez aussi en ajouter un ici."
+
+msgid "Export"
+msgstr "Exporter"
+
+#, python-format
+msgid "Export %(len)s selected item."
+msgid_plural "Export %(len)s selected items."
+msgstr[0] "Exporter %(len)s élément sélectionné."
+msgstr[1] "Exporter %(len)s éléments sélectionnés."
+
+msgid "This exporter will export the following fields: "
+msgstr "Cet exportateur va exporter les champs suivants: "
+
+msgid "Select all"
+msgstr "Tout sélectionner"
+
+msgid "Submit"
+msgstr "Soumettre"
+
+msgid "How to use Outreach"
+msgstr "Utiliser Outreach"
+
+msgid "Everything you need to add prospects and send a message."
+msgstr ""
+"Tout ce qu’il faut savoir pour ajouter des prospects et envoyer un message."
+
+msgid "Sections"
+msgstr "Rubriques"
+
+msgid "What a prospect is"
+msgstr "Ce qu’est un prospect"
+
+msgid "Add and import prospects"
+msgstr "Ajouter et importer des prospects"
+
+msgid "Search and filter"
+msgstr "Rechercher et filtrer"
+
+msgid "Send a message"
+msgstr "Envoyer un message"
+
+msgid "Variables"
+msgstr "Variables"
+
+msgid "Who is skipped"
+msgstr "Qui est ignoré"
+
+msgid "Unsubscribing"
+msgstr "Désinscription"
+
+msgid "Mailings"
+msgstr "Envois"
+
+msgid "Permissions"
+msgstr "Permissions"
+
+msgid "Troubleshooting"
+msgstr "Dépannage"
+
+#, python-format
+msgid ""
+"A prospect is a person or an organisation you may write to. They can be "
+"%(name)s members or people who have not enrolled yet."
+msgstr ""
+"Un prospect est une personne ou une organisation à qui vous pouvez écrire. "
+"Ce peut être un membre %(name)s ou quelqu’un qui n’est pas encore inscrit."
+
+msgid "has never been mailed."
+msgstr "n’a jamais été contacté."
+
+msgid "has received at least one message."
+msgstr "a reçu au moins un message."
+
+msgid "will never be mailed again."
+msgstr "ne sera plus jamais contacté."
+
+#, python-format
+msgid ""
+"means the email matches a %(name)s account. The link is made automatically."
+msgstr ""
+"signifie que l’e-mail correspond à un compte %(name)s. Le lien se fait "
+"automatiquement."
+
+msgid ""
+"Use Add prospect for one person, or Import CSV for many. Every row needs an "
+"email address. These columns are read, and the alternative headers work too:"
+msgstr ""
+"Utilisez Ajouter un prospect pour une personne, ou Importer un CSV pour "
+"plusieurs. Chaque ligne doit avoir une adresse e-mail. Ces colonnes sont "
+"lues, et les en-têtes alternatifs fonctionnent aussi :"
+
+msgid "Column"
+msgstr "Colonne"
+
+msgid "Other accepted headers"
+msgstr "Autres en-têtes acceptés"
+
+msgid ""
+"Addresses already in Outreach are skipped. One invalid row cancels the whole"
+" file, so nothing is half imported, and the error names the row."
+msgstr ""
+"Les adresses déjà présentes dans Outreach sont ignorées. Une ligne invalide "
+"annule tout le fichier, donc rien n’est importé à moitié, et l’erreur "
+"indique la ligne."
+
+msgid ""
+"The search box looks in names, organisations and emails. The chips above the"
+" list filter by type, status and member. Filters combine, and they also "
+"decide what Select all takes."
+msgstr ""
+"La recherche porte sur les noms, les organisations et les e-mails. Les puces"
+" au-dessus de la liste filtrent par type, statut et membre. Les filtres se "
+"combinent, et ils décident aussi de ce que prend Tout sélectionner."
+
+msgid ""
+"Tick the prospects in the list. To take every match of the current filters, "
+"use Select all under the list."
+msgstr ""
+"Cochez les prospects dans la liste. Pour prendre tous les résultats des "
+"filtres en cours, utilisez Tout sélectionner sous la liste."
+
+msgid "Choose Send a mail in the Action menu and press Go."
+msgstr ""
+"Choisissez Envoyer un e-mail dans le menu Action et appuyez sur Envoyer."
+
+msgid ""
+"Write the subject and the message. Insert variable puts a person's name or "
+"another detail into the text."
+msgstr ""
+"Rédigez l’objet et le message. Insérer une variable place le nom d’une "
+"personne ou un autre détail dans le texte."
+
+msgid "Press Preview message. Use Preview as to see it for another recipient."
+msgstr ""
+"Appuyez sur Aperçu du message. Utilisez Aperçu pour voir le rendu pour un "
+"autre destinataire."
+
+msgid ""
+"Press Send. A summary tells you how many were sent, skipped and failed."
+msgstr ""
+"Appuyez sur Envoyer. Un résumé indique combien de messages sont partis, ont "
+"été ignorés ou ont échoué."
+
+msgid ""
+"Variables are replaced for each recipient, in the subject and in the "
+"message. Write them between double braces."
+msgstr ""
+"Les variables sont remplacées pour chaque destinataire, dans l’objet et dans"
+" le message. Écrivez-les entre doubles accolades."
+
+msgid "Variable"
+msgstr "Variable"
+
+msgid "Example"
+msgstr "Exemple"
+
+msgid "Description"
+msgstr "Description"
+
+#, python-format
+msgid ""
+"<code>%(placeholder)s</code> is the link recipients use to unsubscribe. It "
+"is added automatically at the bottom of every message, and you can also use "
+"it as the target of a link."
+msgstr ""
+"<code>%(placeholder)s</code> est le lien que les destinataires utilisent "
+"pour se désinscrire. Il est ajouté automatiquement en bas de chaque message,"
+" et vous pouvez aussi l’utiliser comme cible d’un lien."
+
+#, python-format
+msgid ""
+"Add a fallback after a pipe: <code>%(example)s</code> writes “there” when "
+"the first name is empty. A name that is not in the table stops the preview, "
+"so nothing odd is ever sent."
+msgstr ""
+"Ajoutez une valeur de repli après une barre verticale : "
+"<code>%(example)s</code> écrit « there » quand le prénom est vide. Un nom "
+"absent du tableau bloque l’aperçu, donc rien d’étrange n’est jamais envoyé."
+
+msgid ""
+"Prospects who unsubscribed, and addresses that unsubscribed before and were "
+"imported again."
+msgstr ""
+"Les prospects désinscrits, et les adresses désinscrites auparavant puis "
+"importées à nouveau."
+
+#, python-format
+msgid "Prospects mailed within the last %(hours)s hours."
+msgstr "Les prospects contactés dans les %(hours)s dernières heures."
+
+#, python-format
+msgid ""
+"Anyone past the first %(maximum)s recipients of one send. Send again later "
+"for the rest."
+msgstr ""
+"Tous ceux au-delà des %(maximum)s premiers destinataires d’un envoi. "
+"Renvoyez plus tard pour le reste."
+
+msgid "The compose page lists who is skipped and why before you send."
+msgstr ""
+"La page de rédaction indique qui est ignoré et pourquoi avant l’envoi."
+
+msgid ""
+"Every message ends with an unsubscribe link. The recipient confirms with one"
+" click on a page of their own, and no account is needed."
+msgstr ""
+"Chaque message se termine par un lien de désinscription. Le destinataire "
+"confirme en un clic sur sa propre page, sans compte."
+
+msgid ""
+"Unsubscribing is final. The address is never mailed again, even if the "
+"prospect is deleted and imported again."
+msgstr ""
+"La désinscription est définitive. L’adresse n’est plus jamais contactée, "
+"même si le prospect est supprimé puis importé à nouveau."
+
+msgid ""
+"Each send is recorded under Mailings with its subject, the message as "
+"written, who sent it and the counts. Open a prospect to see which mailings "
+"reached them."
+msgstr ""
+"Chaque envoi est enregistré dans Envois avec son objet, le message tel "
+"qu’écrit, son auteur et les totaux. Ouvrez un prospect pour voir quels "
+"envois l’ont atteint."
+
+msgid ""
+"A template is a saved subject and message you can reuse. Everyone who may "
+"send mail sees the same list."
+msgstr ""
+"Un modèle est un objet et un message enregistrés que vous pouvez réutiliser."
+" Toutes les personnes autorisées à envoyer voient la même liste."
+
+msgid ""
+"To use one, open the compose page, choose it in the Template menu and press "
+"Use template. Your current text is replaced. To keep what you wrote, save it"
+" first with Save as template."
+msgstr ""
+"Pour en utiliser un, ouvrez la page de rédaction, choisissez-le dans le menu"
+" Modèle et appuyez sur Utiliser le modèle. Votre texte actuel est remplacé. "
+"Pour conserver ce que vous avez écrit, enregistrez-le d’abord avec "
+"Enregistrer comme modèle."
+
+msgid ""
+"To change a template, open Templates in the menu. Editing a template never "
+"changes mailings that were already sent, because each mailing keeps the "
+"message as it was sent."
+msgstr ""
+"Pour modifier un modèle, ouvrez Modèles dans le menu. Modifier un modèle ne "
+"change jamais les envois déjà partis, car chaque envoi conserve le message "
+"tel qu’il a été envoyé."
+
+msgid "Permission"
+msgstr "Permission"
+
+msgid "Lets staff"
+msgstr "Permet à l’équipe de"
+
+msgid "View templates"
+msgstr "Voir les modèles"
+
+msgid "See the list and pick a template when composing."
+msgstr "Voir la liste et choisir un modèle en rédigeant."
+
+msgid "Add templates"
+msgstr "Ajouter des modèles"
+
+msgid "Create a template, or save a message as one."
+msgstr "Créer un modèle, ou enregistrer un message comme modèle."
+
+msgid "Change templates"
+msgstr "Modifier les modèles"
+
+msgid "Edit a template, or replace one when saving."
+msgstr "Modifier un modèle, ou en remplacer un à l’enregistrement."
+
+msgid "Delete templates"
+msgstr "Supprimer des modèles"
+
+msgid "Delete a template."
+msgstr "Supprimer un modèle."
+
+msgid "View prospects"
+msgstr "Voir les prospects"
+
+msgid "Open Outreach and read prospects."
+msgstr "Ouvrir Outreach et lire les prospects."
+
+msgid "View mailings"
+msgstr "Voir les envois"
+
+msgid "Read the Mailings log."
+msgstr "Lire le journal des envois."
+
+msgid "Add prospects"
+msgstr "Ajouter des prospects"
+
+msgid "Add one prospect and import files."
+msgstr "Ajouter un prospect et importer des fichiers."
+
+msgid "Change prospects"
+msgstr "Modifier les prospects"
+
+msgid "Edit, send mail, unsubscribe and link accounts."
+msgstr "Modifier, envoyer des e-mails, désinscrire et lier des comptes."
+
+msgid "Delete prospects"
+msgstr "Supprimer des prospects"
+
+msgid "Delete prospects. The unsubscribe record stays."
+msgstr "Supprimer des prospects. La trace de désinscription reste."
+
+#, python-format
+msgid ""
+"<strong>Sending is refused.</strong> The site address for the unsubscribe "
+"link is not configured. Ask a developer to set <code>%(setting)s</code>."
+msgstr ""
+"<strong>L’envoi est refusé.</strong> L’adresse du site pour le lien de "
+"désinscription n’est pas configurée. Demandez à un développeur de définir "
+"<code>%(setting)s</code>."
+
+msgid ""
+"<strong>A recipient is marked failed.</strong> The mail server refused that "
+"message. Check the address, then send to that prospect again."
+msgstr ""
+"<strong>Un destinataire est en échec.</strong> Le serveur de messagerie a "
+"refusé ce message. Vérifiez l’adresse, puis renvoyez à ce prospect."
+
+msgid ""
+"<strong>An old link shows “unsubscribed”.</strong> The prospect was deleted "
+"since the mail went out. Nothing is stored for that link."
+msgstr ""
+"<strong>Un ancien lien affiche « désinscrit ».</strong> Le prospect a été "
+"supprimé depuis l’envoi. Rien n’est conservé pour ce lien."
+
+msgid "Import"
+msgstr "Importer"
+
+msgid ""
+"Below is a preview of data to be imported. If you are satisfied with the "
+"results, click 'Confirm import'"
+msgstr ""
+"Voici un aperçu des données à importer. Si vous êtes satisfait(e) des "
+"résultats, cliquez sur 'Confirmer l’importation'"
+
+msgid "Confirm import"
+msgstr "Confirmer l’importation"
+
+msgid "Errors"
+msgstr "Erreurs"
+
+msgid "Line number"
+msgstr "Numéro de ligne"
+
+msgid "Some rows failed to validate"
+msgstr "Certaines lignes ont échoué à la validation"
+
+msgid ""
+"Please correct these errors in your data where possible, then reupload it "
+"using the form above."
+msgstr ""
+"Veuillez corriger ces erreurs dans les données si possible, puis envoyer à "
+"nouveau en utilisant le formulaire ci-dessus."
+
+msgid "Row"
+msgstr "Ligne"
+
+msgid "Non field specific"
+msgstr "Non spécifique à un champ"
+
+msgid "Preview"
+msgstr "Aperçu"
+
+msgid "New"
+msgstr "Nouveau"
+
+msgid "Skipped"
+msgstr "Ignorés"
+
+msgid "Update"
+msgstr "Mettre à jour"
+
+msgid "Where your prospects stand today."
+msgstr "Où en sont vos prospects aujourd’hui."
+
+msgid "Import CSV"
+msgstr "Importer un CSV"
+
+#, python-format
+msgid "%(name)s members"
+msgstr "Membres %(name)s"
+
+msgid "Recent activity"
+msgstr "Activité récente"
+
+msgid "Before you send"
+msgstr "Avant d’envoyer"
+
+#, python-format
+msgid "Same address mailed within %(hours)s hours"
+msgstr "Même adresse contactée dans les dernières %(hours)s heures"
+
+msgid "Unsubscribed or suppressed address"
+msgstr "Adresse désinscrite ou supprimée"
+
+msgid "never mailed"
+msgstr "jamais contactée"
+
+msgid "Recipients per send"
+msgstr "Destinataires par envoi"
+
+#, python-format
+msgid "%(maximum)s max"
+msgstr "%(maximum)s max"
+
+msgid "Signed out"
+msgstr "Déconnecté"
+
+msgid "You are signed out"
+msgstr "Vous êtes déconnecté"
+
+msgid "Thanks for spending some time with Outreach today."
+msgstr "Merci d’avoir passé du temps sur Outreach aujourd’hui."
+
+msgid "Log in again"
+msgstr "Se reconnecter"
+
+msgid "Sign in"
+msgstr "Connexion"
+
+msgid "Sign in to Outreach"
+msgstr "Connexion à Outreach"
+
+#, python-format
+msgid "For %(name)s staff accounts."
+msgstr "Réservé aux comptes de l’équipe %(name)s."
+
+#, python-format
+msgid ""
+"You are authenticated as %(name)s, but are not authorized to access this "
+"page. Would you like to login to a different account?"
+msgstr ""
+"Vous êtes connecté en tant que %(name)s, mais vous n’avez pas accès à cette "
+"page. Voulez-vous vous connecter avec un autre compte ?"
+
+msgid "Log in"
+msgstr "Se connecter"
+
+msgid "Mailing"
+msgstr "Envoi"
+
+#, python-format
+msgid "Sent by %(sender)s on %(sent_at)s."
+msgstr "Envoyé par %(sender)s le %(sent_at)s."
+
+msgctxt "tile"
+msgid "Sent"
+msgstr "Envoyés"
+
+msgctxt "tile"
+msgid "Failed"
+msgstr "Échecs"
+
+msgctxt "tile"
+msgid "Skipped"
+msgstr "Ignorés"
+
+msgid "Message as written, variables not yet filled in"
+msgstr "Message tel qu’écrit, variables pas encore remplies"
+
+msgctxt "recipient"
+msgid "failed"
+msgstr "échec"
+
+msgctxt "recipient"
+msgid "sent"
+msgstr "envoyé"
+
+msgid "No recipient is kept for this mailing."
+msgstr "Aucun destinataire n’est conservé pour cet envoi."
+
+msgid "Open a prospect to see every mailing that reached them."
+msgstr "Ouvrez un prospect pour voir tous les envois qui l’ont atteint."
+
+msgid ""
+"Skipped people are counted, never named, so an erasure request leaves "
+"nothing behind."
+msgstr ""
+"Les personnes ignorées sont comptées, jamais nommées, donc une demande "
+"d’effacement ne laisse rien derrière elle."
+
+msgctxt "count label"
+msgid "sent"
+msgstr "envoyés"
+
+msgctxt "count label"
+msgid "failed"
+msgstr "échecs"
+
+msgctxt "count label"
+msgid "skipped"
+msgstr "ignorés"
+
+msgid "Every message sent from Outreach, kept for your records."
+msgstr "Chaque message envoyé depuis Outreach, conservé pour vos archives."
+
+msgid "Check and send"
+msgstr "Vérifier et envoyer"
+
+#, python-format
+msgid "This is what the recipient will get, with their own details filled in."
+msgid_plural ""
+"This is what each of the %(counter)s recipients will get, with their own "
+"details filled in."
+msgstr[0] ""
+"Voici ce que recevra le destinataire, avec ses propres informations."
+msgstr[1] ""
+"Voici ce que recevront chacun des %(counter)s destinataires, avec leurs "
+"propres informations."
+
+msgid "Edit message"
+msgstr "Modifier le message"
+
+#, python-format
+msgid "Send to %(counter)s prospect"
+msgid_plural "Send to %(counter)s prospects"
+msgstr[0] "Envoyer à %(counter)s prospect"
+msgstr[1] "Envoyer à %(counter)s prospects"
+
+msgid "Preview as"
+msgstr "Aperçu pour"
+
+msgid "Update preview"
+msgstr "Actualiser l’aperçu"
+
+msgid "To:"
+msgstr "À :"
+
+msgid "Message preview"
+msgstr "Aperçu du message"
+
+msgid "Skip to main content"
+msgstr "Aller au contenu principal"
+
+msgid "Outreach"
+msgstr "Outreach"
+
+msgid "Search prospects"
+msgstr "Rechercher des prospects"
+
+msgid "Open Django admin"
+msgstr "Ouvrir l’admin Django"
+
+msgid "Log out"
+msgstr "Se déconnecter"
+
+msgid "Help"
+msgstr "Aide"
+
+#, python-format
+msgid ""
+"You receive this message because %(name)s thought it could be useful to you."
+msgstr ""
+"Vous recevez ce message car %(name)s a pensé qu’il pourrait vous être utile."
+
+msgid "Unsubscribe"
+msgstr "Se désinscrire"
+
+msgid "at any time, in one click."
+msgstr "à tout moment, en un clic."
+
+msgid "Unsubscribe at any time, in one click:"
+msgstr "Vous désinscrire à tout moment, en un clic :"
+
+msgid "system"
+msgstr "système"
+
+msgid "recipient"
+msgstr "destinataire"
+
+msgid "import"
+msgstr "import"
+
+msgid "unsubscribed"
+msgstr "désinscrit"
+
+msgid "recently mailed"
+msgstr "contacté récemment"
+
+msgid "over the limit"
+msgstr "au-delà de la limite"
+
+#, python-format
+msgid "Unsubscribe from %(name)s"
+msgstr "Se désinscrire de %(name)s"
+
+#, python-format
+msgid "Stop receiving emails from %(name)s?"
+msgstr "Ne plus recevoir d’e‑mails de %(name)s ?"
+
+#, python-format
+msgid ""
+"You are about to unsubscribe <strong>%(address)s</strong>. We will not write"
+" to this address again."
+msgstr ""
+"Vous allez désinscrire <strong>%(address)s</strong>. Nous n’écrirons plus à "
+"cette adresse."
+
+msgid "If you do nothing, you will keep receiving our emails."
+msgstr "Si vous ne faites rien, vous continuerez à recevoir nos e-mails."
+
+msgid "You are unsubscribed"
+msgstr "Vous êtes désinscrit"
+
+#, python-format
+msgid "%(address)s will not receive any more emails from %(name)s."
+msgstr "%(address)s ne recevra plus d’e-mails de %(name)s."
+
+#, python-format
+msgid "This address will not receive any more emails from %(name)s."
+msgstr "Cette adresse ne recevra plus d’e-mails de %(name)s."
+
+msgid "Formatting"
+msgstr "Mise en forme"
+
+msgid "Bold"
+msgstr "Gras"
+
+msgid "Italic"
+msgstr "Italique"
+
+msgid "Strikethrough"
+msgstr "Barré"
+
+msgid "Heading"
+msgstr "Titre"
+
+msgid "Quote"
+msgstr "Citation"
+
+msgid "Bulleted list"
+msgstr "Liste à puces"
+
+msgid "Numbered list"
+msgstr "Liste numérotée"
+
+msgid "Link"
+msgstr "Lien"
+
+msgid "Undo"
+msgstr "Annuler"
+
+msgid "Redo"
+msgstr "Rétablir"
+
+msgid "{ } Insert variable"
+msgstr "{ } Insérer une variable"
+
+msgid "Link address"
+msgstr "Adresse du lien"
+
+msgid "Unlink"
+msgstr "Retirer le lien"
+
+msgid "Message body"
+msgstr "Corps du message"

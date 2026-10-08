@@ -1,0 +1,36 @@
+{% load i18n %}
+<input type="hidden" name="{{ widget.name }}" id="{{ widget.attrs.id }}_input" value="{{ widget.value|default_if_none:'' }}">
+<trix-toolbar id="{{ widget.attrs.id }}_toolbar" class="tools" role="toolbar" aria-label="{% trans 'Formatting' %}">
+  <button type="button" class="tool" data-trix-attribute="bold" data-trix-key="b" title="{% trans 'Bold' %}"><b>B</b></button>
+  <button type="button" class="tool" data-trix-attribute="italic" data-trix-key="i" title="{% trans 'Italic' %}"><i>I</i></button>
+  <button type="button" class="tool" data-trix-attribute="strike" title="{% trans 'Strikethrough' %}"><s>S</s></button>
+  <button type="button" class="tool" data-trix-attribute="heading1" title="{% trans 'Heading' %}">H</button>
+  <button type="button" class="tool" data-trix-attribute="quote" title="{% trans 'Quote' %}">&ldquo;</button>
+  <button type="button" class="tool" data-trix-attribute="bullet" title="{% trans 'Bulleted list' %}"><svg class="ico sm"><use href="#i-list"/></svg></button>
+  <button type="button" class="tool" data-trix-attribute="number" title="{% trans 'Numbered list' %}">1.</button>
+  <button type="button" class="tool" data-trix-attribute="href" data-trix-action="link" data-trix-key="k" title="{% trans 'Link' %}"><svg class="ico sm"><use href="#i-link"/></svg></button>
+  <span class="sep"></span>
+  <button type="button" class="tool" data-trix-action="undo" data-trix-key="z" title="{% trans 'Undo' %}"><svg class="ico sm"><use href="#i-undo"/></svg></button>
+  <button type="button" class="tool" data-trix-action="redo" data-trix-key="shift+z" title="{% trans 'Redo' %}"><svg class="ico sm"><use href="#i-redo"/></svg></button>
+  <span class="grow"></span>
+  <div class="menuwrap">
+    <button type="button" class="tool varbtn" data-outreach-variable-toggle aria-haspopup="menu" aria-expanded="false">{% trans "{ } Insert variable" %}</button>
+    <div class="menu" role="menu" hidden>
+      {% for variable in variables %}
+        <button type="button" role="menuitem" data-trix-variable="{{ variable.key }}"><code>{{ variable.key }}</code><span>{{ variable.example }}</span></button>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="trix-dialogs" data-trix-dialogs>
+    <div class="trix-dialog trix-dialog--link" data-trix-dialog="href" data-trix-dialog-attribute="href">
+      <div class="trix-dialog__link-fields">
+        <input type="text" name="href" class="trix-input trix-input--dialog" placeholder="https://" pattern="(https?://\S+|mailto:\S+|\{\{ unsubscribe_url \}\})" inputmode="url" aria-label="{% trans 'Link address' %}" required data-trix-input disabled>
+        <div class="trix-button-group">
+          <input type="button" class="trix-button trix-button--dialog" value="{% trans 'Link' %}" data-trix-method="setAttribute">
+          <input type="button" class="trix-button trix-button--dialog" value="{% trans 'Unlink' %}" data-trix-method="removeAttribute">
+        </div>
+      </div>
+    </div>
+  </div>
+</trix-toolbar>
+<trix-editor input="{{ widget.attrs.id }}_input" toolbar="{{ widget.attrs.id }}_toolbar" class="body" role="textbox" aria-multiline="true" aria-label="{% trans 'Message body' %}"></trix-editor>

@@ -1,0 +1,1 @@
+{% load static %}{% if logo_path %}<picture>{% if logo_dark_path %}<source media="(prefers-color-scheme: dark)" srcset="{% static logo_dark_path %}">{% endif %}<img class="logo {{ logo_class }}" src="{% static logo_path %}" alt="{{ site_name }}"></picture>{% else %}<span class="wordmark {{ logo_class }}">{{ site_name }}</span>{% endif %}

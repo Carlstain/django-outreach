@@ -1,0 +1,78 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n admin_urls %}
+
+{% block title %}{{ original.subject }} | {{ site_name }}{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} mailing-detail{% endblock %}
+
+{% block head %}
+  {% url opts|admin_urlname:'changelist' as changelist_url %}
+  <div class="head">
+    <div>
+      <p class="eyebrow">{% trans "Mailing" %}</p>
+      <h2>{{ original.subject }}</h2>
+      <p>{% blocktrans with sender=original.sender sent_at=original.created_at|date:"DATETIME_FORMAT" %}Sent by {{ sender }} on {{ sent_at }}.{% endblocktrans %}</p>
+    </div>
+    <div class="actions">
+      <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Mailings" %}</a>
+      {% if has_delete_permission %}
+        {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+        <a class="btn danger" href="{% add_preserved_filters delete_url %}">{% trans "Delete" %}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="tiles three">
+    <div class="tile"><b>{{ original.sent_count }}</b><span>{% trans "Sent" context "tile" %}</span></div>
+    <div class="tile"><b>{{ original.failed_count }}</b><span>{% trans "Failed" context "tile" %}</span></div>
+    <div class="tile"><b>{{ original.skipped_count }}</b><span>{% trans "Skipped" context "tile" %}</span></div>
+  </div>
+  <div class="cols">
+    <div class="card email wide-email">
+      <header>
+        <div>{% trans "Message as written, variables not yet filled in" %}</div>
+        <strong>{{ original.subject }}</strong>
+      </header>
+      <iframe class="email-frame" sandbox title="{% trans 'Message as written' %}" srcdoc="{% filter force_escape %}<!DOCTYPE html><html><body style='font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: {{ theme.email.text }}; margin: 16px;'>{{ original.body_html|safe }}</body></html>{% endfilter %}"></iframe>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <h3>{% trans "Recipients" %}</h3>
+        {% if recipients %}
+          <ul class="skiplist">
+            {% for event in recipients %}
+              <li>
+                <span>
+                  <strong><a href="{% url 'outreach_admin:outreach_prospect_change' event.prospect.pk|admin_urlquote %}">{{ event.prospect.display_name }}</a></strong>
+                  {% if event.kind == "mail_failed" and event.detail %}<br><small>{{ event.detail }}</small>{% endif %}
+                </span>
+                {% if event.kind == "mail_failed" %}<span class="badge unsub">{% trans "failed" context "recipient" %}</span>{% else %}<span class="badge contacted">{% trans "sent" context "recipient" %}</span>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="hint">{% trans "No recipient is kept for this mailing." %}</p>
+        {% endif %}
+        <p class="hint after">{% trans "Open a prospect to see every mailing that reached them." %}</p>
+      </div>
+      {% if skipped_reasons %}
+        <div class="card">
+          <h3>{% trans "Skipped" context "tile" %}</h3>
+          <ul class="skiplist">
+            {% for reason, count in skipped_reasons.items %}
+              {% if count %}
+                <li>
+                  <span>{% if reason == "unsubscribed" %}{% trans "Unsubscribed" %}{% elif reason == "suppressed" %}{% trans "Suppressed" %}{% elif reason == "cooldown" %}{% trans "Contacted recently" %}{% elif reason == "over_limit" %}{% trans "Over the send limit" %}{% else %}{{ reason }}{% endif %}</span>
+                  <strong>{{ count }}</strong>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+          <p class="hint after">{% trans "Skipped people are counted, never named, so an erasure request leaves nothing behind." %}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

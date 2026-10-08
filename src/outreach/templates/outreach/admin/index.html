@@ -1,0 +1,49 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n admin_urls %}
+
+{% block pretitle %}<p class="eyebrow">{% now "l j F" %}</p>{% endblock %}
+
+{% block page_subtitle %}<p>{% trans "Where your prospects stand today." %}</p>{% endblock %}
+
+{% block object-tools %}
+  {% if perms.outreach.add_prospect %}
+    <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_import' %}"><svg class="ico"><use href="#i-upload"/></svg>{% trans "Import CSV" %}</a>
+    <a class="btn fill" href="{% url 'outreach_admin:outreach_prospect_add' %}"><svg class="ico"><use href="#i-plus"/></svg>{% trans "Add prospect" %}</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <div class="tiles">
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}"><b>{{ counts.total }}</b><span>{% trans "Prospects" %}</span></a>
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?status__exact=contacted"><b>{{ counts.contacted }}</b><span>{% trans "Contacted" %}</span></a>
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?member=yes"><b>{{ counts.members }}</b><span>{% blocktrans with name=site_name %}{{ name }} members{% endblocktrans %}</span></a>
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?status__exact=unsubscribed"><b>{{ counts.unsubscribed }}</b><span>{% trans "Unsubscribed" %}</span></a>
+  </div>
+  <div class="cols">
+    <div class="card">
+      <h3>{% trans "Recent activity" %}</h3>
+      {% if recent_events %}
+        <ul class="timeline">
+          {% for event in recent_events %}
+            <li>
+              <strong>{{ event.get_kind_display }}</strong>
+              <a href="{% url 'outreach_admin:outreach_prospect_change' event.prospect.pk|admin_urlquote %}">{{ event.prospect.display_name }}</a>
+              {% if event.detail %}{{ event.detail }}{% endif %}
+              <small>{{ event.created_at|date:"SHORT_DATETIME_FORMAT" }} · {% include "outreach/includes/actor.html" with actor=event.actor %}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="hint">{% trans "Nothing has happened yet." %}</p>
+      {% endif %}
+    </div>
+    <div class="card">
+      <h3>{% trans "Before you send" %}</h3>
+      <ul class="skiplist">
+        <li><span>{% blocktrans with hours=cooldown_hours %}Same address mailed within {{ hours }} hours{% endblocktrans %}</span><span class="badge prospect">{% trans "skipped" %}</span></li>
+        <li><span>{% trans "Unsubscribed or suppressed address" %}</span><span class="badge unsub">{% trans "never mailed" %}</span></li>
+        <li><span>{% trans "Recipients per send" %}</span><strong>{% blocktrans with maximum=max_recipients %}{{ maximum }} max{% endblocktrans %}</strong></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
