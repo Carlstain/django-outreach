@@ -1,0 +1,54 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% static 'outreach/mail-editor.js' %}" defer></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} preview{% endblock %}
+
+{% block head %}
+  {% with recipient_count=plan.recipients|length %}
+  <form method="post" id="send-form">
+    {% csrf_token %}
+    {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+    {% include "outreach/admin/includes/mail_message_fields.html" %}
+    <input type="hidden" name="preview_prospect" value="{{ preview_prospect.pk }}">
+    <div class="head">
+      <div>
+        <p class="eyebrow">{% blocktrans with current=2 total=2 %}Step {{ current }} of {{ total }}{% endblocktrans %}</p>
+        <h2>{% trans "Check and send" %}</h2>
+        <p>{% blocktrans count counter=recipient_count %}This is what the recipient will get, with their own details filled in.{% plural %}This is what each of the {{ counter }} recipients will get, with their own details filled in.{% endblocktrans %}</p>
+      </div>
+      <div class="actions">
+        <button class="btn quiet" type="submit" name="step" value="compose" formnovalidate><svg class="ico"><use href="#i-back"/></svg>{% trans "Edit message" %}</button>
+        <button class="btn fill" type="submit" name="step" value="send"{% if not recipient_count %} disabled{% endif %}><svg class="ico"><use href="#i-send"/></svg>{% blocktrans count counter=recipient_count %}Send to {{ counter }} prospect{% plural %}Send to {{ counter }} prospects{% endblocktrans %}</button>
+      </div>
+    </div>
+  </form>
+  {% endwith %}
+{% endblock %}
+
+{% block content %}
+  <form method="post" class="previewas" id="preview-form">
+    {% csrf_token %}
+    {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+    {% include "outreach/admin/includes/mail_message_fields.html" %}
+    <input type="hidden" name="step" value="preview">
+    <label for="preview-prospect">{% trans "Preview as" %}</label>
+    <select class="sel" id="preview-prospect" name="preview_prospect" data-outreach-auto-submit>
+      {% for choice_pk, choice_name in preview_choices %}
+        <option value="{{ choice_pk }}"{% if choice_pk|stringformat:"s" == preview_prospect.pk|stringformat:"s" %} selected{% endif %}>{{ choice_name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn quiet small no-js-only" type="submit">{% trans "Update preview" %}</button>
+  </form>
+  <div class="card email">
+    <header>
+      <div>{% trans "To:" %} {{ preview_prospect.email }}</div>
+      <strong>{{ preview_subject }}</strong>
+    </header>
+    <iframe class="email-frame" sandbox srcdoc="{{ preview_html|force_escape }}" title="{% trans 'Message preview' %}"></iframe>
+  </div>
+{% endblock %}

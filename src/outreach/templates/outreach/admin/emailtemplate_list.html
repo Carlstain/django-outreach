@@ -1,0 +1,33 @@
+{% extends "outreach/admin/change_list.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Templates" %}{% endblock %}
+
+{% block page_subtitle %}<p>{% trans "Saved subjects and messages anyone allowed to send can reuse." %}</p>{% endblock %}
+
+{% block object-tools-items %}
+  {% if has_add_permission %}
+    <li><a class="addlink" href="{% url 'outreach_admin:outreach_emailtemplate_add' %}"><svg class="ico"><use href="#i-plus"/></svg>{% trans "Add template" %}</a></li>
+  {% endif %}
+{% endblock %}
+
+{% block search %}{% if cl.result_count or cl.query or cl.has_active_filters %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block result_list %}
+  {% if cl.result_count or cl.query or cl.has_active_filters %}
+    {{ block.super }}
+  {% else %}
+    <div class="card list-card">
+      <div class="empty">
+        <span class="round"><svg class="ico lg"><use href="#i-file"/></svg></span>
+        <h3>{% trans "No templates yet" %}</h3>
+        <p>{% trans "Write a message once, save it as a template, and pick it again the next time you send. You can also add one here." %}</p>
+        {% if has_add_permission %}
+          <a class="btn fill" href="{% url 'outreach_admin:outreach_emailtemplate_add' %}">{% trans "Add template" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block pagination %}{% if cl.result_count or cl.query or cl.has_active_filters %}{{ block.super }}{% endif %}{% endblock %}

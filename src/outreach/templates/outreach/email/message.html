@@ -1,0 +1,41 @@
+{% load i18n %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>{{ subject }}</title>
+    <style>
+      .outreach-body p, .outreach-body div { margin: 0 0 16px 0; }
+      .outreach-body h1 { margin: 0 0 16px 0; font-size: 24px; line-height: 1.25; color: {{ theme.email.brand }}; }
+      .outreach-body ul, .outreach-body ol { margin: 0 0 16px 0; padding-left: 24px; }
+      .outreach-body blockquote { margin: 0 0 16px 0; padding-left: 16px; border-left: 3px solid {{ theme.email.border }}; color: {{ theme.email.muted }}; }
+      .outreach-body a { color: {{ theme.email.accent }}; }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: {{ theme.email.background }};">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: {{ theme.email.background }};">
+      <tr>
+        <td align="center" style="padding: 24px 12px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: {{ theme.email.card }}; border: 1px solid {{ theme.email.border }}; border-radius: 16px;">
+            <tr>
+              <td style="padding: 24px 32px 0 32px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: {{ theme.email.brand }};">{{ site_name }}</td>
+            </tr>
+            <tr>
+              <td class="outreach-body" style="padding: 16px 32px 8px 32px; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: {{ theme.email.text }};">
+                {{ body_html|safe }}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px 32px 24px 32px; border-top: 1px solid {{ theme.email.border }}; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: {{ theme.email.muted }};">
+                {% blocktrans with name=site_name %}You receive this message because {{ name }} thought it could be useful to you.{% endblocktrans %}
+                <a href="{{ unsubscribe_url }}" style="color: {{ theme.email.accent }};">{% trans "Unsubscribe" %}</a>
+                {% trans "at any time, in one click." %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
