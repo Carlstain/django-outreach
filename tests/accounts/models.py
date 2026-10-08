@@ -1,0 +1,27 @@
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
+from django.db import models
+
+
+class EmailUserManager(BaseUserManager):
+    def create_user(self, email: str, password: str | None = None, **fields):
+        user = self.model(email=self.normalize_email(email), **fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email: str, password: str | None = None, **fields):
+        fields.setdefault("is_staff", True)
+        fields.setdefault("is_superuser", True)
+        return self.create_user(email, password, **fields)
+
+
+class EmailUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    objects = EmailUserManager()
+
+    USERNAME_FIELD = "email"
+    EMAIL_FIELD = "email"

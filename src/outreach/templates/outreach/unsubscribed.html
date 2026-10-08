@@ -1,0 +1,18 @@
+{% extends "outreach/bare.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "You are unsubscribed" %} | {{ site_name }}{% endblock %}
+
+{% block extrahead %}<meta name="referrer" content="no-referrer">{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <span class="okmark"><svg class="ico lg"><use href="#i-check"/></svg></span>
+    <h2>{% trans "You are unsubscribed" %}</h2>
+    {% if masked_email %}
+      <p>{% blocktrans with address=masked_email name=site_name %}{{ address }} will not receive any more emails from {{ name }}.{% endblocktrans %}</p>
+    {% else %}
+      <p>{% blocktrans with name=site_name %}This address will not receive any more emails from {{ name }}.{% endblocktrans %}</p>
+    {% endif %}
+  </div>
+{% endblock %}

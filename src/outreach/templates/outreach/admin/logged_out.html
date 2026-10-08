@@ -1,0 +1,15 @@
+{% extends "outreach/bare.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Signed out" %} | {{ site_name }}{% endblock %}
+
+{% block content %}
+  <div class="card">
+    {% include "outreach/includes/logo.html" %}
+    <h2>{% trans "You are signed out" %}</h2>
+    <p>{% trans "Thanks for spending some time with Outreach today." %}</p>
+    <div class="stack">
+      <a class="btn fill block" href="{% url 'outreach_admin:index' %}">{% trans "Log in again" %}</a>
+    </div>
+  </div>
+{% endblock %}
