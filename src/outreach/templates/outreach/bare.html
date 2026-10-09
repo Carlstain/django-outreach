@@ -1,0 +1,23 @@
+{% load i18n static outreach_tags %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:,">
+    <title>{% block title %}{{ title }} | {{ site_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'outreach/outreach.css' %}">
+    {% outreach_theme_css %}
+    {% block extrastyle %}{% endblock %}
+    {% block extrahead %}{% endblock %}
+  </head>
+  <body class="{% block bodyclass %}{% endblock %}">
+    {% include "outreach/includes/icons.html" %}
+    {% block body %}
+      <main class="center">
+        {% block content %}{% endblock %}
+      </main>
+    {% endblock %}
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

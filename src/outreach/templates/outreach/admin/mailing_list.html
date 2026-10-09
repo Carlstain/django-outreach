@@ -1,0 +1,15 @@
+{% extends "outreach/admin/change_list.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    :root {
+      --label-sent: "{% trans 'sent' context 'count label' %}";
+      --label-failed: "{% trans 'failed' context 'count label' %}";
+      --label-skipped: "{% trans 'skipped' context 'count label' %}";
+    }
+  </style>
+{% endblock %}
+
+{% block page_subtitle %}<p>{% trans "Every message sent from Outreach, kept for your records." %}</p>{% endblock %}

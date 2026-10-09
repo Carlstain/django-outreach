@@ -1,0 +1,18 @@
+{% extends "outreach/bare.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktrans with name=site_name %}Unsubscribe from {{ name }}{% endblocktrans %}{% endblock %}
+
+{% block extrahead %}<meta name="referrer" content="no-referrer">{% endblock %}
+
+{% block content %}
+  <div class="card">
+    {% include "outreach/includes/logo.html" %}
+    <h2>{% blocktrans with name=site_name %}Stop receiving emails from {{ name }}?{% endblocktrans %}</h2>
+    <p>{% blocktrans with address=masked_email %}You are about to unsubscribe <strong>{{ address }}</strong>. We will not write to this address again.{% endblocktrans %}</p>
+    <form method="post">
+      <button class="btn fill block" type="submit">{% trans "Unsubscribe" %}</button>
+      <p class="hint">{% trans "If you do nothing, you will keep receiving our emails." %}</p>
+    </form>
+  </div>
+{% endblock %}

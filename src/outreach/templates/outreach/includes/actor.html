@@ -1,0 +1,1 @@
+{% load i18n %}{% if actor == "system" %}{% trans "system" %}{% elif actor == "recipient" %}{% trans "recipient" %}{% elif actor == "import" %}{% trans "import" %}{% else %}{{ actor }}{% endif %}
