@@ -1,0 +1,108 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} compose{% endblock %}
+
+{% block scripts %}{{ form.media }}{% endblock %}
+
+{% block pretitle %}<p class="eyebrow">{% blocktrans with current=1 total=2 %}Step {{ current }} of {{ total }}{% endblocktrans %}</p>{% endblock %}
+
+{% block page_title %}{% trans "Write a message" %}{% endblock %}
+
+{% block page_subtitle %}<p>{% trans "Every message ends with an unsubscribe link." %}</p>{% endblock %}
+
+{% block content %}
+  {% with received_count=plan.recipients|length skipped_count=plan.skipped|length %}
+  <div class="cols">
+    <form class="stack" method="post">
+      {% csrf_token %}
+      {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+      <input type="hidden" name="step" value="compose">
+      <button class="visually-hidden-submit" type="submit" name="step" value="preview" formnovalidate tabindex="-1" aria-hidden="true"></button>
+      <div class="card">
+        <div class="form">
+          {% if form.non_field_errors or form.subject.errors or form.body.errors %}
+            <div class="notice err wide" role="alert">
+              {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+              {% for error in form.subject.errors %}<p>{{ error }}</p>{% endfor %}
+              {% for error in form.body.errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+          {% if email_templates or perms.outreach.view_emailtemplate %}
+            <div class="wide row2">
+              <label class="f grow">{% trans "Template" %}
+                <select name="template"{% if not email_templates %} disabled{% endif %}>
+                  {% if email_templates %}
+                    <option value="">{% trans "No template" %}</option>
+                    {% for template_id, template_name in email_templates %}
+                      <option value="{{ template_id }}"{% if selected_template and selected_template.pk|stringformat:"s" == template_id|stringformat:"s" %} selected{% endif %}>{{ template_name }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="">{% trans "No templates yet" %}</option>
+                  {% endif %}
+                </select>
+              </label>
+              <button class="btn quiet" type="submit" name="apply_template" value="1" formnovalidate{% if not email_templates %} disabled{% endif %}>{% trans "Use template" %}</button>
+            </div>
+          {% endif %}
+          {% if template_applied and selected_template %}
+            <div class="wide notice ok" role="status">{% blocktrans with name=selected_template.name %}Using the template <strong>{{ name }}</strong>. Your previous text was replaced.{% endblocktrans %}</div>
+          {% endif %}
+          <div class="f wide">
+            {{ form.subject.label_tag }}
+            {{ form.subject }}
+          </div>
+          <div class="f wide">
+            <span>{{ form.body.label }}</span>
+            <div class="editor">
+              {{ form.body }}
+            </div>
+            <span class="hint flow">
+              {% blocktrans with example="{{ first_name | there }}" %}Variables are replaced for each recipient. Add a fallback after a pipe, for example <code>{{ example }}</code> sends “there” when the name is empty.{% endblocktrans %}
+              <a href="{% url 'outreach_admin:help' %}#h-variables">{% trans "Need help?" %}</a>
+            </span>
+          </div>
+          <div class="wide actions">
+            <button class="btn fill" type="submit" name="step" value="preview" formnovalidate{% if not received_count %} disabled{% endif %}>{% trans "Preview message" %}</button>
+            <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_changelist' %}">{% trans "Cancel" %}</a>
+          </div>
+        </div>
+      </div>
+      {% if can_save_template %}
+        <div class="saveas" data-outreach-save-block>
+          <h4>{% trans "Save this message as a template" %}</h4>
+          <div class="row2">
+            <label class="f grow{% if save_template_form.name.errors %} bad{% endif %}">{% trans "Template name" %}
+              {{ save_template_form.name }}
+            </label>
+            <button class="btn" type="submit" name="step" value="save_template" formnovalidate data-outreach-save-button>{% trans "Save as template" %}</button>
+          </div>
+          {% for error in save_template_form.name.errors %}<div class="fielderr" role="alert">{{ error }}</div>{% endfor %}
+          {% if can_overwrite_template %}
+            <label class="check">{{ save_template_form.overwrite }} {% trans "Replace the template if the name already exists" %}</label>
+          {% endif %}
+          <span class="hint">{% trans "You need permission to add templates. Replacing needs permission to change them." %}</span>
+        </div>
+      {% endif %}
+    </form>
+    <div class="card">
+      <h3>{% trans "Recipients" %}</h3>
+      <div class="stat"><b>{{ received_count }}</b><span>{% trans "will receive this message" %}</span></div>
+      <p class="hint spaced">{% blocktrans with selected=received_count|add:skipped_count %}{{ selected }} selected, {{ skipped_count }} skipped{% endblocktrans %}</p>
+      {% if max_recipients %}
+        <p class="hint spaced">{% blocktrans with maximum=max_recipients %}At most {{ maximum }} messages are sent at once.{% endblocktrans %}</p>
+      {% endif %}
+      {% if plan.skipped %}
+        <ul class="skiplist">
+          {% for skipped_prospect in plan.skipped %}
+            <li>
+              <span><strong>{{ skipped_prospect.prospect.display_name }}</strong>{% if skipped_prospect.reason.name == "COOLDOWN" and skipped_prospect.prospect.last_mailed_at %}<br><small>{% blocktrans with ago=skipped_prospect.prospect.last_mailed_at|timesince %}Mailed {{ ago }} ago{% endblocktrans %}</small>{% endif %}</span>
+              {% include "outreach/includes/skip_reason.html" with skipped=skipped_prospect %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+  {% endwith %}
+{% endblock %}

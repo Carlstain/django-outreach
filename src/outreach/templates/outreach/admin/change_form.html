@@ -1,0 +1,127 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{% if errors %}{% trans "Error:" %} {% endif %}{% if add %}{% trans "Add prospect" %}{% else %}{{ original.display_name }}{% endif %} | {{ site_name }}{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% url 'outreach_admin:jsi18n' %}"></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% block head %}
+  {% url opts|admin_urlname:'changelist' as changelist_url %}
+  <div class="head">
+    {% if change and original %}
+      <div class="head-identity">
+        <span class="avatar lg{% if original.kind == 'organization' %} org{% endif %}">{{ original.initials }}</span>
+        <div>
+          <h2>{{ original.display_name }}</h2>
+          <p>
+            <span class="badge {% if original.status == 'unsubscribed' %}unsub{% else %}{{ original.status }}{% endif %}">{{ original.get_status_display }}</span>
+            {% if original.user %}<span class="badge user">{% blocktrans with name=site_name %}{{ name }} member{% endblocktrans %}</span>{% endif %}
+          </p>
+        </div>
+      </div>
+    {% else %}
+      <div><h2>{% trans "Add prospect" %}</h2></div>
+    {% endif %}
+    <div class="actions">
+      {% if has_view_permission %}
+        <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Prospects" %}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="cols{% if not change %} single{% endif %}" id="content-main">
+    <div class="card">
+      <h3>{% trans "Details" %}</h3>
+      <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate>
+        {% csrf_token %}
+        {% block form_top %}{% endblock %}
+        {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+        {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+        {% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+        {% if errors %}
+          <p class="errornote">{% blocktrans count counter=errors|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}</p>
+          {{ adminform.form.non_field_errors }}
+        {% endif %}
+
+        {% block field_sets %}
+          {% for fieldset in adminform %}
+            {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+          {% endfor %}
+        {% endblock %}
+
+        {% block after_field_sets %}
+          {% if change %}
+            <p class="hint after"><svg class="ico xs"><use href="#i-lock"/></svg>{% trans "The address cannot change. Add a new prospect instead." %}</p>
+          {% endif %}
+        {% endblock %}
+
+        {% block inline_field_sets %}
+          {% for inline_admin_formset in inline_admin_formsets %}
+            {{ inline_admin_formset.formset.management_form }}
+          {% endfor %}
+        {% endblock %}
+
+        {% block after_related_objects %}{% endblock %}
+
+        {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+
+        {% block admin_change_form_document_ready %}
+          <script id="django-admin-form-add-constants"
+                  src="{% static 'admin/js/change_form.js' %}"
+                  {% if adminform and add %}
+                    data-model-name="{{ opts.model_name }}"
+                  {% endif %}
+                  async>
+          </script>
+        {% endblock %}
+
+        {% prepopulated_fields_js %}
+      </form>
+    </div>
+
+    {% if change and original %}
+      <div class="stack">
+        <div class="card">
+          <h3>{% blocktrans with name=site_name %}{{ name }} account{% endblocktrans %}</h3>
+          {% if original.user %}
+            <div class="person">
+              <span class="avatar">{{ original.initials }}</span>
+              <div>
+                <strong>{{ original.user.email|default:original.user.get_username }}</strong>
+                {% if original.user.date_joined %}<small>{% blocktrans with joined=original.user.date_joined|date:"SHORT_DATE_FORMAT" %}Member since {{ joined }}{% endblocktrans %}</small>{% endif %}
+              </div>
+            </div>
+            <p class="hint after">{% trans "Linked automatically because the email matches." %}</p>
+          {% else %}
+            <p class="hint">{% trans "Not linked to an account yet. The link is made when a member signs up with this email." %}</p>
+          {% endif %}
+        </div>
+        <div class="card">
+          <h3>{% trans "Timeline" %}</h3>
+          {% with events=original.events.all %}
+          {% if events %}
+            <ul class="timeline">
+              {% for event in events %}
+                <li>
+                  <strong>{{ event.get_kind_display }}</strong>
+                  {% if event.mailing_id and perms.outreach.view_mailing %}<a href="{% url 'outreach_admin:outreach_mailing_change' event.mailing_id|admin_urlquote %}">{{ event.detail|default:event.get_kind_display }}</a>{% elif event.detail %}{{ event.detail }}{% endif %}
+                  <small>{{ event.created_at|date:"SHORT_DATETIME_FORMAT" }} · {% include "outreach/includes/actor.html" with actor=event.actor %}</small>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="hint">{% trans "Nothing has happened yet." %}</p>
+          {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

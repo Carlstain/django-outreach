@@ -1,0 +1,58 @@
+[build-system]
+requires = ["uv_build>=0.9,<0.13"]
+build-backend = "uv_build"
+
+[project]
+name = "django-outreach"
+version = "0.1.0"
+description = "Prospects, reusable email templates and bulk mail with unsubscribe links for Django projects."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "Mahadi Eric", email = "33723198+Carlstain@users.noreply.github.com" }]
+classifiers = [
+    "Framework :: Django",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "Django>=5.1,<6",
+    "django-import-export>=4.2,<5,!=4.3.0",
+    "tablib",
+    "nh3>=0.3,<0.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-django",
+    "factory-boy",
+    "ruff==0.16.10",
+    "pre-commit",
+    "Babel",
+    "psycopg[binary]",
+]
+
+[tool.uv.build-backend]
+module-name = "outreach"
+module-root = "src"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["."]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 95
+target-version = "py310"
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "SIM", "I", "UP"]
+ignore = ["E501"]

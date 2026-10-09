@@ -1,0 +1,141 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} help-page{% endblock %}
+
+{% block page_title %}{% trans "How to use Outreach" %}{% endblock %}
+
+{% block page_subtitle %}<p>{% trans "Everything you need to add prospects and send a message." %}</p>{% endblock %}
+
+{% block content %}
+  <div class="help">
+    <nav class="helpnav" aria-label="{% trans 'Sections' %}">
+      <a href="#h-overview">{% trans "What a prospect is" %}</a>
+      <a href="#h-import">{% trans "Add and import prospects" %}</a>
+      <a href="#h-search">{% trans "Search and filter" %}</a>
+      <a href="#h-send">{% trans "Send a message" %}</a>
+      <a href="#h-variables">{% trans "Variables" %}</a>
+      <a href="#h-skipped">{% trans "Who is skipped" %}</a>
+      <a href="#h-unsub">{% trans "Unsubscribing" %}</a>
+      <a href="#h-mailings">{% trans "Mailings" %}</a>
+      <a href="#h-templates">{% trans "Templates" %}</a>
+      <a href="#h-perms">{% trans "Permissions" %}</a>
+      <a href="#h-trouble">{% trans "Troubleshooting" %}</a>
+    </nav>
+    <div class="helpbody">
+      <section class="card" id="h-overview">
+        <h3>{% trans "What a prospect is" %}</h3>
+        <p>{% blocktrans with name=site_name %}A prospect is a person or an organisation you may write to. They can be {{ name }} members or people who have not enrolled yet.{% endblocktrans %}</p>
+        <ul>
+          <li><span class="badge prospect">{% trans "Prospect" %}</span> {% trans "has never been mailed." %}</li>
+          <li><span class="badge contacted">{% trans "Contacted" %}</span> {% trans "has received at least one message." %}</li>
+          <li><span class="badge unsub">{% trans "Unsubscribed" %}</span> {% trans "will never be mailed again." %}</li>
+          <li><span class="badge user">{% trans "Member" %}</span> {% blocktrans with name=site_name %}means the email matches a {{ name }} account. The link is made automatically.{% endblocktrans %}</li>
+        </ul>
+      </section>
+      <section class="card" id="h-import">
+        <h3>{% trans "Add and import prospects" %}</h3>
+        <p>{% trans "Use Add prospect for one person, or Import CSV for many. Every row needs an email address. These columns are read, and the alternative headers work too:" %}</p>
+        <div class="tablewrap">
+          <table class="helptable">
+            <thead><tr><th>{% trans "Column" %}</th><th>{% trans "Other accepted headers" %}</th></tr></thead>
+            <tbody>
+              {% for column in import_columns %}
+                <tr><td><code>{{ column.name }}</code></td><td>{% for alias in column.aliases %}<code>{{ alias }}</code>{% if not forloop.last %} {% endif %}{% empty %}-{% endfor %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p>{% trans "Addresses already in Outreach are skipped. One invalid row cancels the whole file, so nothing is half imported, and the error names the row." %}</p>
+      </section>
+      <section class="card" id="h-search">
+        <h3>{% trans "Search and filter" %}</h3>
+        <p>{% trans "The search box looks in names, organisations and emails. The chips above the list filter by type, status and member. Filters combine, and they also decide what Select all takes." %}</p>
+      </section>
+      <section class="card" id="h-send">
+        <h3>{% trans "Send a message" %}</h3>
+        <ol>
+          <li>{% trans "Tick the prospects in the list. To take every match of the current filters, use Select all under the list." %}</li>
+          <li>{% trans "Choose Send a mail in the Action menu and press Go." %}</li>
+          <li>{% trans "Write the subject and the message. Insert variable puts a person's name or another detail into the text." %}</li>
+          <li>{% trans "Press Preview message. Use Preview as to see it for another recipient." %}</li>
+          <li>{% trans "Press Send. A summary tells you how many were sent, skipped and failed." %}</li>
+        </ol>
+      </section>
+      <section class="card" id="h-variables">
+        <h3>{% trans "Variables" %}</h3>
+        <p>{% trans "Variables are replaced for each recipient, in the subject and in the message. Write them between double braces." %}</p>
+        <div class="tablewrap">
+          <table class="helptable wide">
+            <thead><tr><th>{% trans "Variable" %}</th><th>{% trans "Example" %}</th><th>{% trans "Description" %}</th></tr></thead>
+            <tbody>
+              {% for variable in variables %}
+                <tr><td><code>{% templatetag openvariable %} {{ variable.key }} {% templatetag closevariable %}</code></td><td>{{ variable.example }}</td><td>{{ variable.label }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="spaced-top">{% blocktrans with placeholder="{{ unsubscribe_url }}" %}<code>{{ placeholder }}</code> is the link recipients use to unsubscribe. It is added automatically at the bottom of every message, and you can also use it as the target of a link.{% endblocktrans %}</p>
+        <p>{% blocktrans with example="{{ first_name | there }}" %}Add a fallback after a pipe: <code>{{ example }}</code> writes “there” when the first name is empty. A name that is not in the table stops the preview, so nothing odd is ever sent.{% endblocktrans %}</p>
+      </section>
+      <section class="card" id="h-skipped">
+        <h3>{% trans "Who is skipped" %}</h3>
+        <ul>
+          <li>{% trans "Prospects who unsubscribed, and addresses that unsubscribed before and were imported again." %}</li>
+          <li>{% blocktrans with hours=cooldown_hours %}Prospects mailed within the last {{ hours }} hours.{% endblocktrans %}</li>
+          <li>{% blocktrans with maximum=max_recipients %}Anyone past the first {{ maximum }} recipients of one send. Send again later for the rest.{% endblocktrans %}</li>
+        </ul>
+        <p>{% trans "The compose page lists who is skipped and why before you send." %}</p>
+      </section>
+      <section class="card" id="h-unsub">
+        <h3>{% trans "Unsubscribing" %}</h3>
+        <p>{% trans "Every message ends with an unsubscribe link. The recipient confirms with one click on a page of their own, and no account is needed." %}</p>
+        <p>{% trans "Unsubscribing is final. The address is never mailed again, even if the prospect is deleted and imported again." %}</p>
+      </section>
+      <section class="card" id="h-mailings">
+        <h3>{% trans "Mailings" %}</h3>
+        <p>{% trans "Each send is recorded under Mailings with its subject, the message as written, who sent it and the counts. Open a prospect to see which mailings reached them." %}</p>
+      </section>
+      <section class="card" id="h-templates">
+        <h3>{% trans "Templates" %}</h3>
+        <p>{% trans "A template is a saved subject and message you can reuse. Everyone who may send mail sees the same list." %}</p>
+        <p>{% trans "To use one, open the compose page, choose it in the Template menu and press Use template. Your current text is replaced. To keep what you wrote, save it first with Save as template." %}</p>
+        <p>{% trans "To change a template, open Templates in the menu. Editing a template never changes mailings that were already sent, because each mailing keeps the message as it was sent." %}</p>
+        <div class="tablewrap">
+          <table class="helptable">
+            <thead><tr><th>{% trans "Permission" %}</th><th>{% trans "Lets staff" %}</th></tr></thead>
+            <tbody>
+              <tr><td>{% trans "View templates" %}</td><td>{% trans "See the list and pick a template when composing." %}</td></tr>
+              <tr><td>{% trans "Add templates" %}</td><td>{% trans "Create a template, or save a message as one." %}</td></tr>
+              <tr><td>{% trans "Change templates" %}</td><td>{% trans "Edit a template, or replace one when saving." %}</td></tr>
+              <tr><td>{% trans "Delete templates" %}</td><td>{% trans "Delete a template." %}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card" id="h-perms">
+        <h3>{% trans "Permissions" %}</h3>
+        <div class="tablewrap">
+          <table class="helptable">
+            <thead><tr><th>{% trans "Permission" %}</th><th>{% trans "Lets staff" %}</th></tr></thead>
+            <tbody>
+              <tr><td>{% trans "View prospects" %}</td><td>{% trans "Open Outreach and read prospects." %}</td></tr>
+              <tr><td>{% trans "View mailings" %}</td><td>{% trans "Read the Mailings log." %}</td></tr>
+              <tr><td>{% trans "Add prospects" %}</td><td>{% trans "Add one prospect and import files." %}</td></tr>
+              <tr><td>{% trans "Change prospects" %}</td><td>{% trans "Edit, send mail, unsubscribe and link accounts." %}</td></tr>
+              <tr><td>{% trans "Delete prospects" %}</td><td>{% trans "Delete prospects. The unsubscribe record stays." %}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card" id="h-trouble">
+        <h3>{% trans "Troubleshooting" %}</h3>
+        <ul>
+          <li>{% blocktrans with setting="OUTREACH_BASE_URL" %}<strong>Sending is refused.</strong> The site address for the unsubscribe link is not configured. Ask a developer to set <code>{{ setting }}</code>.{% endblocktrans %}</li>
+          <li>{% blocktrans %}<strong>A recipient is marked failed.</strong> The mail server refused that message. Check the address, then send to that prospect again.{% endblocktrans %}</li>
+          <li>{% blocktrans %}<strong>An old link shows “unsubscribed”.</strong> The prospect was deleted since the mail went out. Nothing is stored for that link.{% endblocktrans %}</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+{% endblock %}
