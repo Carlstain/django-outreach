@@ -15,6 +15,7 @@
       <a href="#h-search">{% trans "Search and filter" %}</a>
       <a href="#h-send">{% trans "Send a message" %}</a>
       <a href="#h-variables">{% trans "Variables" %}</a>
+      <a href="#h-tags">{% trans "Tags" %}</a>
       <a href="#h-skipped">{% trans "Who is skipped" %}</a>
       <a href="#h-unsub">{% trans "Unsubscribing" %}</a>
       <a href="#h-mailings">{% trans "Mailings" %}</a>
@@ -77,6 +78,24 @@
         </div>
         <p class="spaced-top">{% blocktrans with placeholder="{{ unsubscribe_url }}" %}<code>{{ placeholder }}</code> is the link recipients use to unsubscribe. It is added automatically at the bottom of every message, and you can also use it as the target of a link.{% endblocktrans %}</p>
         <p>{% blocktrans with example="{{ first_name | there }}" %}Add a fallback after a pipe: <code>{{ example }}</code> writes “there” when the first name is empty. A name that is not in the table stops the preview, so nothing odd is ever sent.{% endblocktrans %}</p>
+      </section>
+      <section class="card" id="h-tags">
+        <h3>{% trans "Tags" %}</h3>
+        <p>{% trans "Tags compute a value for each recipient when the message is sent, in the subject and in the message. Write them between brace and percent signs." %}</p>
+        <div class="tablewrap">
+          <table class="helptable wide">
+            <thead><tr><th>{% trans "Tag" %}</th><th>{% trans "Example" %}</th><th>{% trans "Description" %}</th></tr></thead>
+            <tbody>
+              {% for tag in mail_tags %}
+                <tr><td><code>{% templatetag openblock %} {{ tag.name }} {% templatetag closeblock %}</code></td><td>{{ tag.example }}</td><td>{{ tag.label }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="spaced-top">{% trans "A tag can take arguments. Text in quotes is used as written, for example a date format:" %} <code>{% templatetag openblock %} today "j F Y" {% templatetag closeblock %}</code></p>
+        <p>{% trans "A name without quotes is a variable, or a tag called without arguments: its value is given to the tag." %} {% trans "A tag whose name is not in the table stops the preview, so nothing odd is ever sent. The date and the greeting use the server's time zone." %}</p>
+        <p>{% trans "A button is a link shown as a button. It takes a label and one link, and only works in the message, not in the subject:" %} <code>{% templatetag openblock %} button "Read more" "https://example.org" {% templatetag closeblock %}</code></p>
+        <p>{% trans "The link can be a variable or a tag instead of fixed text. It must start with http, https or mailto. A recipient whose link is empty or invalid is not sent the message and is counted as failed." %}</p>
       </section>
       <section class="card" id="h-skipped">
         <h3>{% trans "Who is skipped" %}</h3>

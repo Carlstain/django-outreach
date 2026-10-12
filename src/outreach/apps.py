@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.core.checks import register
+from django.utils.module_loading import autodiscover_modules
 
 
 class OutreachConfig(AppConfig):
@@ -12,3 +13,4 @@ class OutreachConfig(AppConfig):
 
         register(check_theme)
         register(check_export_formulae_escaping)
+        autodiscover_modules("mail_tags")

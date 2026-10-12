@@ -85,6 +85,7 @@ class EmailColors:
     muted: str
     brand: str
     accent: str
+    on_accent: str
 
 
 @dataclass(frozen=True)
@@ -192,6 +193,7 @@ class OutreachTheme:
             muted=light["muted"],
             brand=light["brand"],
             accent=light["accent"],
+            on_accent=light["on_accent"],
         )
         return ResolvedTheme(light, dark, font_family or SYSTEM_FONT_STACK, email)
 

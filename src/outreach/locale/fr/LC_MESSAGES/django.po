@@ -1225,3 +1225,118 @@ msgstr "Retirer le lien"
 
 msgid "Message body"
 msgstr "Corps du message"
+
+#, python-format
+msgid "Unknown tag(s): %(unknown)s. Use one of: %(allowed)s."
+msgstr "Balise(s) inconnue(s) : %(unknown)s. Utilisez l’une de : %(allowed)s."
+
+#, python-format
+msgid "Invalid arguments for tag(s): %(tags)s."
+msgstr "Arguments invalides pour la ou les balises : %(tags)s."
+
+msgid "Malformed tag: check the delimiters around {% ... %}."
+msgstr "Balise mal formée : vérifiez les délimiteurs autour de {% ... %}."
+
+msgid "Tags"
+msgstr "Balises"
+
+msgid "Tag"
+msgstr "Balise"
+
+msgid ""
+"Tags compute a value for each recipient when the message is sent, in the "
+"subject and in the message. Write them between brace and percent signs."
+msgstr ""
+"Les balises calculent une valeur pour chaque destinataire à l’envoi, dans "
+"l’objet et dans le message. Écrivez-les entre une accolade et un signe "
+"pourcentage."
+
+msgid ""
+"A tag can take arguments. Text in quotes is used as written, for example a "
+"date format:"
+msgstr ""
+"Une balise peut prendre des arguments. Le texte entre guillemets est utilisé "
+"tel quel, par exemple un format de date :"
+
+msgid ""
+"A name without quotes is a variable, or a tag called without arguments: its "
+"value is given to the tag."
+msgstr ""
+"Un nom sans guillemets est une variable, ou une balise appelée sans "
+"argument : sa valeur est transmise à la balise."
+
+msgid ""
+"A tag whose name is not in the table stops the preview, so nothing odd is "
+"ever sent. The date and the greeting use the server's time zone."
+msgstr ""
+"Une balise absente du tableau bloque l’aperçu, donc rien d’étrange n’est "
+"jamais envoyé. La date et la salutation utilisent le fuseau horaire du "
+"serveur."
+
+msgctxt "mail tag"
+msgid "Today's date"
+msgstr "Date du jour"
+
+msgctxt "mail tag example"
+msgid "May 14, 2026"
+msgstr "14 mai 2026"
+
+msgctxt "mail tag"
+msgid "Greeting for the time of day"
+msgstr "Salutation selon l’heure"
+
+msgctxt "mail tag example"
+msgid "Good morning"
+msgstr "Bonjour"
+
+msgctxt "mail tag greeting"
+msgid "Good morning"
+msgstr "Bonjour"
+
+msgctxt "mail tag greeting"
+msgid "Good afternoon"
+msgstr "Bon après-midi"
+
+msgctxt "mail tag greeting"
+msgid "Good evening"
+msgstr "Bonsoir"
+
+msgctxt "mail tag"
+msgid "Date the member joined"
+msgstr "Date d’inscription du membre"
+
+msgctxt "mail tag example"
+msgid "March 2, 2024"
+msgstr "2 mars 2024"
+
+msgid "Buttons can only be used in the message body."
+msgstr "Les boutons ne peuvent être utilisés que dans le corps du message."
+
+msgid ""
+"Invalid button: a button needs a label and one link (http, https or mailto, "
+"a variable or a tag)."
+msgstr ""
+"Bouton invalide : un bouton demande un libellé et un lien (http, https ou "
+"mailto, une variable ou une balise)."
+
+msgid "Button with a link"
+msgstr "Bouton avec un lien"
+
+msgid ""
+"A button is a link shown as a button. It takes a label and one link, and "
+"only works in the message, not in the subject:"
+msgstr ""
+"Un bouton est un lien affiché comme un bouton. Il prend un libellé et un "
+"lien, et ne fonctionne que dans le message, pas dans l’objet :"
+
+msgid ""
+"The link can be a variable or a tag instead of fixed text. It must start "
+"with http, https or mailto. A recipient whose link is empty or invalid is "
+"not sent the message and is counted as failed."
+msgstr ""
+"Le lien peut être une variable ou une balise au lieu d’un texte fixe. Il "
+"doit commencer par http, https ou mailto. Un destinataire dont le lien est "
+"vide ou invalide ne reçoit pas le message et est compté comme échec."
+
+msgid "Label"
+msgstr "Libellé"

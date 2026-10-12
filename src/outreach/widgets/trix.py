@@ -2,6 +2,7 @@ from typing import Any
 
 from django import forms
 
+from outreach.services.mail_tags import mail_tag_library
 from outreach.services.variables import MailVariables
 
 TRIX_VERSION = "2.1.19"
@@ -22,4 +23,5 @@ class TrixWidget(forms.Widget):
     ) -> dict[str, Any]:
         context = super().get_context(name, value, attrs)
         context["variables"] = MailVariables().catalog()
+        context["mail_tags"] = mail_tag_library.catalog()
         return context
