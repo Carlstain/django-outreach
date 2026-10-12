@@ -44,3 +44,29 @@ class MailTagArgumentsTests(OutreachMailTagTestCase):
         rendered = self.render_mail(prospect, subject="{% echo unsubscribe_url %}")
 
         self.assertTrue(rendered.subject.startswith("https://outreach.example.test/"))
+
+    def test_a_bare_word_naming_a_tag_passes_the_output_of_that_tag(self) -> None:
+        self.register_tag(lambda prospect: "LOUD", "shout")
+
+        rendered = self.render_mail(ProspectFactory(), subject="{% echo shout %}")
+
+        self.assertEqual(rendered.subject, "LOUD")
+        self.assertEqual(self.echo_calls, [("LOUD",)])
+
+    def test_a_tag_named_by_a_bare_word_receives_only_the_prospect(self) -> None:
+        received_arguments: list[tuple[str, ...]] = []
+
+        def inspector(prospect: object, *arguments: str) -> str:
+            received_arguments.append(arguments)
+            return "seen"
+
+        self.register_tag(inspector, "inspector")
+
+        self.render_mail(ProspectFactory(), subject="{% echo inspector %}")
+
+        self.assertEqual(received_arguments, [()])
+
+    def test_an_unknown_bare_word_is_passed_as_an_empty_string(self) -> None:
+        self.render_mail(ProspectFactory(), subject="{% echo nothing_by_that_name %}")
+
+        self.assertEqual(self.echo_calls, [("",)])

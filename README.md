@@ -218,11 +218,19 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
     return prospect.user.account_manager.get_full_name() if prospect.user else fallback
 ```
 
-- The first parameter is always the prospect. Every other parameter needs a default, and arguments are strings. A bare word in a call, such as `{% initial last_name %}`, is replaced by the raw value of that variable.
+- The first parameter is always the prospect. Every other parameter needs a default, and arguments are strings. A bare word in a call, such as `{% initial last_name %}`, is replaced by the raw value of that variable, or by the output of a tag of that name called with the prospect only. Tag names may not be `button` or equal to a variable key.
 - Arguments come from staff, so treat them as untrusted input. A name already taken raises `ImproperlyConfigured` at startup.
 - An exception in a tag fails that recipient only: the mail is not sent, the claim is restored and a failure event is recorded.
 - The compose form rejects unknown tags, too many arguments (over 200 characters each is also refused) and stray `{%` or `%}`. The template preview shows each tag's `example` and never runs the function.
 - Tags are applied before variables, so a prospect's data (a name containing `{% ... %}`) is never run as a tag.
+
+### Buttons
+
+`{% button "Read more" "https://example.org" %}` writes a link styled as a button, using `accent` and `on_accent` from `OUTREACH_THEME`. It takes exactly a label and a link, and only works in the message body, not in the subject. The link can be fixed text, a variable (`{% button "Leave" unsubscribe_url %}`) or a tag (`{% button "Book" booking_url %}`).
+
+- The link must start with `http`, `https` or `mailto`. The compose form rejects a fixed link that does not. A variable or tag link is checked at send time: if it is empty or invalid, that recipient is not sent the message and is counted as failed, with a failure event.
+- The plain-text part shows `Label (link)`. The button markup is added after the final sanitising pass, since the sanitiser strips inline styles. Outlook desktop ignores the padding of a link and shows a plain coloured link.
+- The template preview shows the button with a placeholder link when it comes from a variable or a tag.
 
 ## Email templates
 

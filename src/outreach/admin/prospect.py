@@ -26,6 +26,7 @@ from outreach.forms import (
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
 from outreach.resources import ProspectResource
 from outreach.services.linking import UserLinker
+from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from outreach.services.unsubscribe import ProspectUnsubscriber
@@ -230,7 +231,11 @@ class ProspectAdmin(ImportExportModelAdmin):
                 request.POST.get("preview_prospect", ""), plan.recipients[0]
             )
             subject = form.cleaned_data["subject"]
-            rendered = mailer.render(preview_prospect, subject, form.cleaned_data["body"])
+            try:
+                rendered = mailer.render(preview_prospect, subject, form.cleaned_data["body"])
+            except InvalidButtonLink as error:
+                form.add_error("body", str(error))
+                return TemplateResponse(request, "outreach/admin/compose.html", context)
             context.update(
                 preview_prospect=preview_prospect,
                 preview_html=rendered.html,

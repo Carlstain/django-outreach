@@ -22,6 +22,7 @@
       {% for tag in mail_tags %}
         <button type="button" role="menuitem" data-trix-tag="{{ tag.name }}"><code>{{ tag.name }}</code><span>{{ tag.example }}</span></button>
       {% endfor %}
+      <button type="button" role="menuitem" data-trix-snippet='{% templatetag openblock %} button "{% trans "Label" %}" "https://" {% templatetag closeblock %}'><code>button</code><span>{% trans "Button with a link" %}</span></button>
     </div>
   </div>
   <div class="trix-dialogs" data-trix-dialogs>
