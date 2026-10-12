@@ -19,6 +19,9 @@
       {% for variable in variables %}
         <button type="button" role="menuitem" data-trix-variable="{{ variable.key }}"><code>{{ variable.key }}</code><span>{{ variable.example }}</span></button>
       {% endfor %}
+      {% for tag in mail_tags %}
+        <button type="button" role="menuitem" data-trix-tag="{{ tag.name }}"><code>{{ tag.name }}</code><span>{{ tag.example }}</span></button>
+      {% endfor %}
     </div>
   </div>
   <div class="trix-dialogs" data-trix-dialogs>

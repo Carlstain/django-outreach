@@ -4,6 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from outreach.services.body import MailBodySanitizer
+from outreach.services.mail_tags import mail_tag_library
 from outreach.services.variables import MailVariables
 
 
@@ -14,7 +15,10 @@ class MessageContentForm:
 
     def raise_for_variable_problems(self, text: str) -> None:
         variables = MailVariables()
-        unknown_keys = variables.unknown_keys(text)
+        allowed_keys = set(variables.KEYS) | set(variables.ALWAYS_ALLOWED)
+        unknown_keys = variables.unknown_keys(text) | mail_tag_library.unknown_variables(
+            text, allowed_keys
+        )
         if unknown_keys:
             raise forms.ValidationError(
                 _("Unknown variable(s): %(unknown)s. Use one of: %(allowed)s."),
@@ -28,11 +32,33 @@ class MessageContentForm:
                 _("Malformed variable: check the braces around {{ ... }}.")
             )
 
+    def raise_for_tag_problems(self, text: str) -> None:
+        unknown_names = mail_tag_library.unknown_names(text)
+        if unknown_names:
+            raise forms.ValidationError(
+                _("Unknown tag(s): %(unknown)s. Use one of: %(allowed)s."),
+                params={
+                    "unknown": ", ".join(sorted(unknown_names)),
+                    "allowed": ", ".join(tag.name for tag in mail_tag_library.catalog()),
+                },
+            )
+        invalid_calls = mail_tag_library.invalid_calls(text)
+        if invalid_calls:
+            raise forms.ValidationError(
+                _("Invalid arguments for tag(s): %(tags)s."),
+                params={"tags": ", ".join(sorted(invalid_calls))},
+            )
+        if mail_tag_library.has_malformed_delimiters(text):
+            raise forms.ValidationError(
+                _("Malformed tag: check the delimiters around {% ... %}.")
+            )
+
     def clean_subject(self) -> str:
         subject = self.cleaned_data["subject"]
         if "\n" in subject or "\r" in subject:
             raise forms.ValidationError(_("The subject must be on a single line."))
         self.raise_for_variable_problems(subject)
+        self.raise_for_tag_problems(subject)
         return subject
 
     def clean_body_content(self, field_name: str) -> str:
@@ -41,4 +67,5 @@ class MessageContentForm:
         if not sanitizer.to_text(body_html).strip():
             raise forms.ValidationError(_("The message is empty."))
         self.raise_for_variable_problems(body_html)
+        self.raise_for_tag_problems(body_html)
         return body_html
