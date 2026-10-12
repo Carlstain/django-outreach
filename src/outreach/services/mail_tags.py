@@ -14,6 +14,7 @@ MAIL_TAG_PATTERN = re.compile(r"\{%\s*(\w+)((?:\s+(?:\"[^\"]*\"|'[^']*'|\w+))*)\
 ARGUMENT_PATTERN = re.compile(r"\"([^\"]*)\"|'([^']*)'|(\w+)")
 MAX_ARGUMENT_LENGTH = 200
 BUTTON_TAG_NAME = "button"
+PREVIEW_PARAMETER = "preview"
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,7 @@ class MailTag:
     label: str
     example: str
     function: Callable[..., str]
+    accepts_preview: bool = False
 
 
 class MailTagLibrary:
@@ -44,7 +46,12 @@ class MailTagLibrary:
             if tag_name == BUTTON_TAG_NAME or tag_name in MailVariables().allowed_keys():
                 raise ImproperlyConfigured(f"The mail tag name '{tag_name}' is reserved.")
             self.raise_for_required_parameters(tag_name, function)
-            self.tags[tag_name] = MailTag(tag_name, label, example, function)
+            preview_parameter = inspect.signature(function).parameters.get(PREVIEW_PARAMETER)
+            accepts_preview = (
+                preview_parameter is not None
+                and preview_parameter.kind is inspect.Parameter.KEYWORD_ONLY
+            )
+            self.tags[tag_name] = MailTag(tag_name, label, example, function, accepts_preview)
             return function
 
         return decorator
@@ -59,6 +66,14 @@ class MailTagLibrary:
             )
         variadic_kinds = (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
         for parameter in parameters[1:]:
+            if (
+                parameter.name == PREVIEW_PARAMETER
+                and parameter.kind is not inspect.Parameter.KEYWORD_ONLY
+            ):
+                raise ImproperlyConfigured(
+                    f"The mail tag '{tag_name}' parameter '{PREVIEW_PARAMETER}' must be "
+                    "keyword-only, or staff text could fill it."
+                )
             if (
                 parameter.default is inspect.Parameter.empty
                 and parameter.kind not in variadic_kinds
@@ -117,18 +132,32 @@ class MailTagLibrary:
         remainder = MAIL_TAG_PATTERN.sub("", text)
         return "{%" in remainder or "%}" in remainder
 
+    def call(
+        self, tag: MailTag, prospect: Prospect, arguments: list[str], *, preview: bool
+    ) -> str:
+        if tag.accepts_preview:
+            return str(tag.function(prospect, *arguments, preview=preview))
+        return str(tag.function(prospect, *arguments))
+
     def render(
-        self, text: str, prospect: Prospect, values: dict[str, str], *, html: bool
+        self,
+        text: str,
+        prospect: Prospect,
+        values: dict[str, str],
+        *,
+        html: bool,
+        preview: bool = False,
     ) -> str:
         def substitute(match: re.Match[str]) -> str:
             tag = self.tags.get(match.group(1))
             if tag is None:
                 return match.group(0)
             arguments = [
-                self.resolve_argument(argument, prospect, values, html=html)
+                self.resolve_argument(argument, prospect, values, html=html, preview=preview)
                 for argument in self.parse_arguments(match.group(2))
             ]
-            return self.format_output(str(tag.function(prospect, *arguments)), html=html)
+            output = self.call(tag, prospect, arguments, preview=preview)
+            return self.format_output(output, html=html)
 
         return MAIL_TAG_PATTERN.sub(substitute, text)
 
@@ -148,13 +177,14 @@ class MailTagLibrary:
         values: dict[str, str],
         *,
         html: bool,
+        preview: bool = False,
     ) -> str:
         if not argument.is_variable:
             return unescape(argument.text) if html else argument.text
         if argument.text in values:
             return values[argument.text]
         tag = self.tags.get(argument.text)
-        return str(tag.function(prospect)) if tag else ""
+        return self.call(tag, prospect, [], preview=preview) if tag else ""
 
     def resolve_example(self, argument: MailTagArgument, sample_values: dict[str, str]) -> str:
         if not argument.is_variable:
