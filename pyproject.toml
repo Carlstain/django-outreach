@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "django-outreach"
-version = "0.1.0"
+version = "0.1.0b1"
 description = "Prospects, reusable email templates and bulk mail with unsubscribe links for Django projects."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -12,6 +12,7 @@ license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 authors = [{ name = "Mahadi Eric", email = "rickyblackwall@gmail.com" }]
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Framework :: Django",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
