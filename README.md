@@ -25,25 +25,27 @@ See `example/` for a runnable host project.
 
 ## Installation
 
-The repository is private, so install over SSH. The tag `v0.1.0` does not exist until the first release.
+The current release is `0.1.0b1`, the first beta. The repository is private, so install over SSH from the tag.
 
-With uv, before the first release:
-
-```
-uv add "django-outreach @ git+ssh://git@github.com/Carlstain/django-outreach.git"
-```
-
-With uv, from the first release on:
+With uv:
 
 ```
-uv add "django-outreach @ git+ssh://git@github.com/Carlstain/django-outreach.git" --tag v0.1.0
+uv add "django-outreach @ git+ssh://git@github.com/Carlstain/django-outreach.git" --tag v0.1.0b1
 ```
 
 With pip:
 
 ```
-pip install "git+ssh://git@github.com/Carlstain/django-outreach.git@v0.1.0"
+pip install "git+ssh://git@github.com/Carlstain/django-outreach.git@v0.1.0b1"
 ```
+
+Every release also has its wheel and sdist attached to its GitHub Release. Download one with `gh release download v0.1.0b1` and install the file with `uv add ./django_outreach-0.1.0b1-py3-none-any.whl`.
+
+The machine that installs needs access to this private repository. On a developer machine that is an SSH key with access. In a Docker build or in CI, give the build a read-only deploy key, a forwarded SSH agent or a token, since a private repository cannot be installed anonymously.
+
+### Beta
+
+`0.1.0b1` is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen from this version on, so an installation can be upgraded without resetting its tables. Known limits: sending runs synchronously in the admin request with a per-send cap and no task queue, and Outlook desktop shows a button as a plain coloured link.
 
 ## Try the example project
 
