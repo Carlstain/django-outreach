@@ -14,6 +14,7 @@ from outreach.choices import EventKind, ProspectStatus, SkipReason
 from outreach.conf import outreach_settings
 from outreach.models import Mailing, Prospect, ProspectEvent
 from outreach.services.body import MailBodySanitizer
+from outreach.services.mail_buttons import mail_buttons
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.unsubscribe import SuppressionList, UnsubscribeTokens
 from outreach.services.variables import MailVariables
@@ -101,12 +102,18 @@ class ProspectMailer:
         with translation.override(outreach_settings.language):
             tagged_subject = mail_tag_library.render(subject, prospect, values, html=False)
             personalised_subject = variables.render(tagged_subject, values, html=False)
+            body_with_tokens, buttons = mail_buttons.extract(
+                sanitizer.clean(body_html),
+                lambda argument: mail_tag_library.resolve_argument(
+                    argument, prospect, values, html=True
+                ),
+            )
             tagged_html = mail_tag_library.render(
-                sanitizer.clean(body_html), prospect, values, html=True
+                body_with_tokens, prospect, values, html=True
             )
-            personalised_html = sanitizer.clean(
-                variables.render(tagged_html, values, html=True)
-            )
+            cleaned_html = sanitizer.clean(variables.render(tagged_html, values, html=True))
+            theme = outreach_settings.theme
+            personalised_html = mail_buttons.insert(cleaned_html, buttons, theme.email)
             personalised_text = sanitizer.to_text(personalised_html)
             context = {
                 "subject": personalised_subject,
@@ -115,7 +122,7 @@ class ProspectMailer:
                 "unsubscribe_url": unsubscribe_url,
                 "site_name": outreach_settings.site_name,
                 "prospect": prospect,
-                "theme": outreach_settings.theme,
+                "theme": theme,
             }
             text_part = render_to_string("outreach/email/message.txt", context)
             html_part = render_to_string("outreach/email/message.html", context)

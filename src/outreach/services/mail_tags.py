@@ -8,10 +8,12 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.html import escape
 
 from outreach.models import Prospect
+from outreach.services.variables import MailVariables
 
 MAIL_TAG_PATTERN = re.compile(r"\{%\s*(\w+)((?:\s+(?:\"[^\"]*\"|'[^']*'|\w+))*)\s*%\}")
 ARGUMENT_PATTERN = re.compile(r"\"([^\"]*)\"|'([^']*)'|(\w+)")
 MAX_ARGUMENT_LENGTH = 200
+BUTTON_TAG_NAME = "button"
 
 
 @dataclass(frozen=True)
@@ -39,6 +41,8 @@ class MailTagLibrary:
             tag_name = name or function.__name__
             if tag_name in self.tags:
                 raise ImproperlyConfigured(f"The mail tag '{tag_name}' is already registered.")
+            if tag_name == BUTTON_TAG_NAME or tag_name in MailVariables().allowed_keys():
+                raise ImproperlyConfigured(f"The mail tag name '{tag_name}' is reserved.")
             self.raise_for_required_parameters(tag_name, function)
             self.tags[tag_name] = MailTag(tag_name, label, example, function)
             return function
@@ -79,7 +83,7 @@ class MailTagLibrary:
 
     def unknown_names(self, text: str) -> set[str]:
         used_names = {match.group(1) for match in MAIL_TAG_PATTERN.finditer(text)}
-        return used_names - set(self.tags)
+        return used_names - set(self.tags) - {BUTTON_TAG_NAME}
 
     def unknown_variables(self, text: str, allowed_keys: set[str]) -> set[str]:
         used_keys = {
@@ -88,7 +92,7 @@ class MailTagLibrary:
             for argument in self.parse_arguments(match.group(2))
             if argument.is_variable
         }
-        return used_keys - allowed_keys
+        return used_keys - allowed_keys - set(self.tags)
 
     def invalid_calls(self, text: str) -> set[str]:
         invalid_names = set()
@@ -121,7 +125,7 @@ class MailTagLibrary:
             if tag is None:
                 return match.group(0)
             arguments = [
-                self.resolve_argument(argument, values, html=html)
+                self.resolve_argument(argument, prospect, values, html=html)
                 for argument in self.parse_arguments(match.group(2))
             ]
             return self.format_output(str(tag.function(prospect, *arguments)), html=html)
@@ -138,11 +142,27 @@ class MailTagLibrary:
         return MAIL_TAG_PATTERN.sub(substitute, text)
 
     def resolve_argument(
-        self, argument: MailTagArgument, values: dict[str, str], *, html: bool
+        self,
+        argument: MailTagArgument,
+        prospect: Prospect,
+        values: dict[str, str],
+        *,
+        html: bool,
     ) -> str:
-        if argument.is_variable:
-            return values.get(argument.text, "")
-        return unescape(argument.text) if html else argument.text
+        if not argument.is_variable:
+            return unescape(argument.text) if html else argument.text
+        if argument.text in values:
+            return values[argument.text]
+        tag = self.tags.get(argument.text)
+        return str(tag.function(prospect)) if tag else ""
+
+    def resolve_example(self, argument: MailTagArgument, sample_values: dict[str, str]) -> str:
+        if not argument.is_variable:
+            return unescape(argument.text)
+        if argument.text in sample_values:
+            return sample_values[argument.text]
+        tag = self.tags.get(argument.text)
+        return str(tag.example) if tag else ""
 
     def format_output(self, value: str, *, html: bool) -> str:
         if html:

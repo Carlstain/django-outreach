@@ -56,6 +56,20 @@ class MailTagRegistryTests(OutreachTestCase):
 
         self.assertEqual([tag.name for tag in self.library.catalog()], ["flexible"])
 
+    def test_the_button_name_is_reserved(self) -> None:
+        with self.assertRaises(ImproperlyConfigured):
+
+            @self.library.register(label="Button", example="x")
+            def button(prospect: Prospect) -> str:
+                return ""
+
+    def test_a_name_equal_to_a_variable_key_is_refused(self) -> None:
+        for variable_key in ("first_name", "unsubscribe_url"):
+            with self.subTest(name=variable_key), self.assertRaises(ImproperlyConfigured):
+                self.library.register(label="Clash", example="x", name=variable_key)(
+                    lambda prospect: ""
+                )
+
     def test_the_shared_library_lists_the_built_in_tags(self) -> None:
         names = {tag.name for tag in mail_tag_library.catalog()}
 

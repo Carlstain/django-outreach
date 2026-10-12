@@ -4,6 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from outreach.services.body import MailBodySanitizer
+from outreach.services.mail_buttons import mail_buttons
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.variables import MailVariables
 
@@ -15,9 +16,8 @@ class MessageContentForm:
 
     def raise_for_variable_problems(self, text: str) -> None:
         variables = MailVariables()
-        allowed_keys = set(variables.KEYS) | set(variables.ALWAYS_ALLOWED)
         unknown_keys = variables.unknown_keys(text) | mail_tag_library.unknown_variables(
-            text, allowed_keys
+            text, variables.allowed_keys()
         )
         if unknown_keys:
             raise forms.ValidationError(
@@ -53,12 +53,23 @@ class MessageContentForm:
                 _("Malformed tag: check the delimiters around {% ... %}.")
             )
 
+    def raise_for_button_problems(self, text: str) -> None:
+        if mail_buttons.has_invalid_buttons(text):
+            raise forms.ValidationError(
+                _(
+                    "Invalid button: a button needs a label and one link "
+                    "(http, https or mailto, a variable or a tag)."
+                )
+            )
+
     def clean_subject(self) -> str:
         subject = self.cleaned_data["subject"]
         if "\n" in subject or "\r" in subject:
             raise forms.ValidationError(_("The subject must be on a single line."))
         self.raise_for_variable_problems(subject)
         self.raise_for_tag_problems(subject)
+        if mail_buttons.contains_button(subject):
+            raise forms.ValidationError(_("Buttons can only be used in the message body."))
         return subject
 
     def clean_body_content(self, field_name: str) -> str:
@@ -68,4 +79,5 @@ class MessageContentForm:
             raise forms.ValidationError(_("The message is empty."))
         self.raise_for_variable_problems(body_html)
         self.raise_for_tag_problems(body_html)
+        self.raise_for_button_problems(body_html)
         return body_html

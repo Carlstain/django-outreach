@@ -93,7 +93,9 @@
           </table>
         </div>
         <p class="spaced-top">{% trans "A tag can take arguments. Text in quotes is used as written, for example a date format:" %} <code>{% templatetag openblock %} today "j F Y" {% templatetag closeblock %}</code></p>
-        <p>{% trans "A name without quotes is a variable: its value is given to the tag." %} {% trans "A tag whose name is not in the table stops the preview, so nothing odd is ever sent. The date and the greeting use the server's time zone." %}</p>
+        <p>{% trans "A name without quotes is a variable, or a tag called without arguments: its value is given to the tag." %} {% trans "A tag whose name is not in the table stops the preview, so nothing odd is ever sent. The date and the greeting use the server's time zone." %}</p>
+        <p>{% trans "A button is a link shown as a button. It takes a label and one link, and only works in the message, not in the subject:" %} <code>{% templatetag openblock %} button "Read more" "https://example.org" {% templatetag closeblock %}</code></p>
+        <p>{% trans "The link can be a variable or a tag instead of fixed text. It must start with http, https or mailto. A recipient whose link is empty or invalid is not sent the message and is counted as failed." %}</p>
       </section>
       <section class="card" id="h-skipped">
         <h3>{% trans "Who is skipped" %}</h3>

@@ -74,10 +74,12 @@ class MailVariables:
             "country": prospect.country,
         }
 
+    def allowed_keys(self) -> set[str]:
+        return set(self.KEYS) | set(self.ALWAYS_ALLOWED)
+
     def unknown_keys(self, text: str) -> set[str]:
-        allowed = set(self.KEYS) | set(self.ALWAYS_ALLOWED)
         used_keys = {match.group(1) for match in VARIABLE_PATTERN.finditer(text)}
-        return used_keys - allowed
+        return used_keys - self.allowed_keys()
 
     def has_malformed_braces(self, text: str) -> bool:
         remainder = VARIABLE_PATTERN.sub("", text)
