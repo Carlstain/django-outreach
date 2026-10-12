@@ -94,22 +94,26 @@ class ProspectMailer:
         path = reverse("outreach:unsubscribe", args=[self.tokens.make(prospect)])
         return f"{self.base_url}{path}"
 
-    def render(self, prospect: Prospect, subject: str, body_html: str) -> RenderedMail:
+    def render(
+        self, prospect: Prospect, subject: str, body_html: str, *, preview: bool = False
+    ) -> RenderedMail:
         variables = MailVariables()
         sanitizer = MailBodySanitizer()
         unsubscribe_url = self.unsubscribe_url(prospect)
         values = {**variables.values_for(prospect), "unsubscribe_url": unsubscribe_url}
         with translation.override(outreach_settings.language):
-            tagged_subject = mail_tag_library.render(subject, prospect, values, html=False)
+            tagged_subject = mail_tag_library.render(
+                subject, prospect, values, html=False, preview=preview
+            )
             personalised_subject = variables.render(tagged_subject, values, html=False)
             body_with_tokens, buttons = mail_buttons.extract(
                 sanitizer.clean(body_html),
                 lambda argument: mail_tag_library.resolve_argument(
-                    argument, prospect, values, html=True
+                    argument, prospect, values, html=True, preview=preview
                 ),
             )
             tagged_html = mail_tag_library.render(
-                body_with_tokens, prospect, values, html=True
+                body_with_tokens, prospect, values, html=True, preview=preview
             )
             cleaned_html = sanitizer.clean(variables.render(tagged_html, values, html=True))
             theme = outreach_settings.theme

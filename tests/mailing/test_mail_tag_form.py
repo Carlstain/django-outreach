@@ -36,6 +36,17 @@ class MailTagFormTests(OutreachMailTagTestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("Invalid arguments for tag(s): today", form.errors["body"][0])
 
+    def test_staff_text_cannot_fill_the_preview_parameter(self) -> None:
+        def aware(prospect: object, *, preview: bool = False) -> str:
+            return ""
+
+        self.register_tag(aware, "aware")
+
+        form = self.build_form(body='<p>{% aware "x" %}</p>')
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("Invalid arguments for tag(s): aware", form.errors["body"][0])
+
     def test_an_unknown_variable_used_as_an_argument_is_rejected(self) -> None:
         form = self.build_form(body="<p>{% today nope %}</p>")
 
