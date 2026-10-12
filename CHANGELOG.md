@@ -4,8 +4,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0b1] - 2026-10-13
+
+First beta. It is meant to be installed and tried by projects that follow it, and the interface may still change before 0.1.0.
+
 ### Added
 
+- Computed mail tags: `{% name "text" variable %}` in the subject or the message runs a registered Python function once per recipient and writes its escaped text result. Built-in tags are `today`, `greeting` and `member_since`. A host project adds its own with `@mail_tag_library.register` in a `mail_tags.py` module of any installed app. A bare word in a call names a variable, or a tag called with the prospect only.
+- Buttons: `{% button "Label" link %}` in the message writes a link styled as a button, using `accent` and `on_accent` from `OUTREACH_THEME`. The link is fixed text, a variable or a tag, and must be `http`, `https` or `mailto`. A link that is empty or invalid at send time fails that recipient only.
 - Prospect list with an optional OneToOne link to the host user model, an event timeline and a `Mailing` log, on its own admin site (`outreach_admin`) with a dashboard, import and export and a help page.
 - Bulk mail with per-recipient variables (`{{ key }}` and `{{ key | fallback }}`), a Trix rich text editor, nh3 sanitising, a preview step, a cooldown, a per-send cap and claim-before-send.
 - Email templates: named subject and body pairs shared by staff with the permission, a template picker and "Save this message as a template" on the compose page, a Templates section with a sample preview.
@@ -24,6 +30,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Notes
 
+- `0001_initial` is frozen from this beta on: schema changes ship as new migration files, and the initial migration is never edited.
 - The user model is not assumed to have `email`, `first_name` or `last_name` fields: linking uses `get_user_model().get_email_field_name()`, names of a linked user are read with a default.
 - The unsubscribe view is exempt from Django's `LoginRequiredMiddleware`.
 - The "Open Django admin" link is shown only when the default admin site is mounted.
