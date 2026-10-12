@@ -14,6 +14,7 @@ from outreach.choices import EventKind, ProspectStatus, SkipReason
 from outreach.conf import outreach_settings
 from outreach.models import Mailing, Prospect, ProspectEvent
 from outreach.services.body import MailBodySanitizer
+from outreach.services.mail_tags import mail_tag_library
 from outreach.services.unsubscribe import SuppressionList, UnsubscribeTokens
 from outreach.services.variables import MailVariables
 
@@ -97,21 +98,25 @@ class ProspectMailer:
         sanitizer = MailBodySanitizer()
         unsubscribe_url = self.unsubscribe_url(prospect)
         values = {**variables.values_for(prospect), "unsubscribe_url": unsubscribe_url}
-        personalised_subject = variables.render(subject, values, html=False)
-        personalised_html = sanitizer.clean(
-            variables.render(sanitizer.clean(body_html), values, html=True)
-        )
-        personalised_text = sanitizer.to_text(personalised_html)
-        context = {
-            "subject": personalised_subject,
-            "body_html": personalised_html,
-            "body_text": personalised_text,
-            "unsubscribe_url": unsubscribe_url,
-            "site_name": outreach_settings.site_name,
-            "prospect": prospect,
-            "theme": outreach_settings.theme,
-        }
         with translation.override(outreach_settings.language):
+            tagged_subject = mail_tag_library.render(subject, prospect, values, html=False)
+            personalised_subject = variables.render(tagged_subject, values, html=False)
+            tagged_html = mail_tag_library.render(
+                sanitizer.clean(body_html), prospect, values, html=True
+            )
+            personalised_html = sanitizer.clean(
+                variables.render(tagged_html, values, html=True)
+            )
+            personalised_text = sanitizer.to_text(personalised_html)
+            context = {
+                "subject": personalised_subject,
+                "body_html": personalised_html,
+                "body_text": personalised_text,
+                "unsubscribe_url": unsubscribe_url,
+                "site_name": outreach_settings.site_name,
+                "prospect": prospect,
+                "theme": outreach_settings.theme,
+            }
             text_part = render_to_string("outreach/email/message.txt", context)
             html_part = render_to_string("outreach/email/message.html", context)
         return RenderedMail(personalised_subject, text_part, html_part)
