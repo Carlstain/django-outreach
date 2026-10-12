@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0b2] - 2026-10-13
+
+### Added
+
+- A tag can declare a keyword-only `preview` parameter with a default, as in `def tag(prospect, *, preview=False)`. The package passes `preview=True` while a message is only previewed in the compose step, and `False` when it is sent, including when the tag is named as an argument of another tag or of a button. A tag with side effects can skip them in a preview. `ProspectMailer.render` takes a matching `preview` keyword, `False` by default.
+
+### Notes
+
+- Existing tags are unchanged: a tag without a `preview` parameter is called exactly as before.
+- Registration refuses a `preview` parameter that is not keyword-only, since staff text could fill a positional one.
+
 ## [0.1.0b1] - 2026-10-13
 
 First beta. It is meant to be installed and tried by projects that follow it, and the interface may still change before 0.1.0.
