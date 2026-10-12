@@ -40,9 +40,16 @@ class OutreachMailTagTestCase(OutreachTestCase):
         self.register_tag(echo, "echo")
 
     def render_mail(
-        self, prospect: Prospect, subject: str = "Subject", body: str = "<p>Body</p>"
+        self,
+        prospect: Prospect,
+        subject: str = "Subject",
+        body: str = "<p>Body</p>",
+        *,
+        preview: bool = False,
     ) -> RenderedMail:
-        return ProspectMailer(MAIL_BASE_URL, "staff").render(prospect, subject, body)
+        return ProspectMailer(MAIL_BASE_URL, "staff").render(
+            prospect, subject, body, preview=preview
+        )
 
     def freeze_time(self, hour: int) -> object:
         return patch(

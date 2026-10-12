@@ -232,7 +232,9 @@ class ProspectAdmin(ImportExportModelAdmin):
             )
             subject = form.cleaned_data["subject"]
             try:
-                rendered = mailer.render(preview_prospect, subject, form.cleaned_data["body"])
+                rendered = mailer.render(
+                    preview_prospect, subject, form.cleaned_data["body"], preview=True
+                )
             except InvalidButtonLink as error:
                 form.add_error("body", str(error))
                 return TemplateResponse(request, "outreach/admin/compose.html", context)

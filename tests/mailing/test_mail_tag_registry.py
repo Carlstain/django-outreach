@@ -56,6 +56,25 @@ class MailTagRegistryTests(OutreachTestCase):
 
         self.assertEqual([tag.name for tag in self.library.catalog()], ["flexible"])
 
+    def test_a_keyword_only_preview_parameter_is_detected(self) -> None:
+        @self.library.register(label="Aware", example="x")
+        def aware(prospect: Prospect, *, preview: bool = False) -> str:
+            return ""
+
+        @self.library.register(label="Plain", example="x")
+        def plain(prospect: Prospect) -> str:
+            return ""
+
+        self.assertTrue(self.library.tags["aware"].accepts_preview)
+        self.assertFalse(self.library.tags["plain"].accepts_preview)
+
+    def test_a_positional_preview_parameter_is_refused(self) -> None:
+        with self.assertRaises(ImproperlyConfigured):
+
+            @self.library.register(label="Open", example="x")
+            def open_to_staff(prospect: Prospect, preview: bool = False) -> str:
+                return ""
+
     def test_the_button_name_is_reserved(self) -> None:
         with self.assertRaises(ImproperlyConfigured):
 
