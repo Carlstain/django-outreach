@@ -1,8 +1,15 @@
+from unittest import skipUnless
+
+from django.conf import settings
 from django.test import override_settings
 from django.utils import translation
 
 from tests.base import OutreachMailTagTestCase
 from tests.factories import ProspectFactory
+
+requires_translations = skipUnless(
+    settings.USE_I18N, "Nothing is translated when USE_I18N is False."
+)
 
 
 @override_settings(OUTREACH_LANGUAGE="fr", TIME_ZONE="UTC")
@@ -11,6 +18,7 @@ class MailTagLanguageTests(OutreachMailTagTestCase):
         super().setUp()
         self.prospect = ProspectFactory()
 
+    @requires_translations
     def test_the_greeting_is_translated_to_the_outreach_language(self) -> None:
         for hour, expected in {9: "Bonjour", 14: "Bon après-midi", 20: "Bonsoir"}.items():
             with self.subTest(hour=hour), self.freeze_time(hour=hour):
@@ -18,6 +26,7 @@ class MailTagLanguageTests(OutreachMailTagTestCase):
 
                 self.assertEqual(rendered.subject, expected)
 
+    @requires_translations
     def test_the_date_is_formatted_in_the_outreach_language(self) -> None:
         with self.freeze_time(hour=9):
             rendered = self.render_mail(self.prospect, subject='{% today "j F Y" %}')
