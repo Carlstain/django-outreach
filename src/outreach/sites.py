@@ -18,6 +18,7 @@ from outreach.conf import outreach_settings
 from outreach.forms import OutreachAuthenticationForm
 from outreach.models import EmailTemplate, Mailing, Prospect, ProspectEvent
 from outreach.resources import import_columns
+from outreach.services.mail_tags import mail_tag_library
 from outreach.services.variables import MailVariables
 
 RECENT_EVENTS_LIMIT = 8
@@ -114,6 +115,7 @@ class OutreachAdminSite(AdminSite):
             **self.each_context(request),
             "title": _("How to use"),
             "variables": MailVariables().catalog(),
+            "mail_tags": mail_tag_library.catalog(),
             "max_recipients": outreach_settings.max_recipients_per_send,
             "cooldown_hours": self.cooldown_hours(),
             "import_columns": import_columns(),

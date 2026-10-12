@@ -29,12 +29,18 @@
       toggle.setAttribute("aria-expanded", String(!menu.hidden));
       return;
     }
-    var item = event.target.closest("[data-trix-variable]");
+    var item = event.target.closest("[data-trix-variable], [data-trix-tag], [data-trix-snippet]");
     if (item) {
       var editor = editorFor(item.closest("trix-toolbar"));
       if (editor) {
         editor.focus();
-        editor.editor.insertString("{{ " + item.dataset.trixVariable + " }}");
+        var snippet = item.dataset.trixSnippet;
+        if (item.dataset.trixTag) {
+          snippet = "{% " + item.dataset.trixTag + " %}";
+        } else if (item.dataset.trixVariable) {
+          snippet = "{{ " + item.dataset.trixVariable + " }}";
+        }
+        editor.editor.insertString(snippet);
       }
       closeMenus(null);
       return;

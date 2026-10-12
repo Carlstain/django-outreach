@@ -5,11 +5,14 @@ from django.db import IntegrityError
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponse
 
+from outreach.conf import outreach_settings
 from outreach.forms import (
     EmailTemplateForm,
 )
 from outreach.models import EmailTemplate
 from outreach.services.body import MailBodySanitizer
+from outreach.services.mail_buttons import mail_buttons
+from outreach.services.mail_tags import mail_tag_library
 from outreach.services.variables import MailVariables
 from outreach.sites import outreach_site
 
@@ -63,11 +66,18 @@ class EmailTemplateAdmin(admin.ModelAdmin):
             }
             sample_values["unsubscribe_url"] = "https://example.org/unsubscribe/sample/"
             sanitizer = MailBodySanitizer()
-            personalised_html = variables.render(
-                sanitizer.clean(obj.body_html), sample_values, html=True
+            body_with_tokens, buttons = mail_buttons.extract(
+                sanitizer.clean(obj.body_html),
+                lambda argument: mail_tag_library.resolve_example(argument, sample_values),
+                strict=False,
             )
-            context["sample_preview_html"] = sanitizer.clean(personalised_html)
+            tagged_html = mail_tag_library.render_examples(body_with_tokens, html=True)
+            personalised_html = variables.render(tagged_html, sample_values, html=True)
+            context["sample_preview_html"] = mail_buttons.insert(
+                sanitizer.clean(personalised_html), buttons, outreach_settings.theme.email
+            )
+            tagged_subject = mail_tag_library.render_examples(obj.subject, html=False)
             context["sample_preview_subject"] = variables.render(
-                obj.subject, sample_values, html=False
+                tagged_subject, sample_values, html=False
             )
         return super().render_change_form(request, context, add, change, form_url, obj)
