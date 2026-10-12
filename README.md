@@ -25,27 +25,27 @@ See `example/` for a runnable host project.
 
 ## Installation
 
-The current release is `0.1.0b1`, the first beta. The repository is private, so install over SSH from the tag.
+The current release is `0.1.0b2`, the second beta. The repository is private, so install over SSH from the tag.
 
 With uv:
 
 ```
-uv add "django-outreach @ git+ssh://git@github.com/Carlstain/django-outreach.git" --tag v0.1.0b1
+uv add "django-outreach @ git+ssh://git@github.com/Carlstain/django-outreach.git" --tag v0.1.0b2
 ```
 
 With pip:
 
 ```
-pip install "git+ssh://git@github.com/Carlstain/django-outreach.git@v0.1.0b1"
+pip install "git+ssh://git@github.com/Carlstain/django-outreach.git@v0.1.0b2"
 ```
 
-Every release also has its wheel and sdist attached to its GitHub Release. Download one with `gh release download v0.1.0b1` and install the file with `uv add ./django_outreach-0.1.0b1-py3-none-any.whl`.
+Every release also has its wheel and sdist attached to its GitHub Release. Download one with `gh release download v0.1.0b2` and install the file with `uv add ./django_outreach-0.1.0b2-py3-none-any.whl`.
 
 The machine that installs needs access to this private repository. On a developer machine that is an SSH key with access. In a Docker build or in CI, give the build a read-only deploy key, a forwarded SSH agent or a token, since a private repository cannot be installed anonymously.
 
 ### Beta
 
-`0.1.0b1` is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen from this version on, so an installation can be upgraded without resetting its tables. Known limits: sending runs synchronously in the admin request with a per-send cap and no task queue, and Outlook desktop shows a button as a plain coloured link.
+`0.1.0b2` is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen from this version on, so an installation can be upgraded without resetting its tables. Known limits: sending runs synchronously in the admin request with a per-send cap and no task queue, and Outlook desktop shows a button as a plain coloured link.
 
 ## Try the example project
 
@@ -222,6 +222,7 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 
 - The first parameter is always the prospect. Every other parameter needs a default, and arguments are strings. A bare word in a call, such as `{% initial last_name %}`, is replaced by the raw value of that variable, or by the output of a tag of that name called with the prospect only. Tag names may not be `button` or equal to a variable key.
 - Arguments come from staff, so treat them as untrusted input. A name already taken raises `ImproperlyConfigured` at startup.
+- A tag with side effects declares a keyword-only `preview` parameter with a default: `def tag(prospect: Prospect, *, preview: bool = False) -> str`. It receives `True` while a message is only previewed in the compose step and `False` when the message is sent, so it can return a placeholder and skip the side effect. Staff text can never fill it, and registration refuses a `preview` parameter that is not keyword-only. A tag without the parameter is called as before.
 - An exception in a tag fails that recipient only: the mail is not sent, the claim is restored and a failure event is recorded.
 - The compose form rejects unknown tags, too many arguments (over 200 characters each is also refused) and stray `{%` or `%}`. The template preview shows each tag's `example` and never runs the function.
 - Tags are applied before variables, so a prospect's data (a name containing `{% ... %}`) is never run as a tag.
