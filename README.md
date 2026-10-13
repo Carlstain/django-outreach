@@ -13,6 +13,8 @@ What it does:
 - CSV and spreadsheet import and export through django-import-export.
 - A built-in help page for the staff who use it, in English and French.
 
+Documentation: https://django-outreach.readthedocs.io/
+
 See `example/` for a runnable host project.
 
 ## Requirements

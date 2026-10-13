@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- Documentation, built with Sphinx and published on Read the Docs: installation, configuration, a user guide for the staff, topics for developers and a reference for the models, services, URLs, permissions and templates.
+- Docstrings on the public classes and functions, which feed the reference.
+
 ## [0.1.0b4] - 2026-10-13
 
 ### Added

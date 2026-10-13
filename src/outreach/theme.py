@@ -113,6 +113,13 @@ def is_valid_font_family(value: object) -> bool:
 
 
 class OutreachTheme:
+    """Resolves ``OUTREACH_THEME`` into CSS variables for the admin and colours for mail.
+
+    ``errors()`` is strict and feeds the ``outreach.E001`` check. At runtime ``css()`` and
+    ``email`` never raise: an invalid value falls back to the default for its key and one
+    warning per problem is logged on the ``outreach`` logger.
+    """
+
     def configured(self) -> object:
         return getattr(settings, "OUTREACH_THEME", None) or {}
 

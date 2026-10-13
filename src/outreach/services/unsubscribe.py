@@ -12,6 +12,8 @@ UNSUBSCRIBE_SALT = "outreach.unsubscribe"
 
 
 class SuppressionList:
+    """Permanent do-not-mail list, stored as salted HMAC hashes of the addresses."""
+
     def hashes(self, email: str) -> list[str]:
         normalised_email = email.strip().lower()
         secret_keys = [settings.SECRET_KEY, *settings.SECRET_KEY_FALLBACKS]
@@ -40,10 +42,17 @@ class SuppressionList:
 
 
 class UnsubscribeTokens:
+    """Signed, non-expiring tokens carried by unsubscribe links."""
+
     def make(self, prospect: Prospect) -> str:
         return signing.dumps(str(prospect.pk), salt=UNSUBSCRIBE_SALT)
 
     def resolve(self, token: str) -> Prospect:
+        """Return the prospect of a token.
+
+        Raises:
+            Prospect.DoesNotExist: The signature is bad or the prospect no longer exists.
+        """
         try:
             prospect_pk = signing.loads(token, salt=UNSUBSCRIBE_SALT)
         except signing.BadSignature as error:
@@ -60,6 +69,10 @@ class UnsubscribeTokens:
 
 class ProspectUnsubscriber:
     def unsubscribe(self, prospect: Prospect, actor: str) -> None:
+        """Suppress the address, mark the prospect unsubscribed and record the event.
+
+        Calling it again on an unsubscribed prospect records nothing more.
+        """
         SuppressionList().add(prospect.email)
         if prospect.status == ProspectStatus.UNSUBSCRIBED:
             return

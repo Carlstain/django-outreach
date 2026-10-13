@@ -5,6 +5,11 @@ from outreach.models import Prospect
 
 class UserLinker:
     def link(self, prospect: Prospect) -> bool:
+        """Set ``prospect.user`` to the host user with the same email, without saving.
+
+        Returns ``False`` and links nothing when no user, several users, or a user already
+        linked to another prospect match.
+        """
         user_model = get_user_model()
         email_field_name = user_model.get_email_field_name()
         matching_users = list(

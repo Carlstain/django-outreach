@@ -27,7 +27,13 @@ LIST_INDENT = "  "
 
 
 class MailBodySanitizer:
+    """Sanitises mail bodies with nh3 and converts them to plain text."""
+
     def clean(self, html: str) -> str:
+        """Keep only the editor's tags, ``href`` on links, and http, https or mailto URLs.
+
+        A body with no HTML tag is treated as plain text and wrapped in paragraphs first.
+        """
         if not TAG_PATTERN.search(html):
             html = linebreaks(html)
         return nh3.clean(

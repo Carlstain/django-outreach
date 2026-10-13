@@ -26,6 +26,12 @@ SECONDS_PER_HOUR = 3600
 
 
 class OutreachAdminSite(AdminSite):
+    """Second admin site, instance name ``outreach_admin``, for staff who manage outreach.
+
+    Access needs an active staff user with ``outreach.view_prospect``. Every view runs under
+    ``OUTREACH_LANGUAGE``.
+    """
+
     enable_nav_sidebar = False
     index_template = "outreach/admin/index.html"
     login_template = "outreach/admin/login.html"

@@ -15,6 +15,8 @@ HOOK_FIELD_NAMES = {"kind", "first_name", "last_name", "organization", "city", "
 
 @dataclass
 class UserLoadReport:
+    """Counts from a load: users selected, prospects created, and why others were not."""
+
     selected: int = 0
     created: int = 0
     existing: int = 0
@@ -23,11 +25,24 @@ class UserLoadReport:
 
 
 class UserProspectLoader:
+    """Turns host users into prospects, as the ``outreach_load_users`` command does.
+
+    Args:
+        dry_run: Count what would happen without saving anything.
+        include_inactive: Also load users whose ``is_active`` is false.
+    """
+
     def __init__(self, dry_run: bool = False, include_inactive: bool = False) -> None:
         self.dry_run = dry_run
         self.include_inactive = include_inactive
 
     def load(self) -> UserLoadReport:
+        """Create a prospect for each user that has no prospect yet, in one transaction.
+
+        Goes through ``Prospect.save()``, so linking and suppression apply: a suppressed
+        address becomes an unsubscribed prospect. Users whose data fails validation are
+        counted as invalid.
+        """
         user_model = get_user_model()
         email_field_name = user_model.get_email_field_name()
         users = user_model.objects.exclude(**{f"{email_field_name}__isnull": True}).exclude(

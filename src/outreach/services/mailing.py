@@ -33,6 +33,8 @@ def count_by_reason(skipped: list[SkippedProspect]) -> dict[str, int]:
 
 @dataclass
 class MailPlan:
+    """Who will be mailed and who is skipped, with the reason for each skip."""
+
     recipients: list[Prospect] = field(default_factory=list)
     skipped: list[SkippedProspect] = field(default_factory=list)
 
@@ -50,6 +52,8 @@ class RenderedMail:
 
 @dataclass
 class MailReport:
+    """Outcome of a send. ``mailing`` is ``None`` when nobody was left to mail."""
+
     mailing: Mailing | None = None
     sent: list[Prospect] = field(default_factory=list)
     failed: list[Prospect] = field(default_factory=list)
@@ -61,12 +65,24 @@ class MailReport:
 
 
 class ProspectMailer:
+    """Plans, renders and sends a mailing to prospects.
+
+    Args:
+        base_url: Origin used to build unsubscribe links, normally ``OUTREACH_BASE_URL``.
+        actor: Who triggers the send, recorded on events and as the mailing sender.
+    """
+
     def __init__(self, base_url: str, actor: str) -> None:
         self.base_url = base_url.rstrip("/")
         self.actor = actor
         self.tokens = UnsubscribeTokens()
 
     def plan(self, prospects: Iterable[Prospect]) -> MailPlan:
+        """Split prospects into recipients and skipped ones.
+
+        A prospect is skipped when unsubscribed, suppressed, mailed within
+        ``OUTREACH_RESEND_COOLDOWN``, or beyond ``OUTREACH_MAX_RECIPIENTS_PER_SEND``.
+        """
         prospect_list = list(prospects)
         suppressed_emails = SuppressionList().filter_suppressed(
             prospect.email for prospect in prospect_list
@@ -97,6 +113,10 @@ class ProspectMailer:
     def render(
         self, prospect: Prospect, subject: str, body_html: str, *, preview: bool = False
     ) -> RenderedMail:
+        """Render the subject and body for one prospect, as text and HTML.
+
+        Tags run first, then variables, and the HTML is sanitised after substitution.
+        """
         variables = MailVariables()
         sanitizer = MailBodySanitizer()
         unsubscribe_url = self.unsubscribe_url(prospect)
@@ -133,6 +153,12 @@ class ProspectMailer:
         return RenderedMail(personalised_subject, text_part, html_part)
 
     def send(self, prospects: Iterable[Prospect], subject: str, body_html: str) -> MailReport:
+        """Send the mail synchronously to every prospect that passes the plan.
+
+        Recipients are claimed (``last_mailed_at`` set) in a transaction before any SMTP call,
+        and the claim is restored for each one that fails. A failure on one recipient does not
+        stop the others.
+        """
         mail_plan, previous_mailed_at, mailing = self.claim(prospects, subject, body_html)
         report = MailReport(mailing=mailing, skipped=mail_plan.skipped)
         if mailing is None:

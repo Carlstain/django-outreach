@@ -13,6 +13,6 @@ RUN pip install --no-cache-dir uv==0.12.23
 
 COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY src ./src
-RUN uv sync --frozen --group dev
+RUN uv sync --frozen --group dev --group docs
 
 CMD ["pytest"]

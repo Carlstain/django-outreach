@@ -33,12 +33,36 @@ class MailTag:
 
 
 class MailTagLibrary:
+    """Registry of the computed tags usable in a subject or body as ``{% name "text" variable %}``.
+
+    Use the shared ``outreach.mail_tags.mail_tag_library`` instance and register tags in a
+    ``mail_tags.py`` module of an installed app, where they are autodiscovered.
+    """
+
     def __init__(self) -> None:
         self.tags: dict[str, MailTag] = {}
 
     def register(
         self, *, label: str, example: str, name: str | None = None
     ) -> Callable[[Callable[..., str]], Callable[..., str]]:
+        """Register a function as a mail tag.
+
+        The function receives the prospect first, then the string arguments written in the
+        mail, and returns plain text. Every parameter after the prospect needs a default. A
+        keyword-only ``preview`` parameter, if declared, is set to whether the call renders a
+        preview.
+
+        Args:
+            label: Name shown to staff in the tag catalogue.
+            example: Text shown in place of the tag in the template preview, where no tag is run.
+            name: Tag name used in mails. Defaults to the function name.
+
+        Raises:
+            ImproperlyConfigured: The name is already registered, is ``button`` or a variable
+                key, the function does not take the prospect first, a later parameter has no
+                default, or ``preview`` is not keyword-only.
+        """
+
         def decorator(function: Callable[..., str]) -> Callable[..., str]:
             tag_name = name or function.__name__
             if tag_name in self.tags:
@@ -83,6 +107,7 @@ class MailTagLibrary:
                 )
 
     def catalog(self) -> list[MailTag]:
+        """Return the registered tags sorted by name."""
         return sorted(self.tags.values(), key=lambda tag: tag.name)
 
     def parse_arguments(self, raw_arguments: str) -> list[MailTagArgument]:
@@ -148,6 +173,14 @@ class MailTagLibrary:
         html: bool,
         preview: bool = False,
     ) -> str:
+        """Replace every registered tag in ``text`` with its output for ``prospect``.
+
+        Args:
+            values: Variable values a bare-word argument can name.
+            html: Escape the output as HTML, otherwise flatten line breaks.
+            preview: Passed to tags that declare a ``preview`` parameter.
+        """
+
         def substitute(match: re.Match[str]) -> str:
             tag = self.tags.get(match.group(1))
             if tag is None:

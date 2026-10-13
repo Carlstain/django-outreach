@@ -36,7 +36,8 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/Carlstain/django-outreach"
 Source = "https://github.com/Carlstain/django-outreach"
-Issues = "https://github.com/Carlstain/django-outreach/issues"
+Documentation = "https://django-outreach.readthedocs.io/"
+Issues ="https://github.com/Carlstain/django-outreach/issues"
 Changelog = "https://github.com/Carlstain/django-outreach/blob/main/CHANGELOG.md"
 
 [dependency-groups]
@@ -48,6 +49,12 @@ dev = [
     "pre-commit",
     "Babel",
     "psycopg[binary]",
+]
+docs = [
+    "sphinx",
+    "myst-parser",
+    "furo",
+    "sphinx-copybutton",
 ]
 
 [tool.uv.build-backend]
