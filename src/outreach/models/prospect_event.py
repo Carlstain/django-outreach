@@ -42,6 +42,7 @@ class ProspectEvent(models.Model):
         detail: str = "",
         mailing: Mailing | None = None,
     ) -> "ProspectEvent":
+        """Create an event, cutting ``actor`` and ``detail`` to the size of their columns."""
         actor_max_length = cls._meta.get_field("actor").max_length
         detail_max_length = cls._meta.get_field("detail").max_length
         return cls.objects.create(

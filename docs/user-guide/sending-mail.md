@@ -1,0 +1,114 @@
+# Sending mail
+
+Mail is sent from the prospect list, in two steps: write, then check and send. You need
+`change_prospect`.
+
+## 1. Select and write
+
+1. In *Prospects*, tick the people to mail.
+2. Choose *Send a mail to the selected prospects* and press *Go*.
+3. The page *Write a message* shows the form on the left and the recipients on the right.
+
+The recipients panel counts who will receive the message and lists who is skipped, and why.
+
+| Skip reason | Why |
+|---|---|
+| Unsubscribed | The prospect unsubscribed |
+| Suppressed | The address is on the suppression list |
+| Contacted recently | Mailed within the resend cooldown (24 hours by default) |
+| Over the send limit | Beyond the maximum for one send (100 by default) |
+
+The dashboard shows the limits of your installation under *Before you send*. If the page says
+that sending is disabled, ask your developer to set `OUTREACH_BASE_URL`.
+
+Fill in:
+
+- **Subject**: a single line. Variables and tags work, buttons do not.
+- **Message**: the rich text editor. Allowed formatting is paragraphs, bold, italic, strike
+  through, a heading, bullet and numbered lists, quotes and links. Anything else is removed.
+
+Every message ends with an unsubscribe link that you do not write yourself.
+
+## Variables
+
+A variable is replaced for each recipient.
+
+| Variable | Value |
+|---|---|
+| `{{ first_name }}` | First name |
+| `{{ last_name }}` | Last name |
+| `{{ full_name }}` | First and last name |
+| `{{ organization }}` | Organization |
+| `{{ email }}` | Email address |
+| `{{ city }}` | City |
+| `{{ country }}` | Country |
+| `{{ unsubscribe_url }}` | The recipient's unsubscribe link |
+
+Add a fallback after a pipe for when the value is empty: `{{ first_name | there }}` writes
+"there" for a prospect with no first name. For a member whose own first and last name are empty,
+the name of the linked user account is used.
+
+Only these names work. An unknown or malformed one is refused when you preview, with the list of
+valid names.
+
+## Computed tags
+
+A tag is a small function run for each recipient, written `{% name %}` or
+`{% name "text" variable %}`. Its result is plain text. These are built in:
+
+| Tag | Result |
+|---|---|
+| `{% today %}` or `{% today "j F Y" %}` | The send date. The optional text is a Django date format |
+| `{% greeting %}` | Good morning, afternoon or evening, from the server time at send |
+| `{% member_since %}` | The date the linked user joined, empty for a prospect with no user |
+
+Your developer may have added more. *How to use* lists every tag with an example. An unknown tag,
+too many arguments or a stray `{%` is refused when you preview.
+
+## Buttons
+
+`{% button "Read more" "https://example.org" %}` writes a link styled as a button, in the accent
+colour of the site theme. It takes exactly a label and a link, and only works in the message, not
+in the subject.
+
+- The link starts with `http`, `https` or `mailto` and has no space.
+- The link can be a variable, for example `{% button "Leave" unsubscribe_url %}`.
+- A button can not be placed inside a link.
+- In the plain-text version of the mail, a button reads `Label (link)`.
+- Outlook for desktop shows a button as a plain coloured link.
+
+## Using a template
+
+If a developer or an administrator gave you template permissions, a *Template* menu sits above the
+subject. Choose one and press *Use template* to replace the subject and message. Nothing is sent
+and nothing is kept until you go on. *Save this message as a template* below the form stores the
+current text under a name, see {doc}`email-templates`.
+
+## 2. Check and send
+
+Press *Preview message*. Step 2 shows the mail exactly as a recipient gets it, with their details
+filled in, in a frame cut off from the rest of the page. *Preview as* switches to another
+recipient. Computed tags run for real in this preview, except those that declare they have side
+effects, which show a placeholder.
+
+- *Edit message* goes back to step 1 with your text.
+- *Send to N prospects* sends. There is no second confirmation, and no undo.
+
+When the send finishes, the list shows a line such as *12 sent, 3 skipped, 0 failed*.
+
+## What happens during a send
+
+- Sending runs while you wait. A send takes about a third of a second per mail, which is why the
+  number of recipients is capped.
+- Before the first mail, the recipients are marked as mailed. If you press the button twice, or
+  someone else sends to the same people, the second attempt finds them in the cooldown and skips
+  them.
+- If a mail fails (the server refuses it, or a tag or button link is invalid for that person), only
+  that person is affected. They are counted as failed, their "last mailed" date is restored, and a
+  failure event with the error is added to their history. Others still receive the mail.
+- A prospect who unsubscribed while the send was running is not mailed.
+- A successful mail sets a never-mailed prospect to *Contacted* and adds a *Mail sent* event.
+- Every send with at least one recipient creates a mailing, see {doc}`mailings`.
+
+If one recipient's failure is something you can fix, such as an empty button link, correct it and
+send again to that person only. They are no longer in the cooldown.
