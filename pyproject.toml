@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "django-outreach"
-version = "0.1.0b2"
+version = "0.1.0b3"
 description = "Prospects, reusable email templates and bulk mail with unsubscribe links for Django projects."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,7 +18,6 @@ classifiers = [
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",

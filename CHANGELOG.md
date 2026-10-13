@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0b3] - 2026-10-13
+
+The first beta published on PyPI. The repository is public from this release.
+
 ### Added
 
 - `Prospect.avatar_tone`, a number from 0 to 5 used for the avatar tint. It is a property, so there is no migration.
