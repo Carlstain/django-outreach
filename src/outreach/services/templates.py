@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import IntegrityError, transaction
 
 from outreach.models import EmailTemplate
@@ -24,7 +25,7 @@ class EmailTemplates:
         name: str,
         subject: str,
         body_html: str,
-        author: str,
+        author: AbstractBaseUser | None,
         overwrite: bool,
         *,
         header_text: str = "",
@@ -32,7 +33,8 @@ class EmailTemplates:
     ) -> SavedTemplate:
         """Create a template, or update the one with the same name when ``overwrite`` is true.
 
-        The body is sanitised. Overwriting keeps the original author.
+        The body is sanitised. Overwriting keeps ``created_by`` and sets ``updated_by`` to the
+        author.
 
         Raises:
             TemplateNameTaken: The name is taken and ``overwrite`` is false.
@@ -60,12 +62,14 @@ class EmailTemplates:
         existing.body_html = clean_body
         existing.header_text = header_text
         existing.is_newsletter = is_newsletter
+        existing.updated_by = author
         existing.save(
             update_fields=[
                 "subject",
                 "body_html",
                 "header_text",
                 "is_newsletter",
+                "updated_by",
                 "updated_at",
             ]
         )
@@ -76,12 +80,11 @@ class EmailTemplates:
         name: str,
         subject: str,
         body_html: str,
-        author: str,
+        author: AbstractBaseUser | None,
         *,
         header_text: str = "",
         is_newsletter: bool = True,
     ) -> SavedTemplate:
-        author_max_length = EmailTemplate._meta.get_field("created_by").max_length
         with transaction.atomic():
             template = EmailTemplate.objects.create(
                 name=name,
@@ -89,6 +92,7 @@ class EmailTemplates:
                 body_html=body_html,
                 header_text=header_text,
                 is_newsletter=is_newsletter,
-                created_by=author[:author_max_length],
+                created_by=author,
+                updated_by=author,
             )
         return SavedTemplate(template, created=True)

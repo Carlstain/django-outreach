@@ -26,8 +26,10 @@ Prospect (outreach_prospect)             Mailing (outreach_mailing)
                                            one row per recipient, unique (mailing, prospect)
 
 EmailTemplate (outreach_emailtemplate)   uuid pk, name (unique ignoring case), subject,
-                                         body_html (sanitised), created_by, created_at,
-                                         updated_at. No foreign key: a Mailing keeps a copy.
+                                         body_html (sanitised), created_by, updated_by (both
+                                         optional FK to the host user model, SET_NULL),
+                                         created_at, updated_at. No foreign key to it from a
+                                         Mailing, which keeps a copy.
 
 Suppression (outreach_suppression)       email_hash pk (salted HMAC of the address), created_at
                                          no foreign key: it outlives the prospect
@@ -48,6 +50,10 @@ Suppression (outreach_suppression)       email_hash pk (salted HMAC of the addre
 .. autoclass:: outreach.models.MailingDelivery
 
 .. autoclass:: outreach.models.EmailTemplate
+
+.. autoclass:: outreach.models.BaseModel
+
+.. autoclass:: outreach.models.AuthoredModel
 
 .. autoclass:: outreach.models.Suppression
 ```

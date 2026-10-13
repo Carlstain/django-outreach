@@ -1453,3 +1453,6 @@ msgstr "en attente"
 
 msgid "%(queued)d queued, %(skipped)d skipped."
 msgstr "%(queued)d en file d'attente, %(skipped)d ignorés."
+
+msgid "updated by"
+msgstr "modifié par"

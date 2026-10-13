@@ -38,7 +38,6 @@ class EmailTemplateFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda sequence_number: f"Template {sequence_number}")
     subject = factory.Sequence(lambda sequence_number: f"Template subject {sequence_number}")
     body_html = "<p>Hello from the template</p>"
-    created_by = "template-author"
 
 
 OUTREACH_PROSPECT_PERMISSIONS = [

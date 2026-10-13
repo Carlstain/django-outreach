@@ -12,6 +12,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
+- `EmailTemplate.created_by` is now an optional foreign key to the host user model (cleared when the account is deleted) instead of a username string, and `updated_by` records who changed a template last. Migration `0004` matches the existing usernames to users through `USERNAME_FIELD`: a template whose author no longer matches an account ends up without an author. `EmailTemplates.save` and `create` take the user instead of a username.
+- `Prospect`, `MailingDelivery` and `EmailTemplate` share the abstract models `BaseModel` (uuid, `created_at`, `updated_at`) and `AuthoredModel` (adds `created_by`, `updated_by`). No schema change except the above.
 - Synchronous sending stays the default but is not recommended in production: `outreach.W001` reports it in `check --deploy`. Its behaviour and the `OUTREACH_MAX_RECIPIENTS_PER_SEND` limit (100) are unchanged.
 - `ProspectMailer.send` goes through the new `queue` and `deliver` steps, and `MailReport` has a `queued` list, filled in Celery mode.
 

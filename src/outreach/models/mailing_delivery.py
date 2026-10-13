@@ -1,22 +1,18 @@
-import uuid
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from outreach.choices import DeliveryStatus
+from outreach.models.base import BaseModel
 from outreach.models.mailing import Mailing
 from outreach.models.prospect import Prospect
 
 
-class MailingDelivery(models.Model):
+class MailingDelivery(BaseModel):
     """One recipient of a mailing, from the moment it is claimed until it is sent or failed.
 
     It holds the ``last_mailed_at`` the claim replaced, so a failure can restore it.
     """
 
-    uuid = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_("uuid")
-    )
     mailing = models.ForeignKey(
         Mailing,
         on_delete=models.CASCADE,
@@ -40,8 +36,6 @@ class MailingDelivery(models.Model):
         null=True, blank=True, verbose_name=_("previous mailed at")
     )
     last_error = models.CharField(max_length=255, blank=True, verbose_name=_("last error"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("updated at"))
 
     class Meta:
         ordering = ["created_at", "pk"]

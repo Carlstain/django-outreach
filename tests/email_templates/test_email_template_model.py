@@ -7,7 +7,7 @@ from outreach.forms import EmailTemplateForm
 from outreach.models import EmailTemplate
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from tests.base import OutreachTestCase
-from tests.factories import EmailTemplateFactory
+from tests.factories import EmailTemplateFactory, UserFactory
 
 
 def template_form(**overrides: str) -> EmailTemplateForm:
@@ -96,16 +96,39 @@ class EmailTemplateModelTests(OutreachTestCase):
 
         self.assertEqual(form.errors["body_html"], ["The message is empty."])
 
-    def test_service_truncates_the_author_to_the_stored_length(self) -> None:
-        author = "a" * 240 + "@example.test"
+    def test_service_records_the_author_on_creation(self) -> None:
+        author = UserFactory()
 
         saved = EmailTemplates().save(
             "Welcome", "Hello", "<p>Body</p>", author, overwrite=False
         )
 
         saved.template.refresh_from_db()
-        self.assertEqual(saved.template.created_by, author[:150])
-        self.assertEqual(len(saved.template.created_by), 150)
+        self.assertEqual(saved.template.created_by, author)
+        self.assertEqual(saved.template.updated_by, author)
+
+    def test_overwriting_sets_updated_by_and_keeps_created_by(self) -> None:
+        creator = UserFactory()
+        editor = UserFactory()
+        EmailTemplateFactory(name="Welcome", created_by=creator, updated_by=creator)
+
+        saved = EmailTemplates().save(
+            "welcome", "Hello", "<p>Body</p>", editor, overwrite=True
+        )
+
+        saved.template.refresh_from_db()
+        self.assertEqual(saved.template.created_by, creator)
+        self.assertEqual(saved.template.updated_by, editor)
+
+    def test_deleting_the_author_clears_the_author_fields(self) -> None:
+        author = UserFactory()
+        template = EmailTemplateFactory(created_by=author, updated_by=author)
+
+        author.delete()
+
+        template.refresh_from_db()
+        self.assertIsNone(template.created_by)
+        self.assertIsNone(template.updated_by)
 
     def test_a_name_taken_between_lookup_and_create_is_reported_as_name_taken(self) -> None:
         EmailTemplateFactory(name="Welcome")
@@ -114,6 +137,6 @@ class EmailTemplateModelTests(OutreachTestCase):
             patch.object(QuerySet, "first", return_value=None),
             self.assertRaises(TemplateNameTaken),
         ):
-            EmailTemplates().save("welcome", "Hello", "<p>Body</p>", "author", overwrite=False)
+            EmailTemplates().save("welcome", "Hello", "<p>Body</p>", None, overwrite=False)
 
         self.assertEqual(EmailTemplate.objects.count(), 1)

@@ -1,7 +1,6 @@
 from unittest.mock import patch
 from uuid import uuid4
 
-from django.contrib.auth import get_user_model
 from django.contrib.messages import ERROR, SUCCESS, get_messages
 from django.core import mail
 from django.db.models.query import QuerySet
@@ -165,7 +164,7 @@ class ComposeTemplatesTests(OutreachTestCase):
                 "Welcome",
                 "Hello {{ first_name }}",
                 "<p>Hi {{ first_name }}</p>",
-                self.staff_user.get_username(),
+                self.staff_user,
             ),
         )
         self.assertEqual(flashed(response), [(SUCCESS, "Template saved.")])
@@ -245,7 +244,8 @@ class ComposeTemplatesTests(OutreachTestCase):
         self.assertNotContains(response, "Secret subject")
 
     def test_overwrite_replaces_the_content_and_keeps_the_author(self) -> None:
-        existing = EmailTemplateFactory(name="Welcome", created_by="original-author")
+        original_author = UserFactory()
+        existing = EmailTemplateFactory(name="Welcome", created_by=original_author)
 
         response = self.post_step(
             "save_template",
@@ -259,8 +259,8 @@ class ComposeTemplatesTests(OutreachTestCase):
         self.assertEqual(flashed(response), [(SUCCESS, "Template saved.")])
         self.assertEqual(EmailTemplate.objects.count(), 1)
         self.assertEqual(
-            (existing.subject, existing.body_html, existing.created_by),
-            (POSTED_SUBJECT, POSTED_BODY, "original-author"),
+            (existing.subject, existing.body_html, existing.created_by, existing.updated_by),
+            (POSTED_SUBJECT, POSTED_BODY, original_author, self.staff_user),
         )
 
     def test_overwrite_replaces_the_header_text_and_the_newsletter_flag(self) -> None:
@@ -462,16 +462,6 @@ class ComposeTemplatesTests(OutreachTestCase):
         self.assertEqual(len(save_buttons), 1)
         self.assertIn("formnovalidate", apply_buttons[0].attributes)
         self.assertIn("formnovalidate", save_buttons[0].attributes)
-
-    def test_author_is_truncated_to_the_stored_length_when_saving_from_compose(self) -> None:
-        long_username = "u" * 240 + "@example.test"
-
-        with patch.object(get_user_model(), "get_username", return_value=long_username):
-            self.post_step(
-                "save_template", subject=POSTED_SUBJECT, body=POSTED_BODY, name="Long"
-            )
-
-        self.assertEqual(EmailTemplate.objects.get().created_by, long_username[:150])
 
     def test_a_name_taken_after_the_lookup_is_a_field_error_not_a_server_error(self) -> None:
         EmailTemplateFactory(name="Welcome")
