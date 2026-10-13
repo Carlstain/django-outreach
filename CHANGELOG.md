@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Security
+
+- A `{% button %}` placed inside a link or another tag is rejected by the compose form and refused when a mail is rendered. It could previously write an anchor inside an attribute after the final sanitising pass.
+- A button link may not contain a space, and an `http` or `https` link needs a host.
+- The suppression list honours `SECRET_KEY_FALLBACKS`, like the unsubscribe links. A key rotation no longer lets a removed prospect that is imported again be mailed while the old key is listed.
+- An import file larger than `OUTREACH_MAX_IMPORT_BYTES` (2 MB by default) is rejected before it is parsed.
+
 ## [0.1.0b2] - 2026-10-13
 
 ### Added

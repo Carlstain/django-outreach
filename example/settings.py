@@ -1,5 +1,7 @@
 import os
 
+# INFO - M.E. - 13/10/26 - demonstration project, never deploy it: the secret key is public,
+# DEBUG is on and seed_demo.py creates a demo/demo superuser
 SECRET_KEY = "outreach-example-only-secret-key"
 DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]

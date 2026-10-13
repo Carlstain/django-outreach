@@ -261,6 +261,10 @@ msgstr "suppressions"
 msgid "The file has %(count)d rows, the limit is %(limit)d."
 msgstr "Le fichier contient %(count)d lignes, la limite est de %(limit)d."
 
+#, python-format
+msgid "The file is %(size)d bytes, the limit is %(limit)d."
+msgstr "Le fichier fait %(size)d octets, la limite est de %(limit)d."
+
 msgctxt "mail variable"
 msgid "First name"
 msgstr "Prénom"
@@ -1318,6 +1322,9 @@ msgid ""
 msgstr ""
 "Bouton invalide : un bouton demande un libellé et un lien (http, https ou "
 "mailto, une variable ou une balise)."
+
+msgid "A button cannot be placed inside a link or another tag."
+msgstr "Un bouton ne peut pas être placé dans un lien ou une autre balise."
 
 msgid "Button with a link"
 msgstr "Bouton avec un lien"
