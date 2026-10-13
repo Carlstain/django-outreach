@@ -1,9 +1,11 @@
 from typing import Any
 
 from django.contrib import admin
+from django.db.models import Count, Q, QuerySet
 from django.http import HttpRequest, HttpResponse
+from django.utils.translation import gettext_lazy as _
 
-from outreach.choices import EventKind
+from outreach.choices import DeliveryStatus, EventKind
 from outreach.models import Mailing
 from outreach.sites import outreach_site
 
@@ -14,6 +16,7 @@ class MailingAdmin(admin.ModelAdmin):
         "subject",
         "sender",
         "created_at",
+        "pending_count",
         "sent_count",
         "failed_count",
         "skipped_count",
@@ -23,6 +26,21 @@ class MailingAdmin(admin.ModelAdmin):
     change_list_template = "outreach/admin/mailing_list.html"
     change_form_template = "outreach/admin/mailing_detail.html"
     delete_selected_confirmation_template = "outreach/admin/delete_selected_confirmation.html"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Mailing]:
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                pending=Count(
+                    "deliveries", filter=Q(deliveries__status=DeliveryStatus.PENDING)
+                )
+            )
+        )
+
+    @admin.display(description=_("pending"), ordering="pending")
+    def pending_count(self, mailing: Mailing) -> int:
+        return mailing.pending
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

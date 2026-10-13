@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- Celery dispatch: `OUTREACH_DISPATCH = "celery"` queues one `outreach.deliver_mail` task per recipient, with retries on transient SMTP errors, instead of sending inside the admin request. The task uses the Celery app of the host project. New settings `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` (default 5000), `OUTREACH_CELERY_QUEUE` and `OUTREACH_DELIVERY_MAX_RETRIES` (default 3), the `celery` extra and the `outreach_resume_deliveries` command.
+- Migration `0003`: the `MailingDelivery` model, one row per recipient of a mailing. The Mailing admin shows how many are pending.
+- System checks `outreach.E002`, `outreach.E003` and `outreach.W001`.
+
+### Changed
+
+- Synchronous sending stays the default but is not recommended in production: `outreach.W001` reports it in `check --deploy`. Its behaviour and the `OUTREACH_MAX_RECIPIENTS_PER_SEND` limit (100) are unchanged.
+- `ProspectMailer.send` goes through the new `queue` and `deliver` steps, and `MailReport` has a `queued` list, filled in Celery mode.
+
 ## [0.1.0b6] - 2026-10-13
 
 ### Changed

@@ -122,7 +122,7 @@ class OutreachAdminSite(AdminSite):
             "title": _("How to use"),
             "variables": MailVariables().catalog(),
             "mail_tags": mail_tag_library.catalog(),
-            "max_recipients": outreach_settings.max_recipients_per_send,
+            "max_recipients": outreach_settings.recipient_cap,
             "cooldown_hours": self.cooldown_hours(),
             "import_columns": ProspectCsvColumns().with_aliases(),
         }
@@ -132,7 +132,7 @@ class OutreachAdminSite(AdminSite):
         recent_events = ProspectEvent.objects.select_related("prospect")[:RECENT_EVENTS_LIMIT]
         context = {
             "recent_events": recent_events,
-            "max_recipients": outreach_settings.max_recipients_per_send,
+            "max_recipients": outreach_settings.recipient_cap,
             "cooldown_hours": self.cooldown_hours(),
             **(extra_context or {}),
         }

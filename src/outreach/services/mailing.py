@@ -1,18 +1,27 @@
+import smtplib
 from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
+from functools import partial
 
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.mail.backends.base import BaseEmailBackend
 from django.db import transaction
+from django.db.models import F
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone, translation
 
-from outreach.choices import EventKind, ProspectStatus, SkipReason
+from outreach.choices import (
+    DeliveryStatus,
+    DispatchMode,
+    EventKind,
+    ProspectStatus,
+    SkipReason,
+)
 from outreach.conf import outreach_settings
-from outreach.models import Mailing, Prospect, ProspectEvent
+from outreach.models import Mailing, MailingDelivery, Prospect, ProspectEvent
 from outreach.services.body import MailBodySanitizer
 from outreach.services.mail_buttons import mail_buttons
 from outreach.services.mail_tags import mail_tag_library
@@ -55,6 +64,7 @@ class MailReport:
     """Outcome of a send. ``mailing`` is ``None`` when nobody was left to mail."""
 
     mailing: Mailing | None = None
+    queued: list[Prospect] = field(default_factory=list)
     sent: list[Prospect] = field(default_factory=list)
     failed: list[Prospect] = field(default_factory=list)
     skipped: list[SkippedProspect] = field(default_factory=list)
@@ -62,6 +72,17 @@ class MailReport:
     @property
     def skipped_counts(self) -> dict[str, int]:
         return count_by_reason(self.skipped)
+
+
+@dataclass
+class QueuedMailing:
+    plan: MailPlan
+    mailing: Mailing | None = None
+    deliveries: list[MailingDelivery] = field(default_factory=list)
+
+
+class TransientDeliveryError(Exception):
+    """A delivery failed for a reason that a later attempt may overcome."""
 
 
 class ProspectMailer:
@@ -90,7 +111,7 @@ class ProspectMailer:
             prospect.email for prospect in prospect_list
         )
         cooldown_start = timezone.now() - outreach_settings.resend_cooldown
-        maximum = outreach_settings.max_recipients_per_send
+        maximum = outreach_settings.recipient_cap
         mail_plan = MailPlan()
         for prospect in prospect_list:
             reason = None
@@ -183,82 +204,57 @@ class ProspectMailer:
         header_text: str = "",
         is_newsletter: bool = True,
     ) -> MailReport:
-        """Send the mail synchronously to every prospect that passes the plan.
+        """Send the mail to every prospect that passes the plan, or queue it for Celery.
 
         Recipients are claimed (``last_mailed_at`` set) in a transaction before any SMTP call,
         and the claim is restored for each one that fails. A failure on one recipient does not
-        stop the others.
+        stop the others. With ``OUTREACH_DISPATCH = "celery"`` the deliveries are queued and
+        ``MailReport.queued`` lists their prospects, with ``sent`` and ``failed`` left empty.
         """
-        mail_plan, previous_mailed_at, mailing = self.claim(
-            prospects, subject, body_html, header_text, is_newsletter
+        queued_mailing = self.queue(prospects, subject, body_html, header_text, is_newsletter)
+        report = MailReport(
+            mailing=queued_mailing.mailing, skipped=list(queued_mailing.plan.skipped)
         )
-        report = MailReport(mailing=mailing, skipped=mail_plan.skipped)
-        if mailing is None:
+        if queued_mailing.mailing is None:
             return report
-        processed_pks: set[object] = set()
+        if outreach_settings.dispatch == DispatchMode.CELERY:
+            self.enqueue(delivery.pk for delivery in queued_mailing.deliveries)
+            report.queued = [delivery.prospect for delivery in queued_mailing.deliveries]
+            return report
         connection = get_connection()
+        delivered_pks: set[object] = set()
         try:
-            for prospect in mail_plan.recipients:
-                if not self.is_still_mailable(prospect, is_newsletter):
-                    processed_pks.add(prospect.pk)
-                    self.release(prospect, previous_mailed_at[prospect.pk])
+            for delivery in queued_mailing.deliveries:
+                status = self.deliver(delivery.pk, connection)
+                delivered_pks.add(delivery.pk)
+                if status == DeliveryStatus.SENT:
+                    report.sent.append(delivery.prospect)
+                elif status == DeliveryStatus.FAILED:
+                    report.failed.append(delivery.prospect)
+                else:
                     report.skipped.append(
-                        SkippedProspect(prospect, self.skip_reason_when_gone(is_newsletter))
+                        SkippedProspect(
+                            delivery.prospect, self.skip_reason_when_gone(is_newsletter)
+                        )
                     )
-                    continue
-                try:
-                    connection.open()
-                    self.send_one(
-                        prospect,
-                        subject,
-                        mailing.body_html,
-                        connection,
-                        header_text,
-                        is_newsletter,
-                    )
-                except Exception as error:
-                    processed_pks.add(prospect.pk)
-                    connection.close()
-                    self.release(prospect, previous_mailed_at[prospect.pk])
-                    report.failed.append(prospect)
-                    ProspectEvent.record(
-                        prospect,
-                        EventKind.MAIL_FAILED,
-                        self.actor,
-                        detail=str(error),
-                        mailing=mailing,
-                    )
-                    continue
-                processed_pks.add(prospect.pk)
-                self.mark_mailed(prospect, subject, mailing)
-                report.sent.append(prospect)
         finally:
             connection.close()
-            for prospect in mail_plan.recipients:
-                if prospect.pk not in processed_pks:
-                    self.release(prospect, previous_mailed_at[prospect.pk])
-            mailing.sent_count = len(report.sent)
-            mailing.failed_count = len(report.failed)
-            mailing.skipped_count = len(report.skipped)
-            mailing.skipped_reasons = report.skipped_counts
-            mailing.save(
-                update_fields=[
-                    "sent_count",
-                    "failed_count",
-                    "skipped_count",
-                    "skipped_reasons",
-                ]
-            )
+            for delivery in queued_mailing.deliveries:
+                if delivery.pk not in delivered_pks:
+                    self.release(delivery.prospect, delivery.previous_mailed_at)
+                    delivery.delete()
+        queued_mailing.mailing.refresh_from_db()
         return report
 
-    def claim(
+    def queue(
         self,
         prospects: Iterable[Prospect],
         subject: str,
         body_html: str,
         header_text: str,
         is_newsletter: bool,
-    ) -> tuple[MailPlan, dict[object, datetime | None], Mailing | None]:
+    ) -> QueuedMailing:
+        """Claim the recipients and create the mailing with one pending delivery each."""
         requested_pks = [prospect.pk for prospect in prospects]
         with transaction.atomic():
             locked_prospects = (
@@ -269,31 +265,150 @@ class ProspectMailer:
             locked_by_pk = {prospect.pk: prospect for prospect in locked_prospects}
             fresh_prospects = [locked_by_pk[pk] for pk in requested_pks if pk in locked_by_pk]
             mail_plan = self.plan(fresh_prospects, is_newsletter=is_newsletter)
-            previous_mailed_at = {
-                prospect.pk: prospect.last_mailed_at for prospect in mail_plan.recipients
-            }
-            mailing = None
-            if mail_plan.recipients:
-                mailing = Mailing.objects.create(
-                    subject=subject,
-                    body_html=MailBodySanitizer().clean(body_html),
-                    header_text=header_text,
-                    is_newsletter=is_newsletter,
-                    sender=self.actor[: Mailing._meta.get_field("sender").max_length],
+            if not mail_plan.recipients:
+                return QueuedMailing(plan=mail_plan)
+            mailing = Mailing.objects.create(
+                subject=subject,
+                body_html=MailBodySanitizer().clean(body_html),
+                header_text=header_text,
+                is_newsletter=is_newsletter,
+                sender=self.actor[: Mailing._meta.get_field("sender").max_length],
+                skipped_count=len(mail_plan.skipped),
+                skipped_reasons=mail_plan.skipped_counts,
+            )
+            deliveries = MailingDelivery.objects.bulk_create(
+                MailingDelivery(
+                    mailing=mailing,
+                    prospect=prospect,
+                    previous_mailed_at=prospect.last_mailed_at,
                 )
-                Prospect.objects.filter(pk__in=previous_mailed_at).update(
-                    last_mailed_at=timezone.now()
+                for prospect in mail_plan.recipients
+            )
+            Prospect.objects.filter(
+                pk__in=[prospect.pk for prospect in mail_plan.recipients]
+            ).update(last_mailed_at=timezone.now())
+        return QueuedMailing(plan=mail_plan, mailing=mailing, deliveries=deliveries)
+
+    @staticmethod
+    def enqueue(delivery_pks: Iterable[object]) -> None:
+        from outreach.tasks import deliver_mail
+
+        queue_name = outreach_settings.celery_queue
+        for delivery_pk in delivery_pks:
+            transaction.on_commit(
+                partial(deliver_mail.apply_async, args=[str(delivery_pk)], queue=queue_name)
+            )
+
+    def deliver(
+        self,
+        delivery_pk: object,
+        connection: BaseEmailBackend | None = None,
+        *,
+        may_retry: bool = False,
+    ) -> DeliveryStatus | None:
+        """Send one pending delivery and record the outcome.
+
+        Returns ``None`` when the delivery is not pending anymore or is held by another worker.
+        With ``may_retry``, a transient error raises ``TransientDeliveryError`` after
+        ``attempts`` is saved, until ``OUTREACH_DELIVERY_MAX_RETRIES`` is reached.
+        """
+        transient_error = None
+        with transaction.atomic():
+            locked = (
+                MailingDelivery.objects.select_for_update(skip_locked=True, of=("self",))
+                .select_related("mailing", "prospect")
+                .filter(pk=delivery_pk, status=DeliveryStatus.PENDING)
+                .first()
+            )
+            if locked is None:
+                return None
+            mailing = locked.mailing
+            prospect = locked.prospect
+            is_newsletter = mailing.is_newsletter
+            if not self.is_still_mailable(prospect, is_newsletter):
+                self.release(prospect, locked.previous_mailed_at)
+                self.settle(locked, DeliveryStatus.SKIPPED)
+                self.skip_in_mailing(mailing, self.skip_reason_when_gone(is_newsletter))
+                return DeliveryStatus.SKIPPED
+            own_connection = connection is None
+            mail_connection = get_connection() if own_connection else connection
+            locked.attempts += 1
+            try:
+                mail_connection.open()
+                self.send_one(
+                    prospect,
+                    mailing.subject,
+                    mailing.body_html,
+                    mail_connection,
+                    mailing.header_text,
+                    is_newsletter,
                 )
-        return mail_plan, previous_mailed_at, mailing
+            except Exception as error:
+                mail_connection.close()
+                can_retry = (
+                    may_retry
+                    and self.is_transient(error)
+                    and locked.attempts <= outreach_settings.delivery_max_retries
+                )
+                if not can_retry:
+                    self.fail_delivery(locked, error)
+                    return DeliveryStatus.FAILED
+                locked.last_error = str(error)[:255]
+                locked.save(update_fields=["attempts", "last_error", "updated_at"])
+                transient_error = error
+            else:
+                if own_connection:
+                    mail_connection.close()
+                self.settle(locked, DeliveryStatus.SENT)
+                self.mark_mailed(prospect, mailing.subject, mailing)
+                Mailing.objects.filter(pk=mailing.pk).update(sent_count=F("sent_count") + 1)
+                return DeliveryStatus.SENT
+        raise TransientDeliveryError(str(transient_error)) from transient_error
+
+    @staticmethod
+    def is_transient(error: Exception) -> bool:
+        return isinstance(error, OSError) and not isinstance(
+            error, smtplib.SMTPRecipientsRefused
+        )
+
+    def fail_delivery(self, delivery: MailingDelivery, error: Exception) -> None:
+        self.release(delivery.prospect, delivery.previous_mailed_at)
+        self.settle(delivery, DeliveryStatus.FAILED, error=str(error))
+        Mailing.objects.filter(pk=delivery.mailing_id).update(
+            failed_count=F("failed_count") + 1
+        )
+        ProspectEvent.record(
+            delivery.prospect,
+            EventKind.MAIL_FAILED,
+            self.actor,
+            detail=str(error),
+            mailing=delivery.mailing,
+        )
+
+    @staticmethod
+    def settle(delivery: MailingDelivery, status: DeliveryStatus, error: str = "") -> None:
+        delivery.status = status
+        delivery.last_error = error[:255]
+        delivery.save(update_fields=["status", "attempts", "last_error", "updated_at"])
+
+    def skip_in_mailing(self, mailing: Mailing, reason: SkipReason) -> None:
+        locked_mailing = (
+            Mailing.objects.select_for_update()
+            .only("skipped_count", "skipped_reasons")
+            .get(pk=mailing.pk)
+        )
+        reasons = {skip_reason.value: 0 for skip_reason in SkipReason}
+        reasons.update(locked_mailing.skipped_reasons)
+        reasons[reason.value] += 1
+        locked_mailing.skipped_reasons = reasons
+        locked_mailing.skipped_count += 1
+        locked_mailing.save(update_fields=["skipped_count", "skipped_reasons"])
 
     def is_still_mailable(self, prospect: Prospect, is_newsletter: bool) -> bool:
-        current = Prospect.objects.filter(pk=prospect.pk)
         if not is_newsletter:
-            return current.filter(user__isnull=False).exists()
-        is_unsubscribed = current.filter(status=ProspectStatus.UNSUBSCRIBED).exists()
-        is_deleted = not current.exists()
-        return not (
-            is_unsubscribed or is_deleted or SuppressionList().contains(prospect.email)
+            return prospect.user_id is not None
+        return prospect.status != ProspectStatus.UNSUBSCRIBED and not (
+            SuppressionList().contains(prospect.email)
         )
 
     def skip_reason_when_gone(self, is_newsletter: bool) -> SkipReason:

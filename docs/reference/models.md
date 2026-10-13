@@ -20,6 +20,11 @@ Prospect (outreach_prospect)             Mailing (outreach_mailing)
         +----------------------------------  prospect FK, mailing FK
                                              kind, detail, actor, created_at
 
+                                         MailingDelivery (outreach_mailingdelivery)
+                                           mailing FK, prospect FK (both CASCADE)
+                                           status, attempts, previous_mailed_at, last_error
+                                           one row per recipient, unique (mailing, prospect)
+
 EmailTemplate (outreach_emailtemplate)   uuid pk, name (unique ignoring case), subject,
                                          body_html (sanitised), created_by, created_at,
                                          updated_at. No foreign key: a Mailing keeps a copy.
@@ -39,6 +44,8 @@ Suppression (outreach_suppression)       email_hash pk (salted HMAC of the addre
    :members: record
 
 .. autoclass:: outreach.models.Mailing
+
+.. autoclass:: outreach.models.MailingDelivery
 
 .. autoclass:: outreach.models.EmailTemplate
 

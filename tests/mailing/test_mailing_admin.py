@@ -1,7 +1,7 @@
 from django.urls import reverse
 
-from outreach.choices import EventKind, SkipReason
-from outreach.models import ProspectEvent
+from outreach.choices import DeliveryStatus, EventKind, SkipReason
+from outreach.models import MailingDelivery, ProspectEvent
 from tests.base import OutreachTestCase
 from tests.factories import MailingFactory, ProspectFactory, create_outreach_staff_user
 from tests.routes import (
@@ -34,6 +34,17 @@ class MailingAdminTests(OutreachTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["cl"].result_list), [mailing])
         self.assertContains(response, mailing.subject)
+
+    def test_changelist_counts_the_pending_deliveries_of_each_mailing(self) -> None:
+        mailing = MailingFactory()
+        for status in [DeliveryStatus.PENDING, DeliveryStatus.PENDING, DeliveryStatus.SENT]:
+            MailingDelivery.objects.create(
+                mailing=mailing, prospect=ProspectFactory(), status=status
+            )
+
+        response = self.client.get(outreach_mailing_changelist_url())
+
+        self.assertEqual(response.context["cl"].result_list[0].pending, 2)
 
     def test_view_permission_is_required(self) -> None:
         self.client.force_login(create_outreach_staff_user(["view_prospect"]))

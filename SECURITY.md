@@ -25,7 +25,7 @@ The `example/` project is a demonstration only. It has a public secret key, `DEB
 
 These are understood and accepted for the beta. They are not vulnerabilities, but you should know them when you deploy:
 
-- Sending is synchronous, runs inside the admin request, and is capped per action.
+- By default sending is synchronous, runs inside the admin request, and is capped per action. Celery dispatch (`OUTREACH_DISPATCH = "celery"`) removes that, and delivers each mail at least once.
 - If a send fails after the SMTP server may already have accepted the message (a timeout, for example), the claim on the recipient is restored and a later send can reach them again.
 - Unsubscribe links do not expire and the unsubscribe page has no rate limit. The signature cannot be guessed, and permanent links are the norm for one-click unsubscribe.
 - `SECRET_KEY` signs unsubscribe links and keys the suppression list. Keep the old key in `SECRET_KEY_FALLBACKS` after a rotation, or old links stop working and suppression entries stop matching.
