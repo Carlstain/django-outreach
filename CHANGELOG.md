@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0b5] - 2026-10-13
+
 ### Added
 
 - Notices: a template or a mail not marked as newsletter is a notice to members. It has no unsubscribe footer and no `List-Unsubscribe` headers, goes to members only (new skip reason `not_member`) and still reaches members who unsubscribed from newsletters. A notice text cannot contain `{{ unsubscribe_url }}`.
