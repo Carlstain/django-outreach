@@ -1,0 +1,64 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n admin_urls admin_modify %}
+
+{% block title %}{% if errors %}{% trans "Error:" %} {% endif %}{% if add %}{% trans "Add audience" %}{% else %}{{ original.name }}{% endif %} | {{ site_name }}{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} audience-form{% endblock %}
+
+{% block head %}
+  {% url opts|admin_urlname:'changelist' as changelist_url %}
+  <div class="head">
+    <div>
+      {% if change %}<p class="eyebrow">{% trans "Audience" %}</p>{% endif %}
+      <h2>{% if add %}{% trans "Add audience" %}{% else %}{{ original.name }}{% endif %}</h2>
+      <p>{% trans "Add and remove its prospects from the prospect list. Deleting an audience never deletes its prospects." %}</p>
+    </div>
+    <div class="actions">
+      {% if has_view_permission %}
+        <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Audiences" %}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="cols" id="content-main">
+    <div class="card">
+      {% if change and not has_change_permission %}
+        <div class="form">
+          <div class="f wide">
+            <span>{% trans "Name" %}</span>
+            <div class="readonly">{{ original.name }}</div>
+          </div>
+          <div class="f wide">
+            <span>{% trans "Description" %}</span>
+            <div class="readonly">{{ original.description }}</div>
+          </div>
+        </div>
+      {% else %}
+        <form method="post" id="{{ opts.model_name }}_form" novalidate>
+          {% csrf_token %}
+          <div class="form">
+            {% if errors %}
+              <p class="errornote wide">{% blocktrans count counter=errors|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}</p>
+              {{ adminform.form.non_field_errors }}
+            {% endif %}
+            {% with form=adminform.form %}
+              <div class="f wide">
+                {{ form.name.errors }}
+                {{ form.name.label_tag }}
+                {{ form.name }}
+              </div>
+              <div class="f wide">
+                {{ form.description.errors }}
+                {{ form.description.label_tag }}
+                {{ form.description }}
+              </div>
+            {% endwith %}
+            {% submit_row %}
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

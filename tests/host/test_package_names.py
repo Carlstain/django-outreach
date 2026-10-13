@@ -12,6 +12,7 @@ EXPECTED_TABLES = {
     "outreach_prospectevent",
     "outreach_mailing",
     "outreach_mailingdelivery",
+    "outreach_audience",
     "outreach_suppression",
     "outreach_emailtemplate",
 }

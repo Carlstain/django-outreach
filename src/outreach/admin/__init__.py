@@ -1,3 +1,5 @@
+from outreach.admin.audience import AudienceAdmin
+from outreach.admin.audience_filter import AudienceFilter
 from outreach.admin.email_template import EmailTemplateAdmin
 from outreach.admin.mailing import MailingAdmin
 from outreach.admin.member_filter import MemberFilter
@@ -19,6 +21,8 @@ __all__ = [
     "STEP_PREVIEW",
     "STEP_SAVE_TEMPLATE",
     "STEP_SEND",
+    "AudienceAdmin",
+    "AudienceFilter",
     "EmailTemplateAdmin",
     "MailingAdmin",
     "MemberFilter",

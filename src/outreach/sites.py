@@ -16,7 +16,7 @@ from django.views.decorators.cache import never_cache
 from outreach.choices import ProspectStatus
 from outreach.conf import outreach_settings
 from outreach.forms import OutreachAuthenticationForm
-from outreach.models import EmailTemplate, Mailing, Prospect, ProspectEvent
+from outreach.models import Audience, EmailTemplate, Mailing, Prospect, ProspectEvent
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.prospect_csv import ProspectCsvColumns
 from outreach.services.variables import MailVariables
@@ -105,6 +105,7 @@ class OutreachAdminSite(AdminSite):
         counts["members"] = Prospect.objects.filter(user__isnull=False).count()
         counts["mailings"] = Mailing.objects.count()
         counts["email_templates"] = EmailTemplate.objects.count()
+        counts["audiences"] = Audience.objects.count()
         return counts
 
     def get_urls(self) -> list:

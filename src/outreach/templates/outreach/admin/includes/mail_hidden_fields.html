@@ -1,3 +1,0 @@
-{% for queryset_id in queryset_ids %}<input type="hidden" name="{{ action_checkbox_name }}" value="{{ queryset_id }}">{% endfor %}
-<input type="hidden" name="action" value="send_mail">
-<input type="hidden" name="select_across" value="{% if select_across and select_across != '0' %}1{% else %}0{% endif %}">

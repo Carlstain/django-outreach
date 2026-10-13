@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -43,12 +45,23 @@ class ProspectEvent(models.Model):
         mailing: Mailing | None = None,
     ) -> "ProspectEvent":
         """Create an event, cutting ``actor`` and ``detail`` to the size of their columns."""
-        actor_max_length = cls._meta.get_field("actor").max_length
-        detail_max_length = cls._meta.get_field("detail").max_length
         return cls.objects.create(
-            prospect=prospect,
-            kind=kind,
-            actor=actor[:actor_max_length],
-            detail=detail[:detail_max_length],
-            mailing=mailing,
+            prospect=prospect, kind=kind, mailing=mailing, **cls.fit_to_columns(actor, detail)
         )
+
+    @classmethod
+    def record_many(
+        cls, prospect_pks: Iterable[object], kind: str, actor: str, detail: str = ""
+    ) -> None:
+        """Create the same event for each prospect in one insert."""
+        fitted = cls.fit_to_columns(actor, detail)
+        cls.objects.bulk_create(
+            cls(prospect_id=prospect_pk, kind=kind, **fitted) for prospect_pk in prospect_pks
+        )
+
+    @classmethod
+    def fit_to_columns(cls, actor: str, detail: str) -> dict[str, str]:
+        return {
+            "actor": actor[: cls._meta.get_field("actor").max_length],
+            "detail": detail[: cls._meta.get_field("detail").max_length],
+        }

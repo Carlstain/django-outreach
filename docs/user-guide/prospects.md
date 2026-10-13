@@ -19,7 +19,7 @@ filter and count on the dashboard.
 
 The list shows the name, email, status, whether the prospect is a member and the date of the last
 mail. Search covers the email, first name, last name and organisation. Filters cover the kind
-(individual or organization), the status and membership.
+(individual or organization), the status, membership and audience, see {doc}`audiences`.
 
 ## Adding and editing a prospect
 
@@ -63,11 +63,12 @@ anything someone typed into a name.
 
 ## Actions on selected prospects
 
-Tick prospects in the list, pick an action and press *Go*. All three need `change_prospect`.
+Tick prospects in the list, pick an action and press *Go*. All but the export need `change_prospect`.
 
 | Action | Effect |
 |---|---|
 | Send a mail to the selected prospects | Opens the mail steps, see {doc}`sending-mail` |
+| Add the selected prospects to an audience / Remove the selected prospects from an audience | Puts them in a named list or takes them out, see {doc}`audiences` |
 | Unsubscribe the selected prospects | Marks them unsubscribed and puts their address on the suppression list. There is no way back |
 | Link to user accounts | Links each unlinked prospect to the user account with the same email, when exactly one such user exists and that user has no prospect yet |
 

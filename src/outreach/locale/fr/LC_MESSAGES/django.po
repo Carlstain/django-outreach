@@ -713,15 +713,6 @@ msgstr ""
 "indique la ligne."
 
 msgid ""
-"The search box looks in names, organisations and emails. The chips above the"
-" list filter by type, status and member. Filters combine, and they also "
-"decide what Select all takes."
-msgstr ""
-"La recherche porte sur les noms, les organisations et les e-mails. Les puces"
-" au-dessus de la liste filtrent par type, statut et membre. Les filtres se "
-"combinent, et ils décident aussi de ce que prend Tout sélectionner."
-
-msgid ""
 "Tick the prospects in the list. To take every match of the current filters, "
 "use Select all under the list."
 msgstr ""
@@ -1456,3 +1447,126 @@ msgstr "%(queued)d en file d'attente, %(skipped)d ignorés."
 
 msgid "updated by"
 msgstr "modifié par"
+
+msgid "Audience"
+msgstr "Audience"
+
+msgid "Audiences"
+msgstr "Audiences"
+
+msgid "audience"
+msgstr "audience"
+
+msgid "audiences"
+msgstr "audiences"
+
+msgid "description"
+msgstr "description"
+
+msgid "Named lists of prospects. Filter the prospects by an audience to send a mail to it."
+msgstr "Des listes nommées de prospects. Filtrez les prospects par audience pour lui envoyer un e-mail."
+
+msgid "Add audience"
+msgstr "Ajouter une audience"
+
+msgid "No audiences yet"
+msgstr "Aucune audience pour l’instant"
+
+msgid "Create an audience, then add prospects to it from the prospect list."
+msgstr "Créez une audience, puis ajoutez-y des prospects depuis la liste des prospects."
+
+msgid "Add and remove its prospects from the prospect list. Deleting an audience never deletes its prospects."
+msgstr "Ajoutez et retirez ses prospects depuis la liste des prospects. Supprimer une audience ne supprime jamais ses prospects."
+
+msgid "An audience with this name already exists."
+msgstr "Une audience portant ce nom existe déjà."
+
+msgid "Added to an audience"
+msgstr "Ajouté à une audience"
+
+msgid "Removed from an audience"
+msgstr "Retiré d’une audience"
+
+msgid "Add to an audience"
+msgstr "Ajouter à une audience"
+
+msgid "Remove from an audience"
+msgstr "Retirer d’une audience"
+
+msgid "Add the selected prospects to an audience"
+msgstr "Ajouter les prospects sélectionnés à une audience"
+
+msgid "Remove the selected prospects from an audience"
+msgstr "Retirer les prospects sélectionnés d’une audience"
+
+msgid "Prospects already in the audience are left as they are. Unsubscribed prospects can be members, but are never mailed."
+msgstr "Les prospects déjà dans l’audience ne changent pas. Les prospects désinscrits peuvent en être membres, mais ne reçoivent jamais d’e-mail."
+
+msgid "Add to the audience"
+msgstr "Ajouter à l’audience"
+
+msgid "Remove from the audience"
+msgstr "Retirer de l’audience"
+
+msgid "Create an audience first, then come back to the prospect list."
+msgstr "Créez d’abord une audience, puis revenez à la liste des prospects."
+
+msgid "Ask someone who can add audiences to create one first."
+msgstr "Demandez d’abord à une personne autorisée à ajouter des audiences d’en créer une."
+
+msgid "Back to prospects"
+msgstr "Retour aux prospects"
+
+msgid "An audience is a named list of prospects you mail again and again, such as the visitors of an event. A prospect can be in several audiences."
+msgstr "Une audience est une liste nommée de prospects que vous écrivez régulièrement, par exemple les visiteurs d’un événement. Un prospect peut figurer dans plusieurs audiences."
+
+msgid "Create an audience under Audiences in the menu. In the prospect list, tick people and choose Add the selected prospects to an audience in the Action menu. Choose Remove the selected prospects from an audience to take them out."
+msgstr "Créez une audience dans Audiences, dans le menu. Dans la liste des prospects, cochez des personnes et choisissez Ajouter les prospects sélectionnés à une audience dans le menu Action. Choisissez Retirer les prospects sélectionnés d’une audience pour les en sortir."
+
+msgid "To send a message to an audience, filter the prospect list by that audience, use Select all under the list, then choose Send a mail. The usual rules apply: unsubscribed prospects stay in the audience but are never mailed."
+msgstr "Pour envoyer un message à une audience, filtrez la liste des prospects par cette audience, utilisez Tout sélectionner sous la liste, puis choisissez Envoyer un e-mail. Les règles habituelles s’appliquent : les prospects désinscrits restent dans l’audience mais ne reçoivent jamais d’e-mail."
+
+msgid "View audiences"
+msgstr "Voir les audiences"
+
+msgid "See the list of audiences."
+msgstr "Voir la liste des audiences."
+
+msgid "Add audiences"
+msgstr "Ajouter des audiences"
+
+msgid "Create an audience."
+msgstr "Créer une audience."
+
+msgid "Change audiences"
+msgstr "Modifier les audiences"
+
+msgid "Rename an audience or change its description."
+msgstr "Renommer une audience ou changer sa description."
+
+msgid "Delete audiences"
+msgstr "Supprimer des audiences"
+
+msgid "Delete an audience. Its prospects are kept."
+msgstr "Supprimer une audience. Ses prospects sont conservés."
+
+msgid "Adding and removing prospects needs the permission to change prospects."
+msgstr "Ajouter et retirer des prospects demande la permission de modifier les prospects."
+
+msgid "The search box looks in names, organisations and emails. The chips above the list filter by type, status, member and audience. Filters combine, and they also decide what Select all takes."
+msgstr "La recherche porte sur les noms, les organisations et les e-mails. Les puces au-dessus de la liste filtrent par type, statut, membre et audience. Les filtres se combinent, et ils décident aussi de ce que prend Tout sélectionner."
+
+msgid "%(counter)s prospect selected."
+msgid_plural "%(counter)s prospects selected."
+msgstr[0] "%(counter)s prospect sélectionné."
+msgstr[1] "%(counter)s prospects sélectionnés."
+
+msgid "%(count)d prospect added to %(audience)s."
+msgid_plural "%(count)d prospects added to %(audience)s."
+msgstr[0] "%(count)d prospect ajouté à %(audience)s."
+msgstr[1] "%(count)d prospects ajoutés à %(audience)s."
+
+msgid "%(count)d prospect removed from %(audience)s."
+msgid_plural "%(count)d prospects removed from %(audience)s."
+msgstr[0] "%(count)d prospect retiré de %(audience)s."
+msgstr[1] "%(count)d prospects retirés de %(audience)s."

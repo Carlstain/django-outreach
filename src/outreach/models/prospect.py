@@ -41,6 +41,12 @@ class Prospect(BaseModel):
         related_name="outreach_prospect",
         verbose_name=_("user"),
     )
+    audiences = models.ManyToManyField(
+        "outreach.Audience",
+        blank=True,
+        related_name="prospects",
+        verbose_name=_("audiences"),
+    )
     city = models.CharField(max_length=100, blank=True, verbose_name=_("city"))
     country = models.CharField(max_length=100, blank=True, verbose_name=_("country"))
     last_mailed_at = models.DateTimeField(
