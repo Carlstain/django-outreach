@@ -49,7 +49,9 @@ The recipients panel follows the type chosen once you apply a template, preview 
 Both settings can be saved in a template, and a mailing keeps a copy of them.
 
 The host project can add its logo to the header and to the footer of mails with
-`OUTREACH_EMAIL_LOGO_IN_HEADER` and `OUTREACH_EMAIL_LOGO_IN_FOOTER`.
+`OUTREACH_EMAIL_LOGO_IN_HEADER` and `OUTREACH_EMAIL_LOGO_IN_FOOTER`. A logo in the header is
+centered. When there is a header logo and no header text, the logo stands alone and the site name
+is not repeated as text. A header text is shown under the logo, centered with it.
 
 ## Variables
 
