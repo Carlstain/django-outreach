@@ -15,17 +15,18 @@
 {% block content %}
   <div class="tiles">
     <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}"><b>{{ counts.total }}</b><span>{% trans "Prospects" %}</span></a>
-    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?status__exact=contacted"><b>{{ counts.contacted }}</b><span>{% trans "Contacted" %}</span></a>
-    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?member=yes"><b>{{ counts.members }}</b><span>{% blocktrans with name=site_name %}{{ name }} members{% endblocktrans %}</span></a>
-    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?status__exact=unsubscribed"><b>{{ counts.unsubscribed }}</b><span>{% trans "Unsubscribed" %}</span></a>
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?status__exact=contacted"><b>{{ counts.contacted }}</b><span><i class="dot contacted"></i>{% trans "Contacted" %}</span></a>
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?member=yes"><b>{{ counts.members }}</b><span><i class="dot user"></i>{% blocktrans with name=site_name %}{{ name }} members{% endblocktrans %}</span></a>
+    <a class="tile" href="{% url 'outreach_admin:outreach_prospect_changelist' %}?status__exact=unsubscribed"><b>{{ counts.unsubscribed }}</b><span><i class="dot unsub"></i>{% trans "Unsubscribed" %}</span></a>
   </div>
   <div class="cols">
     <div class="card">
       <h3>{% trans "Recent activity" %}</h3>
       {% if recent_events %}
-        <ul class="timeline">
+        <ul class="timeline people">
           {% for event in recent_events %}
             <li>
+              <span class="avatar tone-{{ event.prospect.avatar_tone }}{% if event.prospect.kind == 'organization' %} org{% endif %}" aria-hidden="true">{{ event.prospect.initials }}</span>
               <strong>{{ event.get_kind_display }}</strong>
               <a href="{% url 'outreach_admin:outreach_prospect_change' event.prospect.pk|admin_urlquote %}">{{ event.prospect.display_name }}</a>
               {% if event.detail %}{{ event.detail }}{% endif %}

@@ -66,7 +66,7 @@ class ProspectAdmin(ImportExportModelAdmin):
     @admin.display(description=gettext_lazy("Name"), ordering="first_name")
     def display_name(self, prospect: Prospect) -> str:
         name = prospect.display_name
-        avatar_class = "outreach-avatar"
+        avatar_class = f"outreach-avatar tone-{prospect.avatar_tone}"
         if prospect.kind == ProspectKind.ORGANIZATION:
             avatar_class += " org"
         return format_html(
