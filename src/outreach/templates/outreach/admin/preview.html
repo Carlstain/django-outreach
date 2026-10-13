@@ -12,7 +12,7 @@
   {% with recipient_count=plan.recipients|length %}
   <form method="post" id="send-form">
     {% csrf_token %}
-    {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+    {% include "outreach/admin/includes/selection_hidden_fields.html" with action_name="send_mail" %}
     {% include "outreach/admin/includes/mail_message_fields.html" %}
     <input type="hidden" name="preview_prospect" value="{{ preview_prospect.pk }}">
     <div class="head">
@@ -33,7 +33,7 @@
 {% block content %}
   <form method="post" class="previewas" id="preview-form">
     {% csrf_token %}
-    {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+    {% include "outreach/admin/includes/selection_hidden_fields.html" with action_name="send_mail" %}
     {% include "outreach/admin/includes/mail_message_fields.html" %}
     <input type="hidden" name="step" value="preview">
     <label for="preview-prospect">{% trans "Preview as" %}</label>

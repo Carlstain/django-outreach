@@ -1,0 +1,51 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} audience-choice{% endblock %}
+
+{% block page_subtitle %}<p>{% blocktrans count counter=selected_count %}{{ counter }} prospect selected.{% plural %}{{ counter }} prospects selected.{% endblocktrans %}</p>{% endblock %}
+
+{% block content %}
+  <div class="card">
+    {% with has_audiences=form.fields.audience.queryset.exists %}
+    {% if adding or has_audiences %}
+      <form class="form" method="post" novalidate>
+        {% csrf_token %}
+        {% include "outreach/admin/includes/selection_hidden_fields.html" %}
+        {% if form.errors %}
+          <div class="notice err wide" role="alert">
+            {% for field_errors in form.errors.values %}{% for error in field_errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+          </div>
+        {% endif %}
+        {% if has_audiences %}
+          <div class="f wide">
+            {{ form.audience.label_tag }}
+            {{ form.audience }}
+            {% if adding %}
+              <span class="hint">{% trans "Prospects already in the audience are left as they are. Unsubscribed prospects can be members, but are never mailed." %}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+        {% if adding %}
+          <div class="f wide">
+            {{ form.new_audience_name.label_tag }}
+            {{ form.new_audience_name }}
+            <span class="hint">{% trans "Creates the audience and adds the selected prospects to it." %}</span>
+          </div>
+        {% endif %}
+        <div class="wide row2">
+          <button class="btn fill" type="submit" name="apply" value="1">{% if adding %}{% trans "Add to the audience" %}{% else %}{% trans "Remove from the audience" %}{% endif %}</button>
+          <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_changelist' %}">{% trans "Cancel" %}</a>
+        </div>
+      </form>
+    {% else %}
+      <div class="empty">
+        <span class="round"><svg class="ico lg"><use href="#i-list"/></svg></span>
+        <h3>{% trans "No audiences yet" %}</h3>
+        <p>{% trans "There is nothing to remove the prospects from." %}</p>
+        <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_changelist' %}">{% trans "Back to prospects" %}</a>
+      </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+{% endblock %}

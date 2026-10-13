@@ -9,6 +9,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Celery dispatch: `OUTREACH_DISPATCH = "celery"` queues one `outreach.deliver_mail` task per recipient, with retries on transient SMTP errors, instead of sending inside the admin request. The task uses the Celery app of the host project. New settings `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` (default 5000), `OUTREACH_CELERY_QUEUE` and `OUTREACH_DELIVERY_MAX_RETRIES` (default 3), the `celery` extra and the `outreach_resume_deliveries` command.
 - Migration `0003`: the `MailingDelivery` model, one row per recipient of a mailing. The Mailing admin shows how many are pending.
 - System checks `outreach.E002`, `outreach.E003` and `outreach.W001`.
+- Audiences: a named, static list of prospects (`Audience`, `Prospect.audiences`, migration `0005`). Prospects are added and removed with two actions of the prospect list (the add page can also create the audience from a typed name), the list can be filtered by audience, and the Audiences pages and permissions (`view`, `add`, `change`, `delete`) are new. Sending to an audience uses the existing filter, Select all and Send a mail. Two event kinds record the changes in the history of a prospect.
 
 ### Changed
 

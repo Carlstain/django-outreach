@@ -32,7 +32,7 @@ Email clients can not use CSS variables, so the HTML part uses `theme.email.*` c
 
 All extend `outreach/admin/base.html`, which extends `outreach/base.html`. The admin site context
 (`each_context`) adds `site_name`, `logo_path`, `logo_dark_path`, `django_admin_url`, `theme` and
-`counts` (prospects by status, `total`, `members`, `mailings`, `email_templates`) to the usual
+`counts` (prospects by status, `total`, `members`, `mailings`, `email_templates`, `audiences`) to the usual
 Django admin context.
 
 | Template | Page | Extra context |
@@ -47,7 +47,9 @@ Django admin context.
 | `outreach/admin/preview.html` | Step 2 of a send | The compose context plus `preview_prospect`, `preview_html`, `preview_subject`, `subject`, `preview_choices` |
 | `outreach/admin/mailing_list.html`, `mailing_detail.html` | Mailings | `recipients`, `skipped_reasons` (detail) |
 | `outreach/admin/emailtemplate_list.html`, `emailtemplate_form.html` | Templates | `sample_preview_html`, `sample_preview_subject` (form) |
-| `outreach/admin/includes/mail_hidden_fields.html`, `mail_message_fields.html` | Parts of the send steps | |
+| `outreach/admin/audience_list.html`, `audience_form.html` | Audiences | |
+| `outreach/admin/audience_choice.html` | Choose the audience of the add and remove actions | `form`, `adding`, `action_name`, `queryset_ids`, `select_across`, `selected_count` |
+| `outreach/admin/includes/selection_hidden_fields.html`, `mail_message_fields.html` | Parts of the send steps (`selection_hidden_fields.html` also serves the audience actions) | |
 
 ## Includes and widgets
 

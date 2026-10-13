@@ -20,6 +20,7 @@
       <a href="#h-unsub">{% trans "Unsubscribing" %}</a>
       <a href="#h-mailings">{% trans "Mailings" %}</a>
       <a href="#h-templates">{% trans "Templates" %}</a>
+      <a href="#h-audiences">{% trans "Audiences" %}</a>
       <a href="#h-perms">{% trans "Permissions" %}</a>
       <a href="#h-trouble">{% trans "Troubleshooting" %}</a>
     </nav>
@@ -51,7 +52,7 @@
       </section>
       <section class="card" id="h-search">
         <h3>{% trans "Search and filter" %}</h3>
-        <p>{% trans "The search box looks in names, organisations and emails. The chips above the list filter by type, status and member. Filters combine, and they also decide what Select all takes." %}</p>
+        <p>{% trans "The search box looks in names, organisations and emails. The chips above the list filter by type, status, member and audience. Filters combine, and they also decide what Select all takes." %}</p>
       </section>
       <section class="card" id="h-send">
         <h3>{% trans "Send a message" %}</h3>
@@ -132,6 +133,25 @@
             </tbody>
           </table>
         </div>
+      </section>
+      <section class="card" id="h-audiences">
+        <h3>{% trans "Audiences" %}</h3>
+        <p>{% trans "An audience is a named list of prospects you mail again and again, such as the visitors of an event. A prospect can be in several audiences." %}</p>
+        <p>{% trans "Create an audience under Audiences in the menu. In the prospect list, tick people and choose Add the selected prospects to an audience in the Action menu. Choose Remove the selected prospects from an audience to take them out." %}</p>
+        <p>{% trans "On that page you can also type the name of a new audience instead of choosing one. It is created and the selected prospects are added to it." %}</p>
+        <p>{% trans "To send a message to an audience, filter the prospect list by that audience, use Select all under the list, then choose Send a mail. The usual rules apply: unsubscribed prospects stay in the audience but are never mailed." %}</p>
+        <div class="tablewrap">
+          <table class="helptable">
+            <thead><tr><th>{% trans "Permission" %}</th><th>{% trans "Lets staff" %}</th></tr></thead>
+            <tbody>
+              <tr><td>{% trans "View audiences" %}</td><td>{% trans "See the list of audiences." %}</td></tr>
+              <tr><td>{% trans "Add audiences" %}</td><td>{% trans "Create an audience." %}</td></tr>
+              <tr><td>{% trans "Change audiences" %}</td><td>{% trans "Rename an audience or change its description." %}</td></tr>
+              <tr><td>{% trans "Delete audiences" %}</td><td>{% trans "Delete an audience. Its prospects are kept." %}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>{% trans "Adding and removing prospects needs the permission to change prospects." %}</p>
       </section>
       <section class="card" id="h-perms">
         <h3>{% trans "Permissions" %}</h3>

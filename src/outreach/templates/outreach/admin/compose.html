@@ -16,7 +16,7 @@
   <div class="cols">
     <form class="stack" method="post">
       {% csrf_token %}
-      {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+      {% include "outreach/admin/includes/selection_hidden_fields.html" with action_name="send_mail" %}
       <input type="hidden" name="step" value="compose">
       <button class="visually-hidden-submit" type="submit" name="step" value="preview" formnovalidate tabindex="-1" aria-hidden="true"></button>
       <div class="card">

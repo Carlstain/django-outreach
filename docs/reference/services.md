@@ -84,6 +84,18 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
 .. autoexception:: outreach.services.templates.TemplateNameTaken
 ```
 
+## Audiences
+
+```{eval-rst}
+.. autoclass:: outreach.services.audiences.AudienceCreator
+   :members: create
+
+.. autoexception:: outreach.services.audiences.AudienceNameTaken
+
+.. autoclass:: outreach.services.audiences.AudienceMembers
+   :members: add, remove
+```
+
 ## CSV import and export
 
 ```{eval-rst}

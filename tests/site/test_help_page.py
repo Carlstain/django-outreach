@@ -9,6 +9,7 @@ from tests.routes import outreach_help_url
 
 SECTION_ANCHORS = [
     "h-templates",
+    "h-audiences",
     "h-overview",
     "h-import",
     "h-search",

@@ -8,6 +8,7 @@ What it does:
 - Message variables such as `{{ first_name }}` and `{{ first_name | friend }}` (fallback when empty), taken from a fixed list.
 - Rich text message body (Trix editor), sanitised with nh3.
 - Email templates: named subject and body pairs, shared by every staff member who has the permission, picked or saved from the compose page.
+- Audiences: named lists of prospects, managed in the admin, to mail the same set again.
 - A `Mailing` log for every send: subject, body as sent, sender, counts of sent, failed and skipped recipients.
 - One-click unsubscribe links (`List-Unsubscribe` headers included) and a suppression list that survives the deletion of a prospect.
 - CSV import with a preview step, and CSV export of selected prospects.
@@ -97,8 +98,12 @@ python manage.py collectstatic
 |---|---|
 | `outreach.view_prospect` | Open the site, list and read prospects, export them as CSV, the help page and the dashboard |
 | `outreach.add_prospect` | Add a prospect, import a CSV file |
-| `outreach.change_prospect` | Edit a prospect, send a mail, unsubscribe selected, link to user accounts |
+| `outreach.change_prospect` | Edit a prospect, send a mail, add to or remove from an audience, unsubscribe selected, link to user accounts |
 | `outreach.delete_prospect` | Delete prospects |
+| `outreach.view_audience` | See the Audiences list |
+| `outreach.add_audience` | Create audiences |
+| `outreach.change_audience` | Edit audiences |
+| `outreach.delete_audience` | Delete audiences |
 | `outreach.view_mailing` | Read the Mailings list and detail |
 | `outreach.delete_mailing` | Delete a mailing log entry (mailings cannot be added or changed) |
 | `outreach.view_emailtemplate` | See the Templates list, use a template on the compose page |
@@ -269,6 +274,13 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 - Templates are managed under Templates in the sidebar. The edit page shows the template rendered with example values in a sandboxed preview.
 - A mailing keeps its own copy of the subject and body, so editing or deleting a template never changes a mailing that was already sent.
 
+## Audiences
+
+- An audience is a named list of prospects, shared by every staff member who holds `outreach.view_audience`. A prospect can be in several audiences.
+- Prospects are added and removed with two actions of the prospect list, which need `change_prospect`. The add page can also create a new audience from a typed name, with the same permission. The list can be filtered by audience. There is no audience on the CSV import.
+- To mail an audience, filter the list by it, use Select all, then Send a mail. Membership never overrides an unsubscription: unsubscribed and suppressed members are skipped like any other prospect.
+- Deleting an audience keeps its prospects. Deleting a prospect removes its memberships.
+
 ## Sending behaviour
 
 - By default sending runs inside the admin request, one SMTP connection per action. This is not recommended in production. With `OUTREACH_DISPATCH = "celery"` one task per recipient is queued on the host project's Celery app, with retries on transient errors.
@@ -294,7 +306,7 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 
 ## App label
 
-The app label is `outreach`, the same as the Python package. Tables are `outreach_prospect`, `outreach_prospectevent`, `outreach_mailing`, `outreach_suppression` and `outreach_emailtemplate`; permissions are `outreach.*`; the URL namespace is `outreach` and the admin site instance is `outreach_admin`. A host project with another app labelled `outreach` will collide, so check before installing.
+The app label is `outreach`, the same as the Python package. Tables are `outreach_prospect`, `outreach_prospect_audiences`, `outreach_prospectevent`, `outreach_mailing`, `outreach_mailingdelivery`, `outreach_suppression`, `outreach_emailtemplate` and `outreach_audience`; permissions are `outreach.*`; the URL namespace is `outreach` and the admin site instance is `outreach_admin`. A host project with another app labelled `outreach` will collide, so check before installing.
 
 ## Running the tests
 

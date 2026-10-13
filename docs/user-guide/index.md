@@ -19,6 +19,7 @@ permissions your group holds, see {ref}`permissions`.
 | Dashboard | Counts of prospects, contacted, members and unsubscribed, recent activity, and the sending limits | `view_prospect` |
 | Prospects | The prospect list, with search and filters | `view_prospect` |
 | Unsubscribed | The prospect list filtered on unsubscribed | `view_prospect` |
+| Audiences | Named lists of prospects | `view_audience` |
 | Mailings | The history of every send | `view_mailing` |
 | Templates | Saved subject and body pairs | `view_emailtemplate` |
 | How to use | A help page with the variables, tags and import columns of your installation | `view_prospect` |
@@ -40,6 +41,7 @@ installation, so it is always correct for your site. It exists in English and Fr
 prospects
 sending-mail
 email-templates
+audiences
 mailings
 unsubscribe
 ```

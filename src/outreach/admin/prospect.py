@@ -3,6 +3,7 @@ from typing import Any
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import QuerySet
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -12,11 +13,14 @@ from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
 
+from outreach.admin.audience_filter import AudienceFilter
 from outreach.admin.member_filter import MemberFilter
 from outreach.admin.prospect_event_inline import ProspectEventInline
 from outreach.choices import ACTOR_SYSTEM, EventKind, ProspectKind, ProspectStatus
 from outreach.conf import outreach_settings
 from outreach.forms import (
+    AUDIENCE_NAME_TAKEN,
+    AudienceChoiceForm,
     MessageForm,
     OutreachImportConfirmForm,
     OutreachImportForm,
@@ -24,6 +28,7 @@ from outreach.forms import (
     SaveTemplateForm,
 )
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
+from outreach.services.audiences import AudienceCreator, AudienceMembers, AudienceNameTaken
 from outreach.services.linking import UserLinker
 from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
@@ -54,10 +59,17 @@ class ProspectAdmin(admin.ModelAdmin):
     form = ProspectForm
     list_per_page = 20
     list_display = ["display_name", "email", "status_badge", "member", "last_mailed_at"]
-    list_filter = ["kind", "status", MemberFilter]
+    list_filter = ["kind", "status", MemberFilter, AudienceFilter]
     search_fields = ["email", "first_name", "last_name", "organization"]
     inlines = [ProspectEventInline]
-    actions = ["send_mail", "unsubscribe_selected", "link_users", "export_csv"]
+    actions = [
+        "send_mail",
+        "add_to_audience",
+        "remove_from_audience",
+        "unsubscribe_selected",
+        "link_users",
+        "export_csv",
+    ]
     change_list_template = "outreach/admin/change_list.html"
     change_form_template = "outreach/admin/change_form.html"
     delete_confirmation_template = "outreach/admin/delete_confirmation.html"
@@ -108,6 +120,7 @@ class ProspectAdmin(admin.ModelAdmin):
             "status",
             "last_mailed_at",
             "user",
+            "audiences",
             "created_at",
             "updated_at",
         ]
@@ -115,7 +128,14 @@ class ProspectAdmin(admin.ModelAdmin):
     def get_readonly_fields(
         self, request: HttpRequest, obj: Prospect | None = None
     ) -> list[str]:
-        readonly_fields = ["status", "last_mailed_at", "user", "created_at", "updated_at"]
+        readonly_fields = [
+            "status",
+            "last_mailed_at",
+            "user",
+            "audiences",
+            "created_at",
+            "updated_at",
+        ]
         if obj is not None:
             readonly_fields.append("email")
         return readonly_fields
@@ -305,17 +325,14 @@ class ProspectAdmin(admin.ModelAdmin):
             self.message_user(request, message, level)
             return None
 
-        select_across = request.POST.get("select_across", "0").lower() not in FALSE_VALUES
         context = {
             **self.admin_site.each_context(request),
+            **self.selection_context(request),
             "title": _("Send a mail"),
             "subtitle": None,
             "opts": self.model._meta,
             "form": form,
             "plan": plan,
-            "queryset_ids": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
-            "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
-            "select_across": int(select_across),
             "max_recipients": outreach_settings.recipient_cap,
             "media": self.media,
             "email_templates": self.template_choices(permissions["view"]),
@@ -428,6 +445,100 @@ class ProspectAdmin(admin.ModelAdmin):
             return None
         self.message_user(request, _("Template saved."), messages.SUCCESS)
         return saved.template
+
+    @admin.action(
+        description=gettext_lazy("Add the selected prospects to an audience"),
+        permissions=["change"],
+    )
+    def add_to_audience(
+        self, request: HttpRequest, queryset: QuerySet[Prospect]
+    ) -> HttpResponse | None:
+        return self.change_audience_members(request, queryset, adding=True)
+
+    @admin.action(
+        description=gettext_lazy("Remove the selected prospects from an audience"),
+        permissions=["change"],
+    )
+    def remove_from_audience(
+        self, request: HttpRequest, queryset: QuerySet[Prospect]
+    ) -> HttpResponse | None:
+        return self.change_audience_members(request, queryset, adding=False)
+
+    def selection_context(self, request: HttpRequest) -> dict[str, Any]:
+        select_across = request.POST.get("select_across", "0").lower() not in FALSE_VALUES
+        return {
+            "queryset_ids": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+            "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+            "select_across": int(select_across),
+        }
+
+    def change_audience_members(
+        self, request: HttpRequest, queryset: QuerySet[Prospect], adding: bool
+    ) -> HttpResponse | None:
+        form = AudienceChoiceForm(
+            request.POST if request.POST.get("apply") else None, creating=adding
+        )
+        if form.is_valid() and self.apply_audience_change(request, form, queryset, adding):
+            return None
+        context = {
+            **self.admin_site.each_context(request),
+            **self.selection_context(request),
+            "title": _("Add to an audience") if adding else _("Remove from an audience"),
+            "opts": self.model._meta,
+            "form": form,
+            "adding": adding,
+            "action_name": "add_to_audience" if adding else "remove_from_audience",
+            "selected_count": queryset.count(),
+            "media": self.media,
+        }
+        return TemplateResponse(request, "outreach/admin/audience_choice.html", context)
+
+    def apply_audience_change(
+        self,
+        request: HttpRequest,
+        form: AudienceChoiceForm,
+        queryset: QuerySet[Prospect],
+        adding: bool,
+    ) -> bool:
+        audience = form.cleaned_data["audience"]
+        is_new_audience = audience is None
+        members = AudienceMembers()
+        actor = request.user.get_username()
+        try:
+            with transaction.atomic():
+                if is_new_audience:
+                    audience = AudienceCreator().create(
+                        form.cleaned_data["new_audience_name"], request.user
+                    )
+                if adding:
+                    count = members.add(audience, queryset, actor)
+                else:
+                    count = members.remove(audience, queryset, actor)
+        except AudienceNameTaken:
+            form.add_error("new_audience_name", AUDIENCE_NAME_TAKEN)
+            return False
+        if is_new_audience:
+            self.message_user(
+                request,
+                _("The audience %(audience)s was created.") % {"audience": audience},
+                messages.SUCCESS,
+            )
+        if adding:
+            message = ngettext(
+                "%(count)d prospect added to %(audience)s.",
+                "%(count)d prospects added to %(audience)s.",
+                count,
+            )
+        else:
+            message = ngettext(
+                "%(count)d prospect removed from %(audience)s.",
+                "%(count)d prospects removed from %(audience)s.",
+                count,
+            )
+        self.message_user(
+            request, message % {"count": count, "audience": audience}, messages.SUCCESS
+        )
+        return True
 
     @admin.action(
         description=gettext_lazy("Unsubscribe the selected prospects"),

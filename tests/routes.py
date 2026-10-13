@@ -69,6 +69,22 @@ def outreach_emailtemplate_delete_url(template_pk: str) -> str:
     return reverse("outreach_admin:outreach_emailtemplate_delete", args=[template_pk])
 
 
+def outreach_audience_changelist_url() -> str:
+    return reverse("outreach_admin:outreach_audience_changelist")
+
+
+def outreach_audience_add_url() -> str:
+    return reverse("outreach_admin:outreach_audience_add")
+
+
+def outreach_audience_change_url(audience_pk: str) -> str:
+    return reverse("outreach_admin:outreach_audience_change", args=[audience_pk])
+
+
+def outreach_audience_delete_url(audience_pk: str) -> str:
+    return reverse("outreach_admin:outreach_audience_delete", args=[audience_pk])
+
+
 def outreach_unsubscribe_url(token: str) -> str:
     return reverse("outreach:unsubscribe", args=[token])
 
