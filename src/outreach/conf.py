@@ -35,6 +35,10 @@ class OutreachSettings:
         return getattr(settings, "OUTREACH_MAX_IMPORT_ROWS", 5000)
 
     @property
+    def max_import_bytes(self) -> int:
+        return getattr(settings, "OUTREACH_MAX_IMPORT_BYTES", 2_000_000)
+
+    @property
     def logo_static_path(self) -> str | None:
         return getattr(settings, "OUTREACH_LOGO_STATIC_PATH", None)
 

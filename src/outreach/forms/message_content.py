@@ -54,6 +54,10 @@ class MessageContentForm:
             )
 
     def raise_for_button_problems(self, text: str) -> None:
+        if mail_buttons.has_misplaced_buttons(text):
+            raise forms.ValidationError(
+                _("A button cannot be placed inside a link or another tag.")
+            )
         if mail_buttons.has_invalid_buttons(text):
             raise forms.ValidationError(
                 _(

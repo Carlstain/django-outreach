@@ -122,6 +122,7 @@ All settings are optional except `OUTREACH_BASE_URL` for sending. They are read 
 | `OUTREACH_MAX_RECIPIENTS_PER_SEND` | `100` | Recipients per send action, the rest are skipped as over the limit |
 | `OUTREACH_RESEND_COOLDOWN` | `timedelta(hours=24)` | A prospect mailed within this time is skipped |
 | `OUTREACH_MAX_IMPORT_ROWS` | `5000` | An import file with more rows is rejected |
+| `OUTREACH_MAX_IMPORT_BYTES` | `2000000` | An uploaded import file larger than this many bytes is rejected before it is parsed |
 | `OUTREACH_LOGO_STATIC_PATH` | none | Static path of a logo (light). Without it the site name is shown as text |
 | `OUTREACH_LOGO_DARK_STATIC_PATH` | none | Static path of the logo used in dark mode |
 | `OUTREACH_IMPORT_HEADER_ALIASES` | `{}` | Extra import column names, see below |
@@ -253,13 +254,14 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 - A `Mailing` stores counts per skip reason, never the names of skipped people. Its detail page lists the sent and failed recipients from the events recorded for it.
 - The unsubscribe page changes nothing on GET (mail scanners follow links). A POST unsubscribes, and the same URL serves the `List-Unsubscribe-Post` one-click request. A valid link for a deleted prospect shows the confirmation page. A forged link is a 404.
 - Unsubscribed is final: no admin action, import or form sets a prospect back. The address is also stored on a suppression list as a salted HMAC (`Suppression`), kept when the prospect is deleted. Adding the same address again creates a prospect that is already unsubscribed.
-- Tokens are signed with `SECRET_KEY` (salt `outreach.unsubscribe`, no expiry). Suppression hashes use the salt `outreach.suppression` and `SECRET_KEY`. Rotating `SECRET_KEY` invalidates every sent unsubscribe link and makes the old suppression hashes stop matching, so previously unsubscribed addresses can be mailed again until they are re-added.
+- Tokens are signed with `SECRET_KEY` (salt `outreach.unsubscribe`, no expiry). Suppression hashes use the salt `outreach.suppression` and `SECRET_KEY`. Both honour `SECRET_KEY_FALLBACKS`: after a rotation, sent unsubscribe links and the suppression list keep working while the old key stays in `SECRET_KEY_FALLBACKS`. Once the old key is removed, old links stop working and the old suppression hashes stop matching, so previously unsubscribed addresses can be mailed again until they are re-added.
 - A prospect is linked to a user when exactly one user has the same email (case-insensitive, on `get_user_model().get_email_field_name()`) and that user has no prospect yet. The staff action "Link to user accounts" does it for existing prospects. First and last name of the linked user are used only when the prospect has none, and only if the user model has those fields.
 
 ## Security notes
 
 - Message bodies are sanitised with nh3 when the form is cleaned and again when each mail is rendered. Allowed tags: `p div br strong em del h1 ul ol li blockquote a`, links limited to `http`, `https`, `mailto`. The result is sanitised once more after variables are inserted.
 - Variable values are HTML-escaped. Author text never goes through the Django template engine.
+- A `{% button %}` is only accepted in the text of a message. Inside a link or any other tag it is rejected, and a button link may not contain a space.
 - Previews and the stored body of a mailing are shown in sandboxed iframes (`srcdoc`).
 - `outreach_theme_css` writes values from `OUTREACH_THEME` into a `<style>` block. Only validated values reach it. A strict Content Security Policy needs a nonce or hash for that block.
 - Set `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True`. Prospect fields are typed by users and exports are opened in spreadsheets. In django-import-export 4.4.1 this removes a leading `=` from cells. System check `outreach.W001` warns when it is not `True`.

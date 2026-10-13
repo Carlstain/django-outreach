@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 
+from django.conf import settings
 from django.core import signing
 from django.utils.crypto import salted_hmac
 
@@ -11,17 +12,27 @@ UNSUBSCRIBE_SALT = "outreach.unsubscribe"
 
 
 class SuppressionList:
+    def hashes(self, email: str) -> list[str]:
+        normalised_email = email.strip().lower()
+        secret_keys = [settings.SECRET_KEY, *settings.SECRET_KEY_FALLBACKS]
+        return [
+            salted_hmac(SUPPRESSION_SALT, normalised_email, secret=secret_key).hexdigest()
+            for secret_key in secret_keys
+        ]
+
     def hash(self, email: str) -> str:
-        return salted_hmac(SUPPRESSION_SALT, email.strip().lower()).hexdigest()
+        return self.hashes(email)[0]
 
     def contains(self, email: str) -> bool:
-        return Suppression.objects.filter(email_hash=self.hash(email)).exists()
+        return Suppression.objects.filter(email_hash__in=self.hashes(email)).exists()
 
     def add(self, email: str) -> None:
         Suppression.objects.get_or_create(email_hash=self.hash(email))
 
     def filter_suppressed(self, emails: Iterable[str]) -> set[str]:
-        email_by_hash = {self.hash(email): email for email in emails}
+        email_by_hash = {
+            email_hash: email for email in emails for email_hash in self.hashes(email)
+        }
         suppressed_hashes = Suppression.objects.filter(
             email_hash__in=email_by_hash.keys()
         ).values_list("email_hash", flat=True)

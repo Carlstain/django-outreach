@@ -14,10 +14,12 @@ from outreach.services.mail_tags import (
 )
 from outreach.theme import EmailColors
 
-BUTTON_SCHEMES = {"http", "https", "mailto"}
+WEB_SCHEMES = {"http", "https"}
+MAILTO_SCHEME = "mailto"
 BUTTON_ARGUMENT_COUNT = 2
 PLACEHOLDER_LINK = "#"
 TOKEN_PATTERN = re.compile(r"outreach-button-[0-9a-f]{32}-\d+")
+HTML_TAG_PATTERN = re.compile(r"""<(?:[^>"']|"[^"]*"|'[^']*')*>""")
 BUTTON_STYLE = (
     "display: inline-block; padding: 12px 24px; border-radius: 8px; font-weight: bold; "
     "text-decoration: none; background-color: {background}; color: {text};"
@@ -36,8 +38,28 @@ class MailButton:
 
 class MailButtons:
     def is_valid_link(self, url: str) -> bool:
-        parts = urlsplit(url.strip())
-        return parts.scheme in BUTTON_SCHEMES and bool(parts.netloc or parts.path)
+        stripped = url.strip()
+        if any(character.isspace() for character in stripped):
+            return False
+        parts = urlsplit(stripped)
+        if parts.scheme == MAILTO_SCHEME:
+            return bool(parts.path)
+        return parts.scheme in WEB_SCHEMES and bool(parts.netloc)
+
+    def markup_spans(self, html: str) -> list[tuple[int, int]]:
+        return [(tag.start(), tag.end()) for tag in HTML_TAG_PATTERN.finditer(html)]
+
+    def misplaced_button_starts(self, html: str) -> set[int]:
+        spans = self.markup_spans(html)
+        return {
+            match.start()
+            for match in MAIL_TAG_PATTERN.finditer(html)
+            if match.group(1) == BUTTON_TAG_NAME
+            and any(start <= match.start() < end for start, end in spans)
+        }
+
+    def has_misplaced_buttons(self, html: str) -> bool:
+        return bool(self.misplaced_button_starts(html))
 
     def contains_button(self, text: str) -> bool:
         return any(
@@ -67,10 +89,17 @@ class MailButtons:
     ) -> tuple[str, dict[str, MailButton]]:
         nonce = uuid.uuid4().hex
         buttons: dict[str, MailButton] = {}
+        misplaced_starts = self.misplaced_button_starts(html)
 
         def substitute(match: re.Match[str]) -> str:
             if match.group(1) != BUTTON_TAG_NAME:
                 return match.group(0)
+            if match.start() in misplaced_starts:
+                if strict:
+                    raise InvalidButtonLink(
+                        "A button cannot be placed inside a tag or a link."
+                    )
+                return PLACEHOLDER_LINK
             arguments = mail_tag_library.parse_arguments(match.group(2))
             if len(arguments) != BUTTON_ARGUMENT_COUNT:
                 raise InvalidButtonLink("A button needs a label and one link.")
@@ -90,10 +119,11 @@ class MailButtons:
 
     def insert(self, html: str, buttons: dict[str, MailButton], colors: EmailColors) -> str:
         style = BUTTON_STYLE.format(background=colors.accent, text=colors.on_accent)
+        spans = self.markup_spans(html)
 
         def substitute(match: re.Match[str]) -> str:
             button = buttons.get(match.group(0))
-            if button is None:
+            if button is None or any(start <= match.start() < end for start, end in spans):
                 return match.group(0)
             return format_html(
                 '<a href="{}" style="{}" rel="noopener noreferrer">{}</a>',

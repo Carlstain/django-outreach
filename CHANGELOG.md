@@ -4,14 +4,21 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- `Prospect.avatar_tone`, a number from 0 to 5 used for the avatar tint. It is a property, so there is no migration.
+
 ### Changed
 
 - New default look: a plum accent on warm neutrals, flat cards with a border and no shadow, and smaller corner radii. The default `OUTREACH_THEME` colours, the stylesheet defaults and the email card change with it. A project that sets every `OUTREACH_THEME` key is unaffected.
 - Each prospect avatar takes one of six tints, chosen from its initials. The dashboard tiles show a status dot and the recent activity shows the prospect avatar.
 
-### Added
+### Security
 
-- `Prospect.avatar_tone`, a number from 0 to 5 used for the avatar tint. It is a property, so there is no migration.
+- A `{% button %}` placed inside a link or another tag is rejected by the compose form and refused when a mail is rendered. It could previously write an anchor inside an attribute after the final sanitising pass.
+- A button link may not contain a space, and an `http` or `https` link needs a host.
+- The suppression list honours `SECRET_KEY_FALLBACKS`, like the unsubscribe links. A key rotation no longer lets a removed prospect that is imported again be mailed while the old key is listed.
+- An import file larger than `OUTREACH_MAX_IMPORT_BYTES` (2 MB by default) is rejected before it is parsed.
 
 ## [0.1.0b2] - 2026-10-13
 
