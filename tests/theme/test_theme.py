@@ -14,36 +14,36 @@ from tests.factories import ProspectFactory
 from tests.routes import outreach_login_url, outreach_unsubscribe_url
 
 DEFAULT_LIGHT = {
-    "brand": "#1f2a44",
-    "accent": "#2563eb",
+    "brand": "#2a2124",
+    "accent": "#7a3b69",
     "on_accent": "#ffffff",
-    "text": "#1f2937",
-    "muted": "#6b7280",
-    "background": "#f8fafc",
-    "surface": "#ffffff",
-    "border": "#e5e7eb",
+    "text": "#2a2124",
+    "muted": "#75676b",
+    "background": "#f8f4f4",
+    "surface": "#fffcfc",
+    "border": "#e8dedf",
 }
 DEFAULT_DARK = {
-    "brand": "#93a4c6",
-    "accent": "#60a5fa",
-    "on_accent": "#0b1220",
-    "text": "#e5e7eb",
-    "muted": "#9ca3af",
-    "background": "#0b1220",
-    "surface": "#111a2e",
-    "border": "#243049",
+    "brand": "#f0e7ea",
+    "accent": "#d79bc6",
+    "on_accent": "#240c1d",
+    "text": "#f0e7ea",
+    "muted": "#aa9aa1",
+    "background": "#181316",
+    "surface": "#231c20",
+    "border": "#3b2f35",
 }
 SYSTEM_FONT_STACK = (
     "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
 )
 DEFAULT_CSS = (
     ":root{color-scheme:light dark;"
-    "--brand:#1f2a44;--accent:#2563eb;--on-accent:#ffffff;--fg:#1f2937;--muted:#6b7280;"
-    "--bg:#f8fafc;--surface:#ffffff;--line:#e5e7eb;"
+    "--brand:#2a2124;--accent:#7a3b69;--on-accent:#ffffff;--fg:#2a2124;--muted:#75676b;"
+    "--bg:#f8f4f4;--surface:#fffcfc;--line:#e8dedf;"
     f"--font-ui:{SYSTEM_FONT_STACK};}}"
     "@media (prefers-color-scheme: dark){:root{"
-    "--brand:#93a4c6;--accent:#60a5fa;--on-accent:#0b1220;--fg:#e5e7eb;--muted:#9ca3af;"
-    "--bg:#0b1220;--surface:#111a2e;--line:#243049;}}"
+    "--brand:#f0e7ea;--accent:#d79bc6;--on-accent:#240c1d;--fg:#f0e7ea;--muted:#aa9aa1;"
+    "--bg:#181316;--surface:#231c20;--line:#3b2f35;}}"
 )
 DISTINCT_THEME = {
     "brand": "#0a0b0c",
@@ -121,7 +121,7 @@ class ThemeTests(OutreachTestCase):
 
         self.assertIn("--brand:#112233;", light_block)
         self.assertIn("--avatar-bg:#abcdef;", light_block)
-        self.assertIn("--accent:#2563eb;", light_block)
+        self.assertIn("--accent:#7a3b69;", light_block)
 
     @override_settings(
         OUTREACH_THEME={"brand": "#112233", "font_family": "Verdana, sans-serif"}

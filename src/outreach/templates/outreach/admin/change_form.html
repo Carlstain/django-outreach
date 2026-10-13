@@ -15,7 +15,7 @@
   <div class="head">
     {% if change and original %}
       <div class="head-identity">
-        <span class="avatar lg{% if original.kind == 'organization' %} org{% endif %}">{{ original.initials }}</span>
+        <span class="avatar lg tone-{{ original.avatar_tone }}{% if original.kind == 'organization' %} org{% endif %}">{{ original.initials }}</span>
         <div>
           <h2>{{ original.display_name }}</h2>
           <p>

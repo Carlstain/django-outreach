@@ -19,24 +19,24 @@ OPTIONAL_COLOR_KEYS = ("avatar",)
 THEME_KEYS = COLOR_KEYS + OPTIONAL_COLOR_KEYS + ("font_family", "dark")
 
 DEFAULT_LIGHT = {
-    "brand": "#1f2a44",
-    "accent": "#2563eb",
+    "brand": "#2a2124",
+    "accent": "#7a3b69",
     "on_accent": "#ffffff",
-    "text": "#1f2937",
-    "muted": "#6b7280",
-    "background": "#f8fafc",
-    "surface": "#ffffff",
-    "border": "#e5e7eb",
+    "text": "#2a2124",
+    "muted": "#75676b",
+    "background": "#f8f4f4",
+    "surface": "#fffcfc",
+    "border": "#e8dedf",
 }
 DEFAULT_DARK = {
-    "brand": "#93a4c6",
-    "accent": "#60a5fa",
-    "on_accent": "#0b1220",
-    "text": "#e5e7eb",
-    "muted": "#9ca3af",
-    "background": "#0b1220",
-    "surface": "#111a2e",
-    "border": "#243049",
+    "brand": "#f0e7ea",
+    "accent": "#d79bc6",
+    "on_accent": "#240c1d",
+    "text": "#f0e7ea",
+    "muted": "#aa9aa1",
+    "background": "#181316",
+    "surface": "#231c20",
+    "border": "#3b2f35",
 }
 SYSTEM_FONT_STACK = (
     "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"

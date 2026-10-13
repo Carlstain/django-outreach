@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 
 from outreach.choices import ProspectKind, ProspectStatus
 
+AVATAR_TONE_COUNT = 6
+
 
 class Prospect(models.Model):
     uuid = models.UUIDField(
@@ -63,6 +65,10 @@ class Prospect(models.Model):
         if self.display_name == self.email:
             return self.email[:2].upper()
         return "".join(part[0] for part in name_parts[:2]).upper()
+
+    @property
+    def avatar_tone(self) -> int:
+        return sum(ord(character) for character in self.initials) % AVATAR_TONE_COUNT
 
     def save(self, *args, **kwargs) -> None:
         self.email = self.email.strip().lower()
