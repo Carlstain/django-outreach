@@ -1,4 +1,4 @@
-from outreach.forms.audience import AudienceForm
+from outreach.forms.audience import AUDIENCE_NAME_TAKEN, AudienceForm
 from outreach.forms.audience_choice import AudienceChoiceForm
 from outreach.forms.email_template import EmailTemplateForm
 from outreach.forms.message import MessageForm
@@ -10,6 +10,7 @@ from outreach.forms.prospect import ProspectForm
 from outreach.forms.save_template import SaveTemplateForm
 
 __all__ = [
+    "AUDIENCE_NAME_TAKEN",
     "AudienceChoiceForm",
     "AudienceForm",
     "EmailTemplateForm",

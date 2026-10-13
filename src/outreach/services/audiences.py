@@ -1,8 +1,29 @@
-from django.db import transaction
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.db import IntegrityError, transaction
 from django.db.models import QuerySet
 
 from outreach.choices import EventKind
 from outreach.models import Audience, Prospect, ProspectEvent
+
+
+class AudienceNameTaken(Exception):
+    """An audience with that name (ignoring case) exists."""
+
+
+class AudienceCreator:
+    def create(self, name: str, creator: AbstractBaseUser | None) -> Audience:
+        """Create an audience and record who created it.
+
+        Raises:
+            AudienceNameTaken: The name is taken, ignoring case.
+        """
+        try:
+            with transaction.atomic():
+                return Audience.objects.create(
+                    name=name, created_by=creator, updated_by=creator
+                )
+        except IntegrityError as error:
+            raise AudienceNameTaken(name) from error
 
 
 class AudienceMembers:

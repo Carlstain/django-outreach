@@ -48,7 +48,7 @@ Django admin context.
 | `outreach/admin/mailing_list.html`, `mailing_detail.html` | Mailings | `recipients`, `skipped_reasons` (detail) |
 | `outreach/admin/emailtemplate_list.html`, `emailtemplate_form.html` | Templates | `sample_preview_html`, `sample_preview_subject` (form) |
 | `outreach/admin/audience_list.html`, `audience_form.html` | Audiences | |
-| `outreach/admin/audience_choice.html` | Choose the audience of the add and remove actions | `form`, `adding`, `action_name`, `queryset_ids`, `select_across`, `selected_count`, `can_add_audience` |
+| `outreach/admin/audience_choice.html` | Choose the audience of the add and remove actions | `form`, `adding`, `action_name`, `queryset_ids`, `select_across`, `selected_count` |
 | `outreach/admin/includes/selection_hidden_fields.html`, `mail_message_fields.html` | Parts of the send steps (`selection_hidden_fields.html` also serves the audience actions) | |
 
 ## Includes and widgets

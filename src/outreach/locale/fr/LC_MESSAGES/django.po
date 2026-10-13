@@ -1508,12 +1508,6 @@ msgstr "Ajouter à l’audience"
 msgid "Remove from the audience"
 msgstr "Retirer de l’audience"
 
-msgid "Create an audience first, then come back to the prospect list."
-msgstr "Créez d’abord une audience, puis revenez à la liste des prospects."
-
-msgid "Ask someone who can add audiences to create one first."
-msgstr "Demandez d’abord à une personne autorisée à ajouter des audiences d’en créer une."
-
 msgid "Back to prospects"
 msgstr "Retour aux prospects"
 
@@ -1570,3 +1564,27 @@ msgid "%(count)d prospect removed from %(audience)s."
 msgid_plural "%(count)d prospects removed from %(audience)s."
 msgstr[0] "%(count)d prospect retiré de %(audience)s."
 msgstr[1] "%(count)d prospects retirés de %(audience)s."
+
+msgid "Choose an audience"
+msgstr "Choisir une audience"
+
+msgid "Or create a new audience"
+msgstr "Ou créer une nouvelle audience"
+
+msgid "Creates the audience and adds the selected prospects to it."
+msgstr "Crée l’audience et y ajoute les prospects sélectionnés."
+
+msgid "Choose an audience, or type the name of a new one."
+msgstr "Choisissez une audience, ou saisissez le nom d’une nouvelle audience."
+
+msgid "Choose an audience or type a new name, not both."
+msgstr "Choisissez une audience ou saisissez un nouveau nom, pas les deux."
+
+msgid "The audience %(audience)s was created."
+msgstr "L’audience %(audience)s a été créée."
+
+msgid "There is nothing to remove the prospects from."
+msgstr "Il n’y a aucune audience dont retirer les prospects."
+
+msgid "On that page you can also type the name of a new audience instead of choosing one. It is created and the selected prospects are added to it."
+msgstr "Sur cette page, vous pouvez aussi saisir le nom d’une nouvelle audience au lieu d’en choisir une. Elle est créée et les prospects sélectionnés y sont ajoutés."

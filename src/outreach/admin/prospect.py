@@ -3,6 +3,7 @@ from typing import Any
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import QuerySet
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -18,6 +19,7 @@ from outreach.admin.prospect_event_inline import ProspectEventInline
 from outreach.choices import ACTOR_SYSTEM, EventKind, ProspectKind, ProspectStatus
 from outreach.conf import outreach_settings
 from outreach.forms import (
+    AUDIENCE_NAME_TAKEN,
     AudienceChoiceForm,
     MessageForm,
     OutreachImportConfirmForm,
@@ -26,7 +28,7 @@ from outreach.forms import (
     SaveTemplateForm,
 )
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
-from outreach.services.audiences import AudienceMembers
+from outreach.services.audiences import AudienceCreator, AudienceMembers, AudienceNameTaken
 from outreach.services.linking import UserLinker
 from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
@@ -473,28 +475,10 @@ class ProspectAdmin(admin.ModelAdmin):
     def change_audience_members(
         self, request: HttpRequest, queryset: QuerySet[Prospect], adding: bool
     ) -> HttpResponse | None:
-        form = AudienceChoiceForm(request.POST if request.POST.get("apply") else None)
-        if form.is_valid():
-            audience = form.cleaned_data["audience"]
-            members = AudienceMembers()
-            actor = request.user.get_username()
-            if adding:
-                count = members.add(audience, queryset, actor)
-                message = ngettext(
-                    "%(count)d prospect added to %(audience)s.",
-                    "%(count)d prospects added to %(audience)s.",
-                    count,
-                )
-            else:
-                count = members.remove(audience, queryset, actor)
-                message = ngettext(
-                    "%(count)d prospect removed from %(audience)s.",
-                    "%(count)d prospects removed from %(audience)s.",
-                    count,
-                )
-            self.message_user(
-                request, message % {"count": count, "audience": audience}, messages.SUCCESS
-            )
+        form = AudienceChoiceForm(
+            request.POST if request.POST.get("apply") else None, creating=adding
+        )
+        if form.is_valid() and self.apply_audience_change(request, form, queryset, adding):
             return None
         context = {
             **self.admin_site.each_context(request),
@@ -505,10 +489,56 @@ class ProspectAdmin(admin.ModelAdmin):
             "adding": adding,
             "action_name": "add_to_audience" if adding else "remove_from_audience",
             "selected_count": queryset.count(),
-            "can_add_audience": request.user.has_perm("outreach.add_audience"),
             "media": self.media,
         }
         return TemplateResponse(request, "outreach/admin/audience_choice.html", context)
+
+    def apply_audience_change(
+        self,
+        request: HttpRequest,
+        form: AudienceChoiceForm,
+        queryset: QuerySet[Prospect],
+        adding: bool,
+    ) -> bool:
+        audience = form.cleaned_data["audience"]
+        is_new_audience = audience is None
+        members = AudienceMembers()
+        actor = request.user.get_username()
+        try:
+            with transaction.atomic():
+                if is_new_audience:
+                    audience = AudienceCreator().create(
+                        form.cleaned_data["new_audience_name"], request.user
+                    )
+                if adding:
+                    count = members.add(audience, queryset, actor)
+                else:
+                    count = members.remove(audience, queryset, actor)
+        except AudienceNameTaken:
+            form.add_error("new_audience_name", AUDIENCE_NAME_TAKEN)
+            return False
+        if is_new_audience:
+            self.message_user(
+                request,
+                _("The audience %(audience)s was created.") % {"audience": audience},
+                messages.SUCCESS,
+            )
+        if adding:
+            message = ngettext(
+                "%(count)d prospect added to %(audience)s.",
+                "%(count)d prospects added to %(audience)s.",
+                count,
+            )
+        else:
+            message = ngettext(
+                "%(count)d prospect removed from %(audience)s.",
+                "%(count)d prospects removed from %(audience)s.",
+                count,
+            )
+        self.message_user(
+            request, message % {"count": count, "audience": audience}, messages.SUCCESS
+        )
+        return True
 
     @admin.action(
         description=gettext_lazy("Unsubscribe the selected prospects"),

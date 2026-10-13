@@ -277,7 +277,7 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 ## Audiences
 
 - An audience is a named list of prospects, shared by every staff member who holds `outreach.view_audience`. A prospect can be in several audiences.
-- Prospects are added and removed with two actions of the prospect list, which need `change_prospect`. The list can be filtered by audience. There is no audience on the CSV import.
+- Prospects are added and removed with two actions of the prospect list, which need `change_prospect`. The add page can also create a new audience from a typed name, with the same permission. The list can be filtered by audience. There is no audience on the CSV import.
 - To mail an audience, filter the list by it, use Select all, then Send a mail. Membership never overrides an unsubscription: unsubscribed and suppressed members are skipped like any other prospect.
 - Deleting an audience keeps its prospects. Deleting a prospect removes its memberships.
 

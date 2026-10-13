@@ -21,11 +21,14 @@ hold, and has a search. It needs `view_audience`. Adding, editing and deleting n
 1. In *Prospects*, tick the people, or filter the list and use *Select all* under it.
 2. Choose *Add the selected prospects to an audience* (or *Remove the selected prospects from an
    audience*) and press *Go*.
-3. Pick the audience and confirm.
+3. Pick the audience and confirm. To start a new audience from the selection, type its name
+   in *Or create a new audience* instead of picking one: the audience is created and the selected
+   prospects are added to it. Choose one or the other, not both, and a name that already exists
+   (ignoring case) is refused.
 
 Prospects that are already members are left as they are, and the message tells you how many were
-really added or removed. Both actions need `change_prospect`, and each change is recorded in the
-history of the prospect.
+really added or removed. Both actions need `change_prospect`, even to create an audience this way, and each change is
+recorded in the history of the prospect. Removing only offers audiences that already exist.
 
 A prospect's page lists the audiences it belongs to. The list can be filtered by audience.
 
