@@ -1340,7 +1340,7 @@ fieldset.module > .fieldset-heading,
   justify-content: center;
 }
 
-/* import and export */
+/* import */
 .import-preview {
   width: 100%;
   border-collapse: collapse;
@@ -1366,98 +1366,15 @@ fieldset.module > .fieldset-heading,
   background: var(--st-user-bg);
 }
 
-.import-preview tr.skip {
+.import-preview tr.skipped {
   background: var(--line-soft);
 }
 
-.import-preview tr.delete {
-  background: var(--st-unsub-bg);
-}
-
-.import-preview tr.update {
-  background: var(--st-prospect-bg);
-}
-
-.import-preview td ins {
-  background: var(--st-user-bg);
-  color: var(--st-user-fg);
-  text-decoration: none;
-}
-
-.import-preview td del {
-  background: var(--st-unsub-bg);
-  color: var(--st-unsub-fg);
-}
-
-.import-preview .errors {
-  position: relative;
-}
-
-.validation-error-count {
-  display: inline-block;
-  background: var(--st-unsub-fg);
-  color: var(--surface);
-  border-radius: 6px;
-  font-size: 0.9em;
-  font-weight: 700;
-  padding: 0.2em 0.4em;
-}
-
-.validation-error-container {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  background: var(--st-unsub-bg);
-  padding: 14px 15px 10px;
-  top: 28px;
-  width: 220px;
-  z-index: 2;
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-}
-
-.import-preview td:hover .validation-error-container {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.validation-error-list,
-.validation-error-list ul {
+.import-preview ul {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.validation-error-field-label {
-  display: block;
-  border-bottom: 1px solid var(--st-unsub-fg);
   color: var(--st-unsub-fg);
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size: 0.85em;
-}
-
-.import-error-li {
-  margin-bottom: 12px;
-}
-
-.traceback {
-  font-family: ui-monospace, monospace;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.selectable-field-export-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-}
-
-.selectable-field-export-row label {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--fg);
 }
 
 /* centered public pages */

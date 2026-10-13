@@ -623,23 +623,8 @@ msgstr ""
 "Rédigez un message une fois, enregistrez-le comme modèle et choisissez-le à "
 "nouveau lors d’un prochain envoi. Vous pouvez aussi en ajouter un ici."
 
-msgid "Export"
-msgstr "Exporter"
-
-#, python-format
-msgid "Export %(len)s selected item."
-msgid_plural "Export %(len)s selected items."
-msgstr[0] "Exporter %(len)s élément sélectionné."
-msgstr[1] "Exporter %(len)s éléments sélectionnés."
-
-msgid "This exporter will export the following fields: "
-msgstr "Cet exportateur va exporter les champs suivants: "
-
 msgid "Select all"
 msgstr "Tout sélectionner"
-
-msgid "Submit"
-msgstr "Soumettre"
 
 msgid "How to use Outreach"
 msgstr "Utiliser Outreach"
@@ -968,37 +953,11 @@ msgstr ""
 msgid "Import"
 msgstr "Importer"
 
-msgid ""
-"Below is a preview of data to be imported. If you are satisfied with the "
-"results, click 'Confirm import'"
-msgstr ""
-"Voici un aperçu des données à importer. Si vous êtes satisfait(e) des "
-"résultats, cliquez sur 'Confirmer l’importation'"
-
 msgid "Confirm import"
 msgstr "Confirmer l’importation"
 
 msgid "Errors"
 msgstr "Erreurs"
-
-msgid "Line number"
-msgstr "Numéro de ligne"
-
-msgid "Some rows failed to validate"
-msgstr "Certaines lignes ont échoué à la validation"
-
-msgid ""
-"Please correct these errors in your data where possible, then reupload it "
-"using the form above."
-msgstr ""
-"Veuillez corriger ces erreurs dans les données si possible, puis envoyer à "
-"nouveau en utilisant le formulaire ci-dessus."
-
-msgid "Row"
-msgstr "Ligne"
-
-msgid "Non field specific"
-msgstr "Non spécifique à un champ"
 
 msgid "Preview"
 msgstr "Aperçu"
@@ -1008,9 +967,6 @@ msgstr "Nouveau"
 
 msgid "Skipped"
 msgstr "Ignorés"
-
-msgid "Update"
-msgstr "Mettre à jour"
 
 msgid "Where your prospects stand today."
 msgstr "Où en sont vos prospects aujourd’hui."
@@ -1414,3 +1370,56 @@ msgstr ""
 
 msgid "Label"
 msgstr "Libellé"
+
+msgid "The file is empty."
+msgstr "Le fichier est vide."
+
+msgid "The file has no email column."
+msgstr "Le fichier n’a pas de colonne email."
+
+msgid "The file must be UTF-8 text."
+msgstr "Le fichier doit être un texte UTF-8."
+
+msgid "The file is too large."
+msgstr "Le fichier est trop volumineux."
+
+msgid "CSV file"
+msgstr "Fichier CSV"
+
+msgid "A UTF-8 CSV file with a header row and an email column."
+msgstr "Un fichier CSV en UTF-8 avec une ligne d’en-tête et une colonne email."
+
+msgid "Preview import"
+msgstr "Aperçu de l’import"
+
+msgid "Some rows are invalid"
+msgstr "Certaines lignes sont invalides"
+
+msgid "Nothing was imported. Correct these rows in your file, then upload it again."
+msgstr ""
+"Rien n’a été importé. Corrigez ces lignes dans votre fichier, puis "
+"envoyez-le à nouveau."
+
+msgid "Line"
+msgstr "Ligne"
+
+msgid "If you are satisfied with the preview, confirm the import."
+msgstr "Si l’aperçu vous convient, confirmez l’import."
+
+msgid "Every row already exists, so there is nothing to import."
+msgstr "Toutes les lignes existent déjà, il n’y a rien à importer."
+
+#, python-format
+msgid "%(count)d prospect imported."
+msgid_plural "%(count)d prospects imported."
+msgstr[0] "%(count)d prospect importé."
+msgstr[1] "%(count)d prospects importés."
+
+#, python-format
+msgid "%(count)d row skipped."
+msgid_plural "%(count)d rows skipped."
+msgstr[0] "%(count)d ligne ignorée."
+msgstr[1] "%(count)d lignes ignorées."
+
+msgid "Export the selected prospects as CSV"
+msgstr "Exporter les prospects sélectionnés en CSV"

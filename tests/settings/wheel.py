@@ -11,7 +11,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "import_export",
     "outreach",
 ]
 
@@ -44,5 +43,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = tempfile.mkdtemp(prefix="outreach-static-")
-IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True
 OUTREACH_BASE_URL = "https://testserver"

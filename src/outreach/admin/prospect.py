@@ -2,15 +2,15 @@ from typing import Any
 
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import QuerySet
 from django.forms import ModelForm
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
+from django.urls import URLPattern, path, reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
-from import_export.admin import ImportExportModelAdmin
 
 from outreach.admin.member_filter import MemberFilter
 from outreach.admin.prospect_event_inline import ProspectEventInline
@@ -18,16 +18,21 @@ from outreach.choices import ACTOR_SYSTEM, EventKind, ProspectKind, ProspectStat
 from outreach.conf import outreach_settings
 from outreach.forms import (
     MessageForm,
-    OutreachExportForm,
+    OutreachImportConfirmForm,
     OutreachImportForm,
     ProspectForm,
     SaveTemplateForm,
 )
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
-from outreach.resources import ProspectResource
 from outreach.services.linking import UserLinker
 from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
+from outreach.services.prospect_csv import (
+    CsvImportError,
+    ProspectCsvColumns,
+    ProspectCsvExporter,
+    ProspectCsvImporter,
+)
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from outreach.services.unsubscribe import ProspectUnsubscriber
 from outreach.sites import outreach_site
@@ -45,23 +50,19 @@ STATUS_BADGE_CLASSES = {
 
 
 @admin.register(Prospect, site=outreach_site)
-class ProspectAdmin(ImportExportModelAdmin):
+class ProspectAdmin(admin.ModelAdmin):
     form = ProspectForm
-    import_form_class = OutreachImportForm
-    export_form_class = OutreachExportForm
-    resource_classes = [ProspectResource]
     list_per_page = 20
     list_display = ["display_name", "email", "status_badge", "member", "last_mailed_at"]
     list_filter = ["kind", "status", MemberFilter]
     search_fields = ["email", "first_name", "last_name", "organization"]
     inlines = [ProspectEventInline]
-    actions = ["send_mail", "unsubscribe_selected", "link_users"]
+    actions = ["send_mail", "unsubscribe_selected", "link_users", "export_csv"]
     change_list_template = "outreach/admin/change_list.html"
     change_form_template = "outreach/admin/change_form.html"
     delete_confirmation_template = "outreach/admin/delete_confirmation.html"
     delete_selected_confirmation_template = "outreach/admin/delete_selected_confirmation.html"
     import_template_name = "outreach/admin/import.html"
-    export_template_name = "outreach/admin/export.html"
 
     @admin.display(description=gettext_lazy("Name"), ordering="first_name")
     def display_name(self, prospect: Prospect) -> str:
@@ -122,13 +123,89 @@ class ProspectAdmin(ImportExportModelAdmin):
     def has_import_permission(self, request: HttpRequest) -> bool:
         return self.has_add_permission(request)
 
-    def has_export_permission(self, request: HttpRequest) -> bool:
-        return self.has_view_permission(request)
+    def get_urls(self) -> list[URLPattern]:
+        return [
+            path(
+                "import/",
+                self.admin_site.admin_view(self.import_view),
+                name="outreach_prospect_import",
+            ),
+            path(
+                "process_import/",
+                self.admin_site.admin_view(self.process_import_view),
+                name="outreach_prospect_process_import",
+            ),
+            *super().get_urls(),
+        ]
 
-    def get_import_data_kwargs(self, **kwargs: Any) -> dict[str, Any]:
-        import_kwargs = super().get_import_data_kwargs(**kwargs)
-        import_kwargs["rollback_on_validation_errors"] = True
-        return import_kwargs
+    def import_response(self, request: HttpRequest, **context: Any) -> HttpResponse:
+        return TemplateResponse(
+            request,
+            self.import_template_name,
+            {
+                **self.admin_site.each_context(request),
+                "title": _("Import"),
+                "subtitle": None,
+                "opts": self.model._meta,
+                "columns": ProspectCsvColumns().labels(),
+                **context,
+            },
+        )
+
+    def import_view(self, request: HttpRequest) -> HttpResponse:
+        if not self.has_import_permission(request):
+            raise PermissionDenied
+        form = OutreachImportForm(request.POST or None, request.FILES or None)
+        if request.method != "POST" or not form.is_valid():
+            return self.import_response(request, form=form)
+        upload = form.cleaned_data["import_file"]
+        try:
+            csv_text = upload.read().decode("utf-8-sig")
+            preview = ProspectCsvImporter().preview(csv_text)
+        except UnicodeDecodeError:
+            form.add_error("import_file", _("The file must be UTF-8 text."))
+            return self.import_response(request, form=form)
+        except CsvImportError as error:
+            form.add_error("import_file", str(error))
+            return self.import_response(request, form=form)
+        if preview.invalid_rows:
+            return self.import_response(request, form=form, preview=preview)
+        confirm_form = OutreachImportConfirmForm(
+            initial={"csv_text": csv_text, "file_name": upload.name}
+        )
+        return self.import_response(
+            request, form=form, preview=preview, confirm_form=confirm_form
+        )
+
+    def process_import_view(self, request: HttpRequest) -> HttpResponse:
+        if not self.has_import_permission(request):
+            raise PermissionDenied
+        import_url = reverse("outreach_admin:outreach_prospect_import")
+        confirm_form = OutreachImportConfirmForm(request.POST or None)
+        if request.method != "POST" or not confirm_form.is_valid():
+            return HttpResponseRedirect(import_url)
+        importer = ProspectCsvImporter()
+        try:
+            preview = importer.preview(confirm_form.cleaned_data["csv_text"])
+        except CsvImportError as error:
+            self.message_user(request, str(error), messages.ERROR)
+            return HttpResponseRedirect(import_url)
+        if preview.invalid_rows:
+            return self.import_response(request, form=OutreachImportForm(), preview=preview)
+        created_count = importer.apply(preview, confirm_form.cleaned_data["file_name"])
+        message = ngettext(
+            "%(count)d prospect imported.", "%(count)d prospects imported.", created_count
+        )
+        skipped_message = ngettext(
+            "%(count)d row skipped.", "%(count)d rows skipped.", preview.skipped_count
+        )
+        self.message_user(
+            request,
+            f"{message % {'count': created_count}} "
+            f"{skipped_message % {'count': preview.skipped_count}}",
+            messages.SUCCESS,
+        )
+        return HttpResponseRedirect(reverse("outreach_admin:outreach_prospect_changelist"))
 
     def save_model(
         self, request: HttpRequest, obj: Prospect, form: ModelForm, change: bool
@@ -379,3 +456,15 @@ class ProspectAdmin(ImportExportModelAdmin):
                 count += 1
         message = ngettext("%(count)d prospect linked.", "%(count)d prospects linked.", count)
         self.message_user(request, message % {"count": count}, messages.SUCCESS)
+
+    @admin.action(
+        description=gettext_lazy("Export the selected prospects as CSV"),
+        permissions=["view"],
+    )
+    def export_csv(self, request: HttpRequest, queryset: QuerySet[Prospect]) -> HttpResponse:
+        response = HttpResponse(
+            ProspectCsvExporter().to_csv(queryset.iterator()),
+            content_type="text/csv; charset=utf-8",
+        )
+        response["Content-Disposition"] = 'attachment; filename="prospects.csv"'
+        return response

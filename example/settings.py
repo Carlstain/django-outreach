@@ -13,7 +13,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "import_export",
     "outreach",
 ]
 
@@ -59,7 +58,6 @@ STATIC_URL = "static/"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 OUTREACH_BASE_URL = "http://localhost:8000"
 
-IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True
 
 WARM_THEME = {
     "brand": "#134e4a",

@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.test import override_settings
 
 from outreach.models import Prospect
-from outreach.resources import import_columns
+from outreach.services.prospect_csv import ProspectCsvColumns
 from tests.base import OutreachTestCase
 from tests.factories import create_outreach_staff_user
 from tests.routes import (
@@ -12,7 +12,6 @@ from tests.routes import (
     outreach_prospect_process_import_url,
 )
 
-CSV_FORMAT_INDEX = "0"
 ALIASED_CSV = (
     "email,given_name,surname,employer\nada@test.com,Ada,Lovelace,Analytical Engines\n"
 )
@@ -29,8 +28,7 @@ class ImportAliasesSettingTests(OutreachTestCase):
             "prospects.csv", csv_content.encode(), content_type="text/csv"
         )
         preview_response = self.client.post(
-            outreach_prospect_import_url(),
-            {"import_file": import_file, "format": CSV_FORMAT_INDEX},
+            outreach_prospect_import_url(), {"import_file": import_file}
         )
         confirm_form = preview_response.context["confirm_form"]
         return self.client.post(outreach_prospect_process_import_url(), confirm_form.initial)
@@ -45,7 +43,8 @@ class ImportAliasesSettingTests(OutreachTestCase):
 
     def test_without_the_setting_no_column_lists_aliases(self) -> None:
         self.assertEqual(
-            [column["aliases"] for column in import_columns()], [[]] * len(import_columns())
+            [column["aliases"] for column in ProspectCsvColumns().with_aliases()],
+            [[]] * len(ProspectCsvColumns().with_aliases()),
         )
 
     def test_without_the_setting_the_help_page_shows_no_other_headers(self) -> None:
@@ -88,7 +87,9 @@ class ImportAliasesSettingTests(OutreachTestCase):
 
     @override_settings(OUTREACH_IMPORT_HEADER_ALIASES={"GIVEN_NAME": "first_name"})
     def test_import_columns_lists_the_configured_aliases(self) -> None:
-        columns = {column["name"]: column["aliases"] for column in import_columns()}
+        columns = {
+            column["name"]: column["aliases"] for column in ProspectCsvColumns().with_aliases()
+        }
 
         self.assertEqual(columns["first_name"], ["GIVEN_NAME"])
         self.assertEqual(columns["email"], [])
