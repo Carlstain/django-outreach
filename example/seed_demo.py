@@ -157,7 +157,7 @@ TEMPLATES = [
 
 def seed_templates() -> None:
     for name, subject, body_html in TEMPLATES:
-        EmailTemplates().save(name, subject, body_html, "demo", overwrite=True)
+        EmailTemplates().save(name, subject, body_html, None, overwrite=True)
 
 
 def seed() -> None:
