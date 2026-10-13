@@ -114,7 +114,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.1,<6" },
     { name = "django-import-export", specifier = ">=4.2,!=4.3.0,<5" },
     { name = "nh3", specifier = ">=0.3,<0.4" },
-    { name = "tablib" },
+    { name = "tablib", specifier = ">=3.5,<4" },
 ]
 
 [package.metadata.requires-dev]
