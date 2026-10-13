@@ -31,4 +31,4 @@ These are understood and accepted for the beta. They are not vulnerabilities, bu
 - `SECRET_KEY` signs unsubscribe links and keys the suppression list. Keep the old key in `SECRET_KEY_FALLBACKS` after a rotation, or old links stop working and suppression entries stop matching.
 - Prospect fields can be used as a button link or a tag argument. The link is still limited to `http`, `https` and `mailto`, and the value only affects that prospect's own mail.
 - A failed send stores the error text in the prospect's history. An SMTP error can contain the recipient's address.
-- Set `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True`. Without it an export can carry spreadsheet formulas typed by users. System check `outreach.W001` warns when it is missing.
+- The CSV export escapes cells that start with `=`, `+`, `-`, `@`, tab or carriage return, so spreadsheet formulas typed by users do not run. The import trusts nothing in the file: every row is validated like a form.

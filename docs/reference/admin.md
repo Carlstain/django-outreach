@@ -13,7 +13,7 @@ all.
 
 | Model admin | Notes |
 |---|---|
-| `ProspectAdmin` | Import and export through django-import-export. Actions: send mail, unsubscribe, link users. The email, status, last mailed date and user are read-only once saved |
+| `ProspectAdmin` | CSV import with a preview step. Actions: send mail, unsubscribe, link users, export as CSV. The email, status, last mailed date and user are read-only once saved |
 | `MailingAdmin` | Read and delete only: it can not add or change |
 | `EmailTemplateAdmin` | Full CRUD. Shows a sandboxed sample preview that never runs tags |
 
@@ -32,7 +32,7 @@ Mounted with `include("outreach.urls")`. With the prefix `outreach/`:
 | `outreach_admin:help` | `outreach/help/` | The *How to use* page |
 | `outreach_admin:outreach_prospect_changelist` | `outreach/outreach/prospect/` | Prospect list |
 | `outreach_admin:outreach_prospect_add` / `change` / `delete` / `history` | `outreach/outreach/prospect/add/`, `<id>/change/`, … | Prospect CRUD |
-| `outreach_admin:outreach_prospect_import` / `export` / `process_import` | `outreach/outreach/prospect/import/`, … | Import and export |
+| `outreach_admin:outreach_prospect_import` / `process_import` | `outreach/outreach/prospect/import/`, … | CSV import and its confirmation |
 | `outreach_admin:outreach_mailing_changelist` / `change` / `delete` | `outreach/outreach/mailing/` | Mailings |
 | `outreach_admin:outreach_emailtemplate_changelist` / `add` / `change` / `delete` | `outreach/outreach/emailtemplate/` | Templates |
 
@@ -46,8 +46,8 @@ permissions are the standard model permissions:
 
 | Permission | Allows |
 |---|---|
-| `outreach.view_prospect` | Open the site, list and read prospects, export, the help page and the dashboard |
-| `outreach.add_prospect` | Add a prospect, import a file |
+| `outreach.view_prospect` | Open the site, list and read prospects, export them as CSV, the help page and the dashboard |
+| `outreach.add_prospect` | Add a prospect, import a CSV file |
 | `outreach.change_prospect` | Edit a prospect, send a mail, unsubscribe selected, link to user accounts |
 | `outreach.delete_prospect` | Delete prospects |
 | `outreach.view_mailing` | Read the Mailings list and detail |

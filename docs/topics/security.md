@@ -40,9 +40,11 @@ a public issue. The same file lists the known limitations.
 
 ## Import and export
 
-- Set `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True`. Prospect fields are typed by users and
-  exports are opened in spreadsheets. In django-import-export 4.4.1 this removes a leading `=`
-  from cells. System check `outreach.W001` warns when it is not `True`.
+- The CSV export always escapes cells that start with `=`, `+`, `-`, `@`, a tab or a carriage
+  return, with a leading apostrophe. Prospect fields are typed by users and exports are opened in
+  spreadsheets, so a name such as `=SUM(1+1)` must not run there. There is nothing to configure.
+- The import re-reads and re-validates the file when it is confirmed, so the text carried by the
+  confirmation form is never trusted. Nothing is stored on the server between the two steps.
 - Import needs `add_prospect` and export needs `view_prospect`. Files over
   `OUTREACH_MAX_IMPORT_BYTES` are rejected before they are parsed, and files over
   `OUTREACH_MAX_IMPORT_ROWS` rows are rejected.

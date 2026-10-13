@@ -2,8 +2,8 @@ from outreach.forms.email_template import EmailTemplateForm
 from outreach.forms.message import MessageForm
 from outreach.forms.message_content import MessageContentForm
 from outreach.forms.outreach_authentication import OutreachAuthenticationForm
-from outreach.forms.outreach_export import OutreachExportForm
 from outreach.forms.outreach_import import OutreachImportForm
+from outreach.forms.outreach_import_confirm import OutreachImportConfirmForm
 from outreach.forms.prospect import ProspectForm
 from outreach.forms.save_template import SaveTemplateForm
 
@@ -12,7 +12,7 @@ __all__ = [
     "MessageContentForm",
     "MessageForm",
     "OutreachAuthenticationForm",
-    "OutreachExportForm",
+    "OutreachImportConfirmForm",
     "OutreachImportForm",
     "ProspectForm",
     "SaveTemplateForm",

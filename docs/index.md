@@ -22,7 +22,7 @@ without resetting its tables.
 - A `Mailing` log for every send, with counts of sent, failed and skipped recipients.
 - One-click unsubscribe links (with `List-Unsubscribe` headers) and a suppression list that
   survives the deletion of a prospect.
-- CSV and spreadsheet import and export through django-import-export.
+- CSV import with a preview step, and CSV export of selected prospects.
 - A built-in help page for the staff, in English and French.
 
 ## Where to start

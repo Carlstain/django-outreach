@@ -9,8 +9,7 @@ class OutreachConfig(AppConfig):
     verbose_name = "Outreach"
 
     def ready(self) -> None:
-        from outreach.checks import check_export_formulae_escaping, check_theme
+        from outreach.checks import check_theme
 
         register(check_theme)
-        register(check_export_formulae_escaping)
         autodiscover_modules("mail_tags")

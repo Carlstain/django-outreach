@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "import_export",
     "outreach",
 ]
 
@@ -56,8 +55,6 @@ STATIC_URL = "static/"
 
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 OUTREACH_BASE_URL = "https://testserver"
-
-IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True
 
 
 def database_from_url(database_url: str) -> dict[str, object]:

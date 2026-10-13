@@ -3,12 +3,15 @@ from typing import Any
 from django import forms
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext_lazy as _
-from import_export.forms import ImportForm
 
 from outreach.conf import outreach_settings
 
 
-class OutreachImportForm(ImportForm):
+class OutreachImportForm(forms.Form):
+    use_required_attribute = False
+
+    import_file = forms.FileField(label=_("CSV file"))
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("label_suffix", "")
         super().__init__(*args, **kwargs)
