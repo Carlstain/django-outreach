@@ -31,6 +31,9 @@ dependencies = [
     "nh3>=0.3,<0.4",
 ]
 
+[project.optional-dependencies]
+celery = ["celery>=5.3,<6"]
+
 [project.urls]
 Homepage = "https://github.com/Carlstain/django-outreach"
 Source = "https://github.com/Carlstain/django-outreach"
@@ -40,6 +43,7 @@ Changelog = "https://github.com/Carlstain/django-outreach/blob/main/CHANGELOG.md
 
 [dependency-groups]
 dev = [
+    "celery>=5.3,<6",
     "pytest",
     "pytest-django",
     "factory-boy",

@@ -43,7 +43,7 @@ Pin an exact version in your own requirements, for example `django-outreach==0.1
 
 ### Beta
 
-This is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen, so an installation can be upgraded without resetting its tables. Known limits: sending runs synchronously in the admin request with a per-send cap and no task queue, and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
+This is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen, so an installation can be upgraded without resetting its tables. Known limits: by default sending runs synchronously in the admin request with a per-send cap (Celery dispatch is available and recommended in production, see the documentation), and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
 
 ## Try the example project
 
@@ -271,7 +271,7 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 
 ## Sending behaviour
 
-- Sending runs inside the admin request, one SMTP connection per action. There is no task queue.
+- By default sending runs inside the admin request, one SMTP connection per action. This is not recommended in production. With `OUTREACH_DISPATCH = "celery"` one task per recipient is queued on the host project's Celery app, with retries on transient errors.
 - Each recipient gets their own subject and body, personalised from their data. Variables are replaced by a fixed regex over a fixed list: `first_name`, `last_name`, `full_name`, `organization`, `email`, `city`, `country`, plus `unsubscribe_url`. Unknown or malformed placeholders are rejected by the compose form.
 - Skipped recipients, with their reason: unsubscribed (status, or found unsubscribed just before sending), suppressed (address on the suppression list), recently contacted (inside `OUTREACH_RESEND_COOLDOWN`), over the send limit (beyond `OUTREACH_MAX_RECIPIENTS_PER_SEND`).
 - Before the first mail, the recipients are claimed in a transaction (rows locked with `skip_locked`, `last_mailed_at` set, the `Mailing` created). A second click or a second request finds them in the cooldown. If a send fails or the recipient is no longer mailable, the previous `last_mailed_at` is restored.

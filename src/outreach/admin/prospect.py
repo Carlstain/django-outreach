@@ -289,17 +289,20 @@ class ProspectAdmin(admin.ModelAdmin):
                 header_text=form.cleaned_data["header_text"],
                 is_newsletter=form.cleaned_data["is_newsletter"],
             )
-            level = messages.WARNING if report.failed else messages.SUCCESS
-            self.message_user(
-                request,
-                _("%(sent)d sent, %(skipped)d skipped, %(failed)d failed.")
-                % {
+            if report.queued:
+                message = _("%(queued)d queued, %(skipped)d skipped.") % {
+                    "queued": len(report.queued),
+                    "skipped": len(report.skipped),
+                }
+                level = messages.SUCCESS
+            else:
+                message = _("%(sent)d sent, %(skipped)d skipped, %(failed)d failed.") % {
                     "sent": len(report.sent),
                     "skipped": len(report.skipped),
                     "failed": len(report.failed),
-                },
-                level,
-            )
+                }
+                level = messages.WARNING if report.failed else messages.SUCCESS
+            self.message_user(request, message, level)
             return None
 
         select_across = request.POST.get("select_across", "0").lower() not in FALSE_VALUES
@@ -313,7 +316,7 @@ class ProspectAdmin(admin.ModelAdmin):
             "queryset_ids": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
             "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
             "select_across": int(select_across),
-            "max_recipients": outreach_settings.max_recipients_per_send,
+            "max_recipients": outreach_settings.recipient_cap,
             "media": self.media,
             "email_templates": self.template_choices(permissions["view"]),
             "selected_template": selected_template,

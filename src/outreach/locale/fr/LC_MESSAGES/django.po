@@ -1423,3 +1423,33 @@ msgstr[1] "%(count)d lignes ignorées."
 
 msgid "Export the selected prospects as CSV"
 msgstr "Exporter les prospects sélectionnés en CSV"
+
+msgid "Synchronous"
+msgstr "Synchrone"
+
+msgid "Celery"
+msgstr "Celery"
+
+msgid "Pending"
+msgstr "En attente"
+
+msgid "attempts"
+msgstr "tentatives"
+
+msgid "previous mailed at"
+msgstr "précédent envoi le"
+
+msgid "last error"
+msgstr "dernière erreur"
+
+msgid "mailing delivery"
+msgstr "envoi du mailing"
+
+msgid "mailing deliveries"
+msgstr "envois du mailing"
+
+msgid "pending"
+msgstr "en attente"
+
+msgid "%(queued)d queued, %(skipped)d skipped."
+msgstr "%(queued)d en file d'attente, %(skipped)d ignorés."
