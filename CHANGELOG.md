@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- `Prospect.avatar_tone`, a number from 0 to 5 used for the avatar tint. It is a property, so there is no migration.
+
+### Changed
+
+- New default look: a plum accent on warm neutrals, flat cards with a border and no shadow, and smaller corner radii. The default `OUTREACH_THEME` colours, the stylesheet defaults and the email card change with it. A project that sets every `OUTREACH_THEME` key is unaffected.
+- Each prospect avatar takes one of six tints, chosen from its initials. The dashboard tiles show a status dot and the recent activity shows the prospect avatar.
+
 ### Security
 
 - A `{% button %}` placed inside a link or another tag is rejected by the compose form and refused when a mail is rendered. It could previously write an anchor inside an attribute after the final sanitising pass.
