@@ -56,6 +56,8 @@ trust if this page and the code ever disagree.
 
 Set `OUTREACH_LOGO_STATIC_PATH` to the static path of a logo, and `OUTREACH_LOGO_DARK_STATIC_PATH`
 for dark mode. Without a logo the site name is shown as text. No logo is shipped.
+With `OUTREACH_EMAIL_LOGO_IN_HEADER` the logo is centered at the top of mails, and the site name
+text is left out unless a template or a mail sets a header text.
 
 ## Overriding templates
 

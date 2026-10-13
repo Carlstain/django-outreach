@@ -150,13 +150,19 @@ class ProspectMailer:
             theme = outreach_settings.theme
             personalised_html = mail_buttons.insert(cleaned_html, buttons, theme.email)
             personalised_text = sanitizer.to_text(personalised_html)
+            has_header_logo = bool(
+                outreach_settings.email_logo_in_header and outreach_settings.email_logo_url
+            )
+            site_name = outreach_settings.site_name
             context = {
                 "subject": personalised_subject,
                 "body_html": personalised_html,
                 "body_text": personalised_text,
                 "unsubscribe_url": unsubscribe_url,
-                "site_name": outreach_settings.site_name,
-                "header_text": header_text or outreach_settings.site_name,
+                "site_name": site_name,
+                "header_text": header_text or ("" if has_header_logo else site_name),
+                "header_logo_alt": header_text or site_name,
+                "has_header_logo": has_header_logo,
                 "is_newsletter": is_newsletter,
                 "logo_url": outreach_settings.email_logo_url,
                 "logo_in_header": outreach_settings.email_logo_in_header,
