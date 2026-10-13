@@ -41,6 +41,7 @@ class SendMailActionTests(OutreachTestCase):
             {
                 "action": "send_mail",
                 "_selected_action": [str(prospect.pk) for prospect in prospects],
+                "is_newsletter": "on",
                 **extra_fields,
             },
         )

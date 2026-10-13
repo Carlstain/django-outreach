@@ -46,6 +46,7 @@ class ComposeTemplatesTests(OutreachTestCase):
         data = {
             "action": "send_mail",
             "_selected_action": [str(prospect.pk) for prospect in self.prospects],
+            "is_newsletter": "on",
             **fields,
         }
         if step is not None:
@@ -263,6 +264,7 @@ class ComposeTemplatesTests(OutreachTestCase):
                         "action": "send_mail",
                         "_selected_action": selected_pks,
                         "select_across": "1",
+                        "is_newsletter": "on",
                         **fields,
                     },
                 )

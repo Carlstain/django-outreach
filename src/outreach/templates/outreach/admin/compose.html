@@ -9,7 +9,7 @@
 
 {% block page_title %}{% trans "Write a message" %}{% endblock %}
 
-{% block page_subtitle %}<p>{% trans "Every message ends with an unsubscribe link." %}</p>{% endblock %}
+{% block page_subtitle %}<p>{% trans "A newsletter ends with an unsubscribe link. A notice has none and goes to members only." %}</p>{% endblock %}
 
 {% block content %}
   {% with received_count=plan.recipients|length skipped_count=plan.skipped|length %}
@@ -21,10 +21,12 @@
       <button class="visually-hidden-submit" type="submit" name="step" value="preview" formnovalidate tabindex="-1" aria-hidden="true"></button>
       <div class="card">
         <div class="form">
-          {% if form.non_field_errors or form.subject.errors or form.body.errors %}
+          {% if form.non_field_errors or form.subject.errors or form.header_text.errors or form.is_newsletter.errors or form.body.errors %}
             <div class="notice err wide" role="alert">
               {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
               {% for error in form.subject.errors %}<p>{{ error }}</p>{% endfor %}
+              {% for error in form.header_text.errors %}<p>{{ error }}</p>{% endfor %}
+              {% for error in form.is_newsletter.errors %}<p>{{ error }}</p>{% endfor %}
               {% for error in form.body.errors %}<p>{{ error }}</p>{% endfor %}
             </div>
           {% endif %}
@@ -51,6 +53,15 @@
           <div class="f wide">
             {{ form.subject.label_tag }}
             {{ form.subject }}
+          </div>
+          <div class="f wide">
+            {{ form.header_text.label_tag }}
+            {{ form.header_text }}
+            <span class="hint">{% trans "Shown at the top of the message. Leave empty to use the site name." %}</span>
+          </div>
+          <div class="wide">
+            <label class="check">{{ form.is_newsletter }} {% trans "Newsletter" %}</label>
+            <span class="hint">{% trans "A newsletter carries an unsubscribe link and skips people who unsubscribed. Untick it for a notice, which goes to members only." %}</span>
           </div>
           <div class="f wide">
             <span>{{ form.body.label }}</span>

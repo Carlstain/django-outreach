@@ -4,6 +4,9 @@ from django.contrib import admin
 from django.db import IntegrityError
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponse
+from django.utils.html import format_html
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from outreach.conf import outreach_settings
 from outreach.forms import (
@@ -20,13 +23,19 @@ from outreach.sites import outreach_site
 @admin.register(EmailTemplate, site=outreach_site)
 class EmailTemplateAdmin(admin.ModelAdmin):
     form = EmailTemplateForm
-    list_display = ["name", "subject", "updated_at", "created_by"]
+    list_display = ["name", "subject", "kind_badge", "updated_at", "created_by"]
     search_fields = ["name", "subject"]
     ordering = ["name"]
     list_per_page = 20
     change_list_template = "outreach/admin/emailtemplate_list.html"
     change_form_template = "outreach/admin/emailtemplate_form.html"
     delete_selected_confirmation_template = "outreach/admin/delete_selected_confirmation.html"
+
+    @admin.display(description=gettext_lazy("Type"), ordering="is_newsletter")
+    def kind_badge(self, template: EmailTemplate) -> str:
+        if template.is_newsletter:
+            return format_html('<span class="badge contacted">{}</span>', _("Newsletter"))
+        return format_html('<span class="badge user">{}</span>', _("Notice"))
 
     def changeform_view(
         self,

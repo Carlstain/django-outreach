@@ -28,8 +28,10 @@ class SendMailConcurrencyTests(OutreachTransactionTestCase):
         reports: dict[str, MailReport] = {}
         original_plan = ProspectMailer.plan
 
-        def plan_then_hold_the_locks(mailer: ProspectMailer, selected: list) -> object:
-            plan = original_plan(mailer, selected)
+        def plan_then_hold_the_locks(
+            mailer: ProspectMailer, selected: list, **options: bool
+        ) -> object:
+            plan = original_plan(mailer, selected, **options)
             if mailer.actor == "first":
                 first_has_claimed.set()
                 second_has_finished.wait(WAIT_SECONDS)

@@ -1,2 +1,4 @@
 <input type="hidden" name="subject" value="{{ form.subject.value }}">
 <input type="hidden" name="body" value="{{ form.body.value }}">
+<input type="hidden" name="header_text" value="{{ form.header_text.value|default_if_none:'' }}">
+{% if form.is_newsletter.value %}<input type="hidden" name="is_newsletter" value="on">{% endif %}

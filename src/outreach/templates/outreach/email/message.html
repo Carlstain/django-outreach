@@ -19,20 +19,28 @@
         <td align="center" style="padding: 24px 12px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: {{ theme.email.card }}; border: 1px solid {{ theme.email.border }}; border-radius: 8px;">
             <tr>
-              <td style="padding: 24px 32px 0 32px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: {{ theme.email.brand }};">{{ site_name }}</td>
+              <td style="padding: 24px 32px 0 32px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: {{ theme.email.brand }};">
+                {% if logo_in_header and logo_url %}<img src="{{ logo_url }}" alt="{{ header_text }}" height="40" style="display: block; height: 40px; width: auto; border: 0; margin: 0 0 8px 0;">{% endif %}
+                {{ header_text }}
+              </td>
             </tr>
             <tr>
               <td class="outreach-body" style="padding: 16px 32px 8px 32px; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: {{ theme.email.text }};">
                 {{ body_html|safe }}
               </td>
             </tr>
+            {% if is_newsletter or logo_in_footer and logo_url %}
             <tr>
               <td style="padding: 16px 32px 24px 32px; border-top: 1px solid {{ theme.email.border }}; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: {{ theme.email.muted }};">
+                {% if logo_in_footer and logo_url %}<img src="{{ logo_url }}" alt="{{ site_name }}" height="28" style="display: block; height: 28px; width: auto; border: 0; margin: 0 0 12px 0;">{% endif %}
+                {% if is_newsletter %}
                 {% blocktrans with name=site_name %}You receive this message because {{ name }} thought it could be useful to you.{% endblocktrans %}
                 <a href="{{ unsubscribe_url }}" style="color: {{ theme.email.accent }};">{% trans "Unsubscribe" %}</a>
                 {% trans "at any time, in one click." %}
+                {% endif %}
               </td>
             </tr>
+            {% endif %}
           </table>
         </td>
       </tr>

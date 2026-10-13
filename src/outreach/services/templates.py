@@ -20,7 +20,15 @@ class SavedTemplate:
 
 class EmailTemplates:
     def save(
-        self, name: str, subject: str, body_html: str, author: str, overwrite: bool
+        self,
+        name: str,
+        subject: str,
+        body_html: str,
+        author: str,
+        overwrite: bool,
+        *,
+        header_text: str = "",
+        is_newsletter: bool = True,
     ) -> SavedTemplate:
         """Create a template, or update the one with the same name when ``overwrite`` is true.
 
@@ -34,7 +42,14 @@ class EmailTemplates:
         existing = EmailTemplate.objects.filter(name__iexact=clean_name).first()
         if existing is None:
             try:
-                return self.create(clean_name, subject, clean_body, author)
+                return self.create(
+                    clean_name,
+                    subject,
+                    clean_body,
+                    author,
+                    header_text=header_text,
+                    is_newsletter=is_newsletter,
+                )
             except IntegrityError as error:
                 existing = EmailTemplate.objects.filter(name__iexact=clean_name).first()
                 if existing is None or not overwrite:
@@ -43,16 +58,37 @@ class EmailTemplates:
             raise TemplateNameTaken(clean_name)
         existing.subject = subject
         existing.body_html = clean_body
-        existing.save(update_fields=["subject", "body_html", "updated_at"])
+        existing.header_text = header_text
+        existing.is_newsletter = is_newsletter
+        existing.save(
+            update_fields=[
+                "subject",
+                "body_html",
+                "header_text",
+                "is_newsletter",
+                "updated_at",
+            ]
+        )
         return SavedTemplate(existing, created=False)
 
-    def create(self, name: str, subject: str, body_html: str, author: str) -> SavedTemplate:
+    def create(
+        self,
+        name: str,
+        subject: str,
+        body_html: str,
+        author: str,
+        *,
+        header_text: str = "",
+        is_newsletter: bool = True,
+    ) -> SavedTemplate:
         author_max_length = EmailTemplate._meta.get_field("created_by").max_length
         with transaction.atomic():
             template = EmailTemplate.objects.create(
                 name=name,
                 subject=subject,
                 body_html=body_html,
+                header_text=header_text,
+                is_newsletter=is_newsletter,
                 created_by=author[:author_max_length],
             )
         return SavedTemplate(template, created=True)

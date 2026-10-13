@@ -29,6 +29,7 @@ class MailTagRenderModeTests(OutreachMailTagTestCase):
                 "action": "send_mail",
                 "_selected_action": [str(prospect.pk)],
                 "step": step,
+                "is_newsletter": "on",
                 "subject": "Hello",
                 "body": body,
             },

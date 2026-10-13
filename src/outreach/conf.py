@@ -3,6 +3,7 @@ from datetime import timedelta
 from typing import Any
 
 from django.conf import settings
+from django.templatetags.static import static
 from django.utils.module_loading import import_string
 
 from outreach.theme import OutreachTheme
@@ -48,6 +49,23 @@ class OutreachSettings:
     @property
     def logo_dark_static_path(self) -> str | None:
         return getattr(settings, "OUTREACH_LOGO_DARK_STATIC_PATH", None)
+
+    @property
+    def email_logo_in_header(self) -> bool:
+        return getattr(settings, "OUTREACH_EMAIL_LOGO_IN_HEADER", False)
+
+    @property
+    def email_logo_in_footer(self) -> bool:
+        return getattr(settings, "OUTREACH_EMAIL_LOGO_IN_FOOTER", False)
+
+    @property
+    def email_logo_url(self) -> str | None:
+        if not self.logo_static_path:
+            return None
+        logo_url = static(self.logo_static_path)
+        if logo_url.startswith(("http://", "https://")) or not self.base_url:
+            return logo_url
+        return f"{self.base_url.rstrip('/')}{logo_url}"
 
     @property
     def theme(self) -> OutreachTheme:

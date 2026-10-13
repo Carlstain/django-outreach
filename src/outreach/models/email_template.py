@@ -18,6 +18,8 @@ class EmailTemplate(models.Model):
     name = models.CharField(max_length=120, verbose_name=_("name"))
     subject = models.CharField(max_length=200, verbose_name=_("subject"))
     body_html = models.TextField(verbose_name=_("message"))
+    header_text = models.CharField(max_length=120, blank=True, verbose_name=_("header text"))
+    is_newsletter = models.BooleanField(default=True, verbose_name=_("newsletter"))
     created_by = models.CharField(max_length=150, blank=True, verbose_name=_("created by"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("updated at"))
