@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0b6] - 2026-10-13
+
 ### Changed
 
 - The header logo of mails (`OUTREACH_EMAIL_LOGO_IN_HEADER`) is centered horizontally. When no header text is set, the logo stands alone and the site name is no longer repeated as text under it (it stays the image `alt`). A header text is shown under the logo, centered with it. Without a header logo nothing changes. New template context keys `has_header_logo` and `header_logo_alt`.
