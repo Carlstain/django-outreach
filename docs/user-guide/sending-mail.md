@@ -9,6 +9,8 @@ Mail is sent from the prospect list, in two steps: write, then check and send. Y
 2. Choose *Send a mail to the selected prospects* and press *Go*.
 3. The page *Write a message* shows the form on the left and the recipients on the right.
 
+![Step 1, write a message](../_static/screenshots/compose.png)
+
 The recipients panel counts who will receive the message and lists who is skipped, and why.
 
 | Skip reason | Why |
@@ -27,7 +29,8 @@ Fill in:
 - **Message**: the rich text editor. Allowed formatting is paragraphs, bold, italic, strike
   through, a heading, bullet and numbered lists, quotes and links. Anything else is removed.
 
-Every message ends with an unsubscribe link that you do not write yourself.
+The *Insert variable* button in the editor toolbar adds a variable at the cursor. Every message
+ends with an unsubscribe link that you do not write yourself.
 
 ## Variables
 
@@ -90,6 +93,8 @@ Press *Preview message*. Step 2 shows the mail exactly as a recipient gets it, w
 filled in, in a frame cut off from the rest of the page. *Preview as* switches to another
 recipient. Computed tags run for real in this preview, except those that declare they have side
 effects, which show a placeholder.
+
+![Step 2, check and send](../_static/screenshots/preview.png)
 
 - *Edit message* goes back to step 1 with your text.
 - *Send to N prospects* sends. There is no second confirmation, and no undo.

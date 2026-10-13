@@ -5,6 +5,8 @@ that mail apps can offer an *Unsubscribe* button.
 
 ## What the recipient sees
 
+![The unsubscribe page](../_static/screenshots/unsubscribe.png)
+
 1. The link opens a page that shows the address with most of it hidden and asks *Stop receiving
    emails from* the site name. Opening the link changes nothing, because mail scanners follow links.
 2. Pressing *Unsubscribe* confirms. The recipient lands on a confirmation page.

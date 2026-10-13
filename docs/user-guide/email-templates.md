@@ -11,6 +11,8 @@ An email template is a named subject and message that you can reuse.
 
 ## Managing templates
 
+![The template list](../_static/screenshots/templates.png)
+
 *Templates* in the sidebar lists the templates with their subject, last change and author, and
 has a search. It needs `view_emailtemplate`. Adding, editing and deleting need `add_`, `change_`
 and `delete_emailtemplate`.

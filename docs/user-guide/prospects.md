@@ -15,6 +15,8 @@ filter and count on the dashboard.
 
 ## Finding prospects
 
+![The prospect list](../_static/screenshots/prospects.png)
+
 The list shows the name, email, status, whether the prospect is a member and the date of the last
 mail. Search covers the email, first name, last name and organisation. Filters cover the kind
 (individual or organization), the status and membership.

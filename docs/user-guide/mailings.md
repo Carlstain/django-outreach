@@ -5,10 +5,14 @@ needs `outreach.view_mailing`.
 
 ## The list
 
+![The mailing list](../_static/screenshots/mailings.png)
+
 Each row shows the subject, who sent it, the date, and the counts of sent, failed and skipped
 recipients. You can search the subject and the sender.
 
 ## The detail page
+
+![A mailing](../_static/screenshots/mailing-detail.png)
 
 Open a mailing to see:
 

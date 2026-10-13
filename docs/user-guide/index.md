@@ -12,6 +12,8 @@ permissions your group holds, see {ref}`permissions`.
 
 ## The sidebar
 
+![The dashboard](../_static/screenshots/dashboard.png)
+
 | Entry | What it holds | Needs |
 |---|---|---|
 | Dashboard | Counts of prospects, contacted, members and unsubscribed, recent activity, and the sending limits | `view_prospect` |
@@ -29,6 +31,8 @@ An entry you may not use is hidden. If your developer left the default Django ad
 *How to use* lists the variables, the computed tags (with an example of each) and the import
 columns, including any alias the developer configured. It is generated from the running
 installation, so it is always correct for your site. It exists in English and French.
+
+![The help page](../_static/screenshots/help.png)
 
 ```{toctree}
 :maxdepth: 1
