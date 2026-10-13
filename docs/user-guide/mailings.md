@@ -21,7 +21,8 @@ Open a mailing to see:
 - The recipients who were sent the mail or failed, taken from the events recorded for the
   mailing. A prospect that was deleted since no longer appears.
 - The number of skipped recipients per reason: unsubscribed, suppressed, contacted recently, over
-  the send limit.
+  the send limit, not a member.
+- Whether it was a newsletter or a notice, and its header text.
 
 Skipped people are stored as counts, never as names. A mailing outlives the prospects it was sent
 to, and it must not keep data about someone who asked for erasure.

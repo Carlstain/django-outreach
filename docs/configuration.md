@@ -17,6 +17,8 @@ so `override_settings` works in tests.
 | `OUTREACH_MAX_IMPORT_BYTES` | `2000000` | An uploaded import file larger than this many bytes is rejected before it is parsed |
 | `OUTREACH_LOGO_STATIC_PATH` | none | Static path of a logo (light). Without it the site name is shown as text |
 | `OUTREACH_LOGO_DARK_STATIC_PATH` | none | Static path of the logo used in dark mode |
+| `OUTREACH_EMAIL_LOGO_IN_HEADER` | `False` | Put `OUTREACH_LOGO_STATIC_PATH` above the header text of mails |
+| `OUTREACH_EMAIL_LOGO_IN_FOOTER` | `False` | Put `OUTREACH_LOGO_STATIC_PATH` at the start of the footer of mails |
 | `OUTREACH_IMPORT_HEADER_ALIASES` | `{}` | Extra import column names, see {ref}`import-aliases` |
 | `OUTREACH_USER_PROSPECT_FIELDS` | none | Dotted path of a callable `(user) -> dict` giving extra prospect fields to `outreach_load_users`, see {doc}`topics/loading-users` |
 | `OUTREACH_THEME` | neutral palette | Colours and font, see {doc}`topics/theming` |

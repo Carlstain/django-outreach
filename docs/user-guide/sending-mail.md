@@ -15,8 +15,9 @@ The recipients panel counts who will receive the message and lists who is skippe
 
 | Skip reason | Why |
 |---|---|
-| Unsubscribed | The prospect unsubscribed |
-| Suppressed | The address is on the suppression list |
+| Unsubscribed | The prospect unsubscribed (newsletters only) |
+| Suppressed | The address is on the suppression list (newsletters only) |
+| Not a member | The prospect is not linked to a user (notices only) |
 | Contacted recently | Mailed within the resend cooldown (24 hours by default) |
 | Over the send limit | Beyond the maximum for one send (100 by default) |
 
@@ -26,11 +27,29 @@ that sending is disabled, ask your developer to set `OUTREACH_BASE_URL`.
 Fill in:
 
 - **Subject**: a single line. Variables and tags work, buttons do not.
+- **Header text**: shown at the top of the message. Empty means the site name. A single line, no variables.
+- **Newsletter**: ticked by default. See below.
 - **Message**: the rich text editor. Allowed formatting is paragraphs, bold, italic, strike
   through, a heading, bullet and numbered lists, quotes and links. Anything else is removed.
 
-The *Insert variable* button in the editor toolbar adds a variable at the cursor. Every message
-ends with an unsubscribe link that you do not write yourself.
+The *Insert variable* button in the editor toolbar adds a variable at the cursor.
+
+## Newsletter or notice
+
+| | Newsletter (ticked) | Notice (unticked) |
+|---|---|---|
+| Unsubscribe link in the footer and `List-Unsubscribe` headers | Yes, added for you | None |
+| Who receives it | Anyone who passes the skip rules | Members only |
+| Unsubscribed or suppressed members | Skipped | Still receive it |
+
+Use a notice for service messages to members, for example a change to the terms of service. A
+notice never changes who is unsubscribed, and its text cannot contain `{{ unsubscribe_url }}`.
+The recipients panel follows the type chosen once you apply a template, preview or save.
+
+Both settings can be saved in a template, and a mailing keeps a copy of them.
+
+The host project can add its logo to the header and to the footer of mails with
+`OUTREACH_EMAIL_LOGO_IN_HEADER` and `OUTREACH_EMAIL_LOGO_IN_FOOTER`.
 
 ## Variables
 

@@ -1,7 +1,8 @@
 # Unsubscribing
 
-Every mail ends with a link to stop receiving mail, and carries the `List-Unsubscribe` headers so
-that mail apps can offer an *Unsubscribe* button.
+Every newsletter ends with a link to stop receiving mail, and carries the `List-Unsubscribe` headers so
+that mail apps can offer an *Unsubscribe* button. A notice to members has neither: it is not
+something a member can opt out of, and it does not change who is unsubscribed.
 
 ## What the recipient sees
 
