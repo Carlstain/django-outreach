@@ -10,7 +10,7 @@ What it does:
 - Email templates: named subject and body pairs, shared by every staff member who has the permission, picked or saved from the compose page.
 - A `Mailing` log for every send: subject, body as sent, sender, counts of sent, failed and skipped recipients.
 - One-click unsubscribe links (`List-Unsubscribe` headers included) and a suppression list that survives the deletion of a prospect.
-- CSV and spreadsheet import and export through django-import-export.
+- CSV import with a preview step, and CSV export of selected prospects.
 - A built-in help page for the staff who use it, in English and French.
 
 Documentation: https://django-outreach.readthedocs.io/
@@ -21,9 +21,7 @@ See `example/` for a runnable host project.
 
 - Python 3.10 or later
 - Django 5.1 or 5.2 (`>=5.1,<6`)
-- django-import-export 4.2 or later in the 4.x series, except 4.3.0 (4.0 and 4.1 fail on import with skipped rows and on export, 4.3.0 cannot import openpyxl)
 - nh3 0.3.x
-- tablib
 
 ## Installation
 
@@ -60,7 +58,7 @@ Open http://localhost:8765/outreach/ and log in as `demo` / `demo` (a throwaway 
 
 ## Host project configuration
 
-1. Add the apps. `outreach` needs `django.contrib.admin`, `auth`, `contenttypes`, `sessions`, `messages` and `staticfiles`, plus `import_export`.
+1. Add the apps. `outreach` needs `django.contrib.admin`, `auth`, `contenttypes`, `sessions`, `messages` and `staticfiles`.
 
 ```python
 INSTALLED_APPS = [
@@ -70,7 +68,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "import_export",
     "outreach",
 ]
 ```
@@ -98,8 +95,8 @@ python manage.py collectstatic
 
 | Permission | Allows |
 |---|---|
-| `outreach.view_prospect` | Open the site, list and read prospects, export, the help page and the dashboard |
-| `outreach.add_prospect` | Add a prospect, import a file |
+| `outreach.view_prospect` | Open the site, list and read prospects, export them as CSV, the help page and the dashboard |
+| `outreach.add_prospect` | Add a prospect, import a CSV file |
 | `outreach.change_prospect` | Edit a prospect, send a mail, unsubscribe selected, link to user accounts |
 | `outreach.delete_prospect` | Delete prospects |
 | `outreach.view_mailing` | Read the Mailings list and detail |
@@ -129,16 +126,15 @@ All settings are optional except `OUTREACH_BASE_URL` for sending. They are read 
 | `OUTREACH_USER_PROSPECT_FIELDS` | none | Dotted path of a callable `(user) -> dict` giving extra prospect fields to `outreach_load_users`, see Loading users |
 | `OUTREACH_THEME` | neutral palette | Colours and font, see Theming |
 
-Settings the app relies on from Django and import-export:
+Settings the app relies on from Django:
 
 | Setting | Use |
 |---|---|
 | `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, `EMAIL_USE_SSL` | How mails leave. The app uses `django.core.mail.get_connection()` |
 | `DEFAULT_FROM_EMAIL` | Sender when `OUTREACH_FROM_EMAIL` is not set |
 | `SECRET_KEY` | Signs unsubscribe tokens and salts the suppression hashes, see Sending |
-| `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT` | Set it to `True`, see Security |
 
-Import aliases: the import reads the columns `email`, `first_name`, `last_name`, `organization`, `city`, `country` and `kind`. Headers are lower-cased and stripped. To accept other names, map the lower-case alias to a field name. They are also listed on the help page.
+Import aliases: the CSV import reads the columns `email`, `first_name`, `last_name`, `organization`, `city`, `country` and `kind`. Headers are lower-cased and stripped. To accept other names, map the lower-case alias to a field name. They are also listed on the help page.
 
 ```python
 OUTREACH_IMPORT_HEADER_ALIASES = {
@@ -292,7 +288,7 @@ def account_manager(prospect: Prospect, fallback: str = "") -> str:
 - A `{% button %}` is only accepted in the text of a message. Inside a link or any other tag it is rejected, and a button link may not contain a space.
 - Previews and the stored body of a mailing are shown in sandboxed iframes (`srcdoc`).
 - `outreach_theme_css` writes values from `OUTREACH_THEME` into a `<style>` block. Only validated values reach it. A strict Content Security Policy needs a nonce or hash for that block.
-- Set `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True`. Prospect fields are typed by users and exports are opened in spreadsheets. In django-import-export 4.4.1 this removes a leading `=` from cells. System check `outreach.W001` warns when it is not `True`.
+- The CSV export always escapes cells that a spreadsheet would read as a formula (a leading `=`, `+`, `-`, `@`, tab or carriage return), because prospect fields are typed by users and exports are opened in spreadsheets.
 - System check `outreach.E001` reports an invalid `OUTREACH_THEME`.
 - Import and export are gated: import needs `add_prospect`, export needs `view_prospect`.
 

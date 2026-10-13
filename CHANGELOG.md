@@ -13,6 +13,18 @@ All notable changes to this project are documented here. The format follows [Kee
 - Documentation, built with Sphinx and published on Read the Docs: installation, configuration, a user guide for the staff, topics for developers and a reference for the models, services, URLs, permissions and templates.
 - Docstrings on the public classes and functions, which feed the reference.
 
+### Changed
+
+- The CSV import is built into the app. It keeps the preview and confirm steps, the same columns, aliases, limits and rules (existing emails skipped, one invalid row blocks the file), and reports row errors by line number. A repeated email in one file is imported once.
+- The CI runs 8 jobs instead of 25: the oldest and newest Python and Django on SQLite and PostgreSQL, the host variants in one job, and pushes to `main` plus pull requests only.
+
+### Removed
+
+- The `django-import-export` and `tablib` dependencies. Only Django and nh3 remain. Spreadsheet formats (xlsx, json, tsv) are no longer read or written: the import and the export are CSV only.
+- The `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT` setting and the system check `outreach.W001`. The export now always escapes cells that start a spreadsheet formula.
+- The URL name `outreach_admin:outreach_prospect_export`. The export is the admin action *Export the selected prospects as CSV*.
+- `import_export` is no longer needed in `INSTALLED_APPS`. Leaving it there does no harm.
+
 ## [0.1.0b4] - 2026-10-13
 
 ### Added

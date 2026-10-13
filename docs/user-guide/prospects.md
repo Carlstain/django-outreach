@@ -40,8 +40,8 @@ prospect, `change_prospect` to edit one and `delete_prospect` to delete one.
 
 ## Importing a file
 
-*Import CSV* on the dashboard or the list takes a CSV or spreadsheet file. It needs
-`add_prospect`.
+*Import CSV* on the dashboard takes a CSV file in UTF-8 with a header row. It needs
+`add_prospect`. You first see a preview of the new and the skipped rows, then confirm.
 
 - The columns are `email`, `first_name`, `last_name`, `organization`, `city`, `country` and
   `kind`. Headers are lower-cased and stripped, and your developer may have added aliases. The
@@ -50,13 +50,16 @@ prospect, `change_prospect` to edit one and `delete_prospect` to delete one.
 - One invalid row stops the whole file. Nothing is imported until every row is valid.
 - A blank `kind` means individual.
 - An address on the suppression list is imported as unsubscribed.
+- A repeated email in the same file is imported once.
 - A file over the row or size limit is rejected.
 
 ## Exporting
 
-*Export* on the list writes the prospects to a file. It needs `view_prospect`. When the developer
-has set `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT`, cells that would start a spreadsheet formula
-are escaped, so opening an export does not run anything someone typed into a name.
+Tick the prospects, or use *Select all* to take every match of the current filters, then choose
+*Export the selected prospects as CSV* in the *Action* menu. It needs `view_prospect`. The file
+has the same columns as the import, so it can be imported again elsewhere. Cells that would start a
+spreadsheet formula are escaped with a leading apostrophe, so opening an export does not run
+anything someone typed into a name.
 
 ## Actions on selected prospects
 

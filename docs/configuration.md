@@ -23,7 +23,7 @@ so `override_settings` works in tests.
 | `OUTREACH_USER_PROSPECT_FIELDS` | none | Dotted path of a callable `(user) -> dict` giving extra prospect fields to `outreach_load_users`, see {doc}`topics/loading-users` |
 | `OUTREACH_THEME` | neutral palette | Colours and font, see {doc}`topics/theming` |
 
-## Settings from Django and import-export
+## Settings from Django
 
 | Setting | Use |
 |---|---|
@@ -31,7 +31,6 @@ so `override_settings` works in tests.
 | `DEFAULT_FROM_EMAIL` | Sender when `OUTREACH_FROM_EMAIL` is not set |
 | `SECRET_KEY`, `SECRET_KEY_FALLBACKS` | Sign unsubscribe tokens and salt the suppression hashes, see {doc}`topics/security` |
 | `USE_I18N` | Must be `True`, otherwise nothing is translated |
-| `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT` | Set it to `True`, see {doc}`topics/security` |
 
 (import-aliases)=
 ## Import column aliases
@@ -69,4 +68,3 @@ The full rules are in {doc}`user-guide/sending-mail`.
 | Id | Level | Raised when |
 |---|---|---|
 | `outreach.E001` | Error | `OUTREACH_THEME` is not valid, see {doc}`topics/theming` |
-| `outreach.W001` | Warning | `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT` is not `True` |

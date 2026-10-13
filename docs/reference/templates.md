@@ -42,7 +42,7 @@ Django admin context.
 | `outreach/admin/help.html` | *How to use* | `variables`, `mail_tags`, `max_recipients`, `cooldown_hours`, `import_columns` |
 | `outreach/admin/change_list.html`, `change_form.html` | Prospect list and form | Django's |
 | `outreach/admin/delete_confirmation.html`, `delete_selected_confirmation.html` | Delete confirmations | Django's |
-| `outreach/admin/import.html`, `export.html` | Import and export | django-import-export's |
+| `outreach/admin/import.html` | CSV import: upload, preview, errors and confirmation | `form`, `columns`, `preview`, `confirm_form` |
 | `outreach/admin/compose.html` | Step 1 of a send | `form`, `plan`, `queryset_ids`, `select_across`, `max_recipients`, `email_templates`, `selected_template`, `template_applied`, `save_template_form`, `can_save_template`, `can_overwrite_template` |
 | `outreach/admin/preview.html` | Step 2 of a send | The compose context plus `preview_prospect`, `preview_html`, `preview_subject`, `subject`, `preview_choices` |
 | `outreach/admin/mailing_list.html`, `mailing_detail.html` | Mailings | `recipients`, `skipped_reasons` (detail) |

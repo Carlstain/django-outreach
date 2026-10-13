@@ -4,10 +4,7 @@
 
 - Python 3.10 or later
 - Django 5.1 or 5.2 (`>=5.1,<6`)
-- django-import-export 4.2 or later in the 4.x series, except 4.3.0 (4.0 and 4.1 fail on import
-  with skipped rows and on export, 4.3.0 cannot import openpyxl)
 - nh3 0.3.x
-- tablib
 
 ## Install the package
 
@@ -35,7 +32,7 @@ its [GitHub Release](https://github.com/Carlstain/django-outreach/releases).
 ### 1. Add the apps
 
 `outreach` needs `django.contrib.admin`, `auth`, `contenttypes`, `sessions`, `messages` and
-`staticfiles`, plus `import_export`.
+`staticfiles`.
 
 ```python
 INSTALLED_APPS = [
@@ -45,7 +42,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "import_export",
     "outreach",
 ]
 ```
@@ -77,8 +73,7 @@ admin site instance is `outreach_admin`. See {doc}`reference/admin` for every UR
 ### 4. Settings, migrations and static files
 
 Set `OUTREACH_BASE_URL` and your `EMAIL_*` settings, see {doc}`configuration`. Sending is refused
-while `OUTREACH_BASE_URL` is empty. Set `IMPORT_EXPORT_ESCAPE_FORMULAE_ON_EXPORT = True` too, or
-system check `outreach.W001` warns.
+while `OUTREACH_BASE_URL` is empty.
 
 ```shell
 python manage.py migrate
