@@ -25,27 +25,25 @@ See `example/` for a runnable host project.
 
 ## Installation
 
-The current release is `0.1.0b2`, the second beta. The repository is private, so install over SSH from the tag.
+django-outreach is a beta published on PyPI as `django-outreach`. The import name and the app label are `outreach`. Beta versions are only installed when you ask for them.
 
 With uv:
 
 ```
-uv add "django-outreach @ git+ssh://git@github.com/Carlstain/django-outreach.git" --tag v0.1.0b2
+uv add django-outreach --prerelease=allow
 ```
 
 With pip:
 
 ```
-pip install "git+ssh://git@github.com/Carlstain/django-outreach.git@v0.1.0b2"
+pip install --pre django-outreach
 ```
 
-Every release also has its wheel and sdist attached to its GitHub Release. Download one with `gh release download v0.1.0b2` and install the file with `uv add ./django_outreach-0.1.0b2-py3-none-any.whl`.
-
-The machine that installs needs access to this private repository. On a developer machine that is an SSH key with access. In a Docker build or in CI, give the build a read-only deploy key, a forwarded SSH agent or a token, since a private repository cannot be installed anonymously.
+Pin an exact version in your own requirements, for example `django-outreach==0.1.0b3`, since the interface may still change before `0.1.0`. Every release also has its wheel and sdist attached to its [GitHub Release](https://github.com/Carlstain/django-outreach/releases).
 
 ### Beta
 
-`0.1.0b2` is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen from this version on, so an installation can be upgraded without resetting its tables. Known limits: sending runs synchronously in the admin request with a per-send cap and no task queue, and Outlook desktop shows a button as a plain coloured link.
+This is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen, so an installation can be upgraded without resetting its tables. Known limits: sending runs synchronously in the admin request with a per-send cap and no task queue, and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
 
 ## Try the example project
 
@@ -304,9 +302,6 @@ Another Python version for the image: `PYTHON_VERSION=3.13 docker compose build 
 
 ## Contributing
 
-- Work on a branch, keep ruff clean (line length 95), and add tests for behaviour you change.
-- Schema changes need a migration, generated in the container with `makemigrations outreach`.
-- Edit the `.po`, then run `scripts/compile_messages.sh` and commit the `.mo`.
-- See `CLAUDE.md` for the module map and the settled decisions.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report a security problem as described in [SECURITY.md](SECURITY.md), not in a public issue.
 
 Licensed under the BSD 3-Clause licence, see `LICENSE`. Third-party notices are in `src/outreach/THIRD_PARTY_NOTICES.md`.

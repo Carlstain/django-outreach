@@ -13,10 +13,15 @@ license-files = ["LICENSE"]
 authors = [{ name = "Mahadi Eric", email = "33723198+Carlstain@users.noreply.github.com" }]
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
     "Framework :: Django",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -25,9 +30,15 @@ classifiers = [
 dependencies = [
     "Django>=5.1,<6",
     "django-import-export>=4.2,<5,!=4.3.0",
-    "tablib",
+    "tablib>=3.5,<4",
     "nh3>=0.3,<0.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Carlstain/django-outreach"
+Source = "https://github.com/Carlstain/django-outreach"
+Issues = "https://github.com/Carlstain/django-outreach/issues"
+Changelog = "https://github.com/Carlstain/django-outreach/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
