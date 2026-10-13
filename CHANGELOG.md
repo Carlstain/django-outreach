@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0b4] - 2026-10-13
+
+### Added
+
+- `manage.py outreach_load_users` creates a prospect for each active user account that has none, with `--dry-run` and `--include-inactive`. Prospects are created through `Prospect.save()`, so suppression and linking apply, and an `added` event by `system` is recorded. Existing prospects are left untouched and the output is counts only. There is no signal: loading is always explicit.
+- `OUTREACH_USER_PROSPECT_FIELDS` setting: a dotted path to a callable `(user) -> dict` that supplies `kind`, `first_name`, `last_name`, `organization`, `city` or `country` for the command.
+
 ## [0.1.0b3] - 2026-10-13
 
 The first beta published on PyPI. The repository is public from this release.

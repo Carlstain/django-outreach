@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.management import call_command
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import override_settings
@@ -64,6 +65,15 @@ class CustomUserModelTests(OutreachTestCase):
                 "country": "",
             },
         )
+
+    def test_load_users_command_works_without_name_fields(self) -> None:
+        user = EmailUserFactory(email="Jane@Test.com")
+
+        call_command("outreach_load_users")
+
+        prospect = Prospect.objects.get()
+        self.assertEqual(prospect.user, user)
+        self.assertEqual((prospect.first_name, prospect.last_name), ("", ""))
 
     def test_staff_with_permissions_can_use_the_admin_site(self) -> None:
         staff_user = create_outreach_staff_user(user_factory=EmailUserFactory)

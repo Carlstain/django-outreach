@@ -1,6 +1,9 @@
+from collections.abc import Callable
 from datetime import timedelta
+from typing import Any
 
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 from outreach.theme import OutreachTheme
 
@@ -53,6 +56,11 @@ class OutreachSettings:
     @property
     def import_header_aliases(self) -> dict[str, str]:
         return getattr(settings, "OUTREACH_IMPORT_HEADER_ALIASES", {})
+
+    @property
+    def user_prospect_fields(self) -> Callable[[Any], dict[str, Any]] | None:
+        dotted_path = getattr(settings, "OUTREACH_USER_PROSPECT_FIELDS", None)
+        return import_string(dotted_path) if dotted_path else None
 
 
 outreach_settings = OutreachSettings()

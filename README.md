@@ -124,6 +124,7 @@ All settings are optional except `OUTREACH_BASE_URL` for sending. They are read 
 | `OUTREACH_LOGO_STATIC_PATH` | none | Static path of a logo (light). Without it the site name is shown as text |
 | `OUTREACH_LOGO_DARK_STATIC_PATH` | none | Static path of the logo used in dark mode |
 | `OUTREACH_IMPORT_HEADER_ALIASES` | `{}` | Extra import column names, see below |
+| `OUTREACH_USER_PROSPECT_FIELDS` | none | Dotted path of a callable `(user) -> dict` giving extra prospect fields to `outreach_load_users`, see Loading users |
 | `OUTREACH_THEME` | neutral palette | Colours and font, see Theming |
 
 Settings the app relies on from Django and import-export:
@@ -146,6 +147,33 @@ OUTREACH_IMPORT_HEADER_ALIASES = {
 ```
 
 Import rules: rows whose email already exists are skipped, never updated. One invalid row stops the whole file. A blank `kind` means `individual`. An address on the suppression list is imported as unsubscribed.
+
+## Loading users as prospects
+
+A user account is not a prospect, and not consent to bulk mail, so nothing creates prospects from users by itself. Run the command when the host decides to:
+
+```
+python manage.py outreach_load_users --dry-run
+python manage.py outreach_load_users
+```
+
+- Users come from `get_user_model()`. The address is read from the model's email field, and `first_name` and `last_name` only if the model has them.
+- Active users with a non-empty email are loaded. `--include-inactive` adds the others.
+- Each prospect is created with `Prospect.save()`, so the address is lower-cased, a suppressed address is created as unsubscribed and the user is linked. An `added` event by `system` is recorded.
+- A user who already has a prospect (same address, or already linked) is counted and left alone.
+- `--dry-run` writes nothing. The output is counts only, never addresses.
+
+For fields the package cannot know, point `OUTREACH_USER_PROSPECT_FIELDS` to a callable. It may return `kind`, `first_name`, `last_name`, `organization`, `city` and `country`; any other key makes the command fail.
+
+```python
+OUTREACH_USER_PROSPECT_FIELDS = "myproject.outreach.prospect_fields"
+
+
+def prospect_fields(user):
+    if hasattr(user, "company"):
+        return {"kind": "organization", "organization": user.company.name}
+    return {}
+```
 
 ## Theming
 
