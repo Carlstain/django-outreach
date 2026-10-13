@@ -123,6 +123,12 @@ msgstr "Contacté récemment"
 msgid "Over the send limit"
 msgstr "Au-delà de la limite d’envoi"
 
+msgid "Not a member"
+msgstr "Pas membre"
+
+msgid "not a member"
+msgstr "pas membre"
+
 #, python-format
 msgid "Unknown variable(s): %(unknown)s. Use one of: %(allowed)s."
 msgstr ""
@@ -139,6 +145,56 @@ msgstr "Le message est vide."
 
 msgid "Subject"
 msgstr "Objet"
+
+msgid "Header text"
+msgstr "Texte d’en-tête"
+
+msgid "header text"
+msgstr "texte d’en-tête"
+
+msgid "Newsletter"
+msgstr "Newsletter"
+
+msgid "newsletter"
+msgstr "newsletter"
+
+msgid "Newsletter."
+msgstr "Newsletter."
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Notice"
+msgstr "Avis"
+
+msgid "Notice to members."
+msgstr "Avis aux membres."
+
+msgid "The header text must be on a single line."
+msgstr "Le texte d’en-tête doit tenir sur une seule ligne."
+
+msgid "A notice has no unsubscribe link: remove {{ unsubscribe_url }}."
+msgstr "Un avis n’a pas de lien de désinscription : retirez {{ unsubscribe_url }}."
+
+msgid "None of the selected prospects can receive this type of mail."
+msgstr "Aucun des prospects sélectionnés ne peut recevoir ce type de message."
+
+msgid "Shown at the top of the message. Leave empty to use the site name."
+msgstr "Affiché en haut du message. Laissez vide pour utiliser le nom du site."
+
+msgid ""
+"A newsletter carries an unsubscribe link and skips people who unsubscribed. "
+"Untick it for a notice, which goes to members only."
+msgstr ""
+"Une newsletter contient un lien de désinscription et ignore les personnes "
+"désinscrites. Décochez pour un avis, qui ne part qu’aux membres."
+
+msgid ""
+"A newsletter carries an unsubscribe link. Untick it for a notice, which goes"
+" to members only."
+msgstr ""
+"Une newsletter contient un lien de désinscription. Décochez pour un avis, "
+"qui ne part qu’aux membres."
 
 msgid "Message"
 msgstr "Message"
@@ -391,8 +447,10 @@ msgstr "Étape %(current)s sur %(total)s"
 msgid "Write a message"
 msgstr "Rédiger un message"
 
-msgid "Every message ends with an unsubscribe link."
-msgstr "Chaque message se termine par un lien de désinscription."
+msgid "A newsletter ends with an unsubscribe link. A notice has none and goes to members only."
+msgstr ""
+"Une newsletter se termine par un lien de désinscription. Un avis n’en a pas "
+"et ne part qu’aux membres."
 
 msgid "Template"
 msgstr "Modèle"
@@ -726,12 +784,14 @@ msgstr "Description"
 #, python-format
 msgid ""
 "<code>%(placeholder)s</code> is the link recipients use to unsubscribe. It "
-"is added automatically at the bottom of every message, and you can also use "
-"it as the target of a link."
+"is added automatically at the bottom of every newsletter, and you can also "
+"use it as the target of a link in a newsletter. A notice has no unsubscribe "
+"link."
 msgstr ""
 "<code>%(placeholder)s</code> est le lien que les destinataires utilisent "
-"pour se désinscrire. Il est ajouté automatiquement en bas de chaque message,"
-" et vous pouvez aussi l’utiliser comme cible d’un lien."
+"pour se désinscrire. Il est ajouté automatiquement en bas de chaque "
+"newsletter, et vous pouvez aussi l’utiliser comme cible d’un lien dans une "
+"newsletter. Un avis n’a pas de lien de désinscription."
 
 #, python-format
 msgid ""
@@ -744,11 +804,18 @@ msgstr ""
 "absent du tableau bloque l’aperçu, donc rien d’étrange n’est jamais envoyé."
 
 msgid ""
-"Prospects who unsubscribed, and addresses that unsubscribed before and were "
-"imported again."
+"Newsletters skip prospects who unsubscribed, and addresses that unsubscribed"
+" before and were imported again."
 msgstr ""
-"Les prospects désinscrits, et les adresses désinscrites auparavant puis "
-"importées à nouveau."
+"Les newsletters ignorent les prospects désinscrits, et les adresses "
+"désinscrites auparavant puis importées à nouveau."
+
+msgid ""
+"Notices skip prospects who are not members. Members who unsubscribed from "
+"newsletters still receive them."
+msgstr ""
+"Les avis ignorent les prospects qui ne sont pas membres. Les membres "
+"désinscrits des newsletters les reçoivent quand même."
 
 #, python-format
 msgid "Prospects mailed within the last %(hours)s hours."
@@ -767,10 +834,10 @@ msgstr ""
 "La page de rédaction indique qui est ignoré et pourquoi avant l’envoi."
 
 msgid ""
-"Every message ends with an unsubscribe link. The recipient confirms with one"
-" click on a page of their own, and no account is needed."
+"Every newsletter ends with an unsubscribe link. The recipient confirms with "
+"one click on a page of their own, and no account is needed."
 msgstr ""
-"Chaque message se termine par un lien de désinscription. Le destinataire "
+"Chaque newsletter se termine par un lien de désinscription. Le destinataire "
 "confirme en un clic sur sa propre page, sans compte."
 
 msgid ""

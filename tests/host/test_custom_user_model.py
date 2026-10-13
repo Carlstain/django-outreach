@@ -112,6 +112,7 @@ class CustomUserModelTests(OutreachTestCase):
                 "action": "send_mail",
                 "_selected_action": [str(prospect.pk)],
                 "step": "send",
+                "is_newsletter": "on",
                 "subject": "Hi {{ first_name | there }}",
                 "body": "<p>Body</p>",
             },

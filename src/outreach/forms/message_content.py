@@ -76,11 +76,22 @@ class MessageContentForm:
             raise forms.ValidationError(_("Buttons can only be used in the message body."))
         return subject
 
+    def clean_header_text(self) -> str:
+        header_text = self.cleaned_data["header_text"].strip()
+        if "\n" in header_text or "\r" in header_text:
+            raise forms.ValidationError(_("The header text must be on a single line."))
+        return header_text
+
     def clean_body_content(self, field_name: str) -> str:
         sanitizer = MailBodySanitizer()
         body_html = sanitizer.clean(self.cleaned_data[field_name])
         if not sanitizer.to_text(body_html).strip():
             raise forms.ValidationError(_("The message is empty."))
+        is_notice = not self.cleaned_data.get("is_newsletter")
+        if is_notice and "unsubscribe_url" in MailVariables().used_keys(body_html):
+            raise forms.ValidationError(
+                _("A notice has no unsubscribe link: remove {{ unsubscribe_url }}.")
+            )
         self.raise_for_variable_problems(body_html)
         self.raise_for_tag_problems(body_html)
         self.raise_for_button_problems(body_html)

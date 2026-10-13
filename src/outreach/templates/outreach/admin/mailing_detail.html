@@ -11,7 +11,7 @@
     <div>
       <p class="eyebrow">{% trans "Mailing" %}</p>
       <h2>{{ original.subject }}</h2>
-      <p>{% blocktrans with sender=original.sender sent_at=original.created_at|date:"DATETIME_FORMAT" %}Sent by {{ sender }} on {{ sent_at }}.{% endblocktrans %}</p>
+      <p>{% blocktrans with sender=original.sender sent_at=original.created_at|date:"DATETIME_FORMAT" %}Sent by {{ sender }} on {{ sent_at }}.{% endblocktrans %} {% if original.is_newsletter %}{% trans "Newsletter." %}{% else %}{% trans "Notice to members." %}{% endif %}</p>
     </div>
     <div class="actions">
       <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Mailings" %}</a>
@@ -64,7 +64,7 @@
             {% for reason, count in skipped_reasons.items %}
               {% if count %}
                 <li>
-                  <span>{% if reason == "unsubscribed" %}{% trans "Unsubscribed" %}{% elif reason == "suppressed" %}{% trans "Suppressed" %}{% elif reason == "cooldown" %}{% trans "Contacted recently" %}{% elif reason == "over_limit" %}{% trans "Over the send limit" %}{% else %}{{ reason }}{% endif %}</span>
+                  <span>{% if reason == "unsubscribed" %}{% trans "Unsubscribed" %}{% elif reason == "suppressed" %}{% trans "Suppressed" %}{% elif reason == "cooldown" %}{% trans "Contacted recently" %}{% elif reason == "over_limit" %}{% trans "Over the send limit" %}{% elif reason == "not_member" %}{% trans "Not a member" %}{% else %}{{ reason }}{% endif %}</span>
                   <strong>{{ count }}</strong>
                 </li>
               {% endif %}

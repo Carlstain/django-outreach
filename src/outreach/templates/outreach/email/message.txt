@@ -1,6 +1,6 @@
 {% load i18n %}{% autoescape off %}{{ body_text }}
-
+{% if is_newsletter %}
 --
 {% blocktrans with name=site_name %}You receive this message because {{ name }} thought it could be useful to you.{% endblocktrans %}
 {% trans "Unsubscribe at any time, in one click:" %} {{ unsubscribe_url }}
-{% endautoescape %}
+{% endif %}{% endautoescape %}

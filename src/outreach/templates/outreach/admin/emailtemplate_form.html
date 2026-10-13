@@ -41,6 +41,14 @@
             <div class="readonly">{{ original.subject }}</div>
           </div>
           <div class="f wide">
+            <span>{% trans "Header text" %}</span>
+            <div class="readonly">{{ original.header_text }}</div>
+          </div>
+          <div class="f wide">
+            <span>{% trans "Newsletter" %}</span>
+            <div class="readonly">{% if original.is_newsletter %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</div>
+          </div>
+          <div class="f wide">
             <span>{% trans "Message" %}</span>
             <iframe class="email-frame template-body-frame" sandbox title="{% trans 'Message as written' %}" srcdoc="{% filter force_escape %}<!DOCTYPE html><html><body style='font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: {{ theme.email.text }}; margin: 16px;'>{{ original.body_html|safe }}</body></html>{% endfilter %}"></iframe>
           </div>
@@ -63,6 +71,17 @@
               {{ form.subject.errors }}
               {{ form.subject.label_tag }}
               {{ form.subject }}
+            </div>
+            <div class="f wide">
+              {{ form.header_text.errors }}
+              {{ form.header_text.label_tag }}
+              {{ form.header_text }}
+              <span class="hint">{% trans "Shown at the top of the message. Leave empty to use the site name." %}</span>
+            </div>
+            <div class="wide">
+              {{ form.is_newsletter.errors }}
+              <label class="check">{{ form.is_newsletter }} {% trans "Newsletter" %}</label>
+              <span class="hint">{% trans "A newsletter carries an unsubscribe link. Untick it for a notice, which goes to members only." %}</span>
             </div>
             <div class="f wide">
               {{ form.body_html.errors }}

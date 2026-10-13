@@ -13,7 +13,7 @@ Rendered once per recipient by `ProspectMailer.render`.
 
 | Template | Purpose | Context |
 |---|---|---|
-| `outreach/email/message.html` | HTML part of the mail: table layout with inline styles, the site name, the body and the unsubscribe footer | `subject`, `body_html` (already sanitised), `body_text`, `unsubscribe_url`, `site_name`, `prospect`, `theme` |
+| `outreach/email/message.html` | HTML part of the mail: table layout with inline styles, the header, the body and the footer (unsubscribe line for newsletters only) | `subject`, `body_html` (already sanitised), `body_text`, `unsubscribe_url`, `site_name`, `header_text` (the site name when empty), `is_newsletter`, `logo_url` (absolute, or `None`), `logo_in_header`, `logo_in_footer`, `prospect`, `theme` |
 | `outreach/email/message.txt` | Plain-text part | The same context |
 
 Email clients can not use CSS variables, so the HTML part uses `theme.email.*` colours (`background`,

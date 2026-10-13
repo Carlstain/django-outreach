@@ -8,9 +8,14 @@ from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.test import override_settings
 
-from outreach.models import EmailTemplate
+from outreach.models import EmailTemplate, Mailing
 from tests.base import OutreachTestCase
-from tests.factories import EmailTemplateFactory, ProspectFactory, create_outreach_staff_user
+from tests.factories import (
+    EmailTemplateFactory,
+    ProspectFactory,
+    UserFactory,
+    create_outreach_staff_user,
+)
 from tests.html_inspector import inspect_page
 from tests.routes import outreach_prospect_changelist_url
 
@@ -46,6 +51,7 @@ class ComposeTemplatesTests(OutreachTestCase):
         data = {
             "action": "send_mail",
             "_selected_action": [str(prospect.pk) for prospect in self.prospects],
+            "is_newsletter": "on",
             **fields,
         }
         if step is not None:
@@ -84,6 +90,33 @@ class ComposeTemplatesTests(OutreachTestCase):
         self.assertEqual(response.context["form"]["body"].value(), "<p>Template body</p>")
         self.assertTrue(response.context["template_applied"])
         self.assertEqual(response.context["selected_template"], template)
+
+    def test_use_template_fills_the_header_text_and_the_newsletter_flag(self) -> None:
+        notice_template = EmailTemplateFactory(header_text="Service desk", is_newsletter=False)
+        newsletter_template = EmailTemplateFactory(header_text="", is_newsletter=True)
+
+        notice_response = self.post_step(
+            "compose", apply_template="1", template=str(notice_template.pk)
+        )
+        newsletter_response = self.post_step(
+            "compose", apply_template="1", template=str(newsletter_template.pk)
+        )
+
+        notice_form = notice_response.context["form"]
+        self.assertEqual(notice_form["header_text"].value(), "Service desk")
+        self.assertFalse(notice_form["is_newsletter"].value())
+        self.assertTrue(newsletter_response.context["form"]["is_newsletter"].value())
+
+    def test_using_a_notice_template_plans_the_notice_recipients(self) -> None:
+        notice_template = EmailTemplateFactory(is_newsletter=False)
+        member = ProspectFactory(user=UserFactory())
+        self.prospects = [*self.prospects, member]
+
+        response = self.post_step(
+            "compose", apply_template="1", template=str(notice_template.pk)
+        )
+
+        self.assertEqual(response.context["plan"].recipients, [member])
 
     def test_missing_or_malformed_template_keeps_the_posted_text(self) -> None:
         for template_value in (str(uuid4()), "not-a-uuid", ""):
@@ -137,6 +170,28 @@ class ComposeTemplatesTests(OutreachTestCase):
         )
         self.assertEqual(flashed(response), [(SUCCESS, "Template saved.")])
         self.assertEqual(response.context["selected_template"], template)
+
+    def test_save_as_template_stores_the_header_text_and_the_newsletter_flag(self) -> None:
+        self.post_step(
+            "save_template",
+            subject=POSTED_SUBJECT,
+            body=POSTED_BODY,
+            header_text="  Service desk  ",
+            is_newsletter="",
+            name="Notice",
+        )
+        self.post_step(
+            "save_template",
+            subject=POSTED_SUBJECT,
+            body=POSTED_BODY,
+            header_text="",
+            name="Newsletter",
+        )
+
+        notice = EmailTemplate.objects.get(name="Notice")
+        newsletter = EmailTemplate.objects.get(name="Newsletter")
+        self.assertEqual((notice.header_text, notice.is_newsletter), ("Service desk", False))
+        self.assertEqual((newsletter.header_text, newsletter.is_newsletter), ("", True))
 
     def test_name_clash_without_overwrite_is_a_field_error(self) -> None:
         existing = EmailTemplateFactory(name="Welcome", subject="Old subject")
@@ -208,6 +263,24 @@ class ComposeTemplatesTests(OutreachTestCase):
             (POSTED_SUBJECT, POSTED_BODY, "original-author"),
         )
 
+    def test_overwrite_replaces_the_header_text_and_the_newsletter_flag(self) -> None:
+        existing = EmailTemplateFactory(
+            name="Welcome", header_text="Old header", is_newsletter=True
+        )
+
+        self.post_step(
+            "save_template",
+            subject=POSTED_SUBJECT,
+            body=POSTED_BODY,
+            header_text="New header",
+            is_newsletter="",
+            name="Welcome",
+            overwrite="on",
+        )
+
+        existing.refresh_from_db()
+        self.assertEqual((existing.header_text, existing.is_newsletter), ("New header", False))
+
     def test_overwrite_needs_the_change_permission(self) -> None:
         existing = EmailTemplateFactory(name="Welcome", subject="Old subject")
         self.client.force_login(
@@ -263,6 +336,7 @@ class ComposeTemplatesTests(OutreachTestCase):
                         "action": "send_mail",
                         "_selected_action": selected_pks,
                         "select_across": "1",
+                        "is_newsletter": "on",
                         **fields,
                     },
                 )
@@ -313,6 +387,62 @@ class ComposeTemplatesTests(OutreachTestCase):
             self.assertEqual(message.subject, f"Hello {prospect.first_name}")
             self.assertIn(f"Dear {prospect.first_name}, welcome.", message.body)
             self.assertIn(f"Dear {prospect.first_name}, welcome.", message.alternatives[0][0])
+
+    def test_a_newsletter_mailing_keeps_the_header_text_and_the_flag(self) -> None:
+        self.post_step(
+            "send", subject=POSTED_SUBJECT, body=POSTED_BODY, header_text="Club news"
+        )
+
+        mailing = Mailing.objects.get()
+        self.assertEqual((mailing.header_text, mailing.is_newsletter), ("Club news", True))
+        self.assertIn("Club news", mail.outbox[0].alternatives[0][0])
+
+    def test_a_notice_mailing_keeps_the_flag_and_goes_to_members_only(self) -> None:
+        member = ProspectFactory(user=UserFactory())
+        self.prospects = [*self.prospects, member]
+
+        self.post_step(
+            "send",
+            subject=POSTED_SUBJECT,
+            body=POSTED_BODY,
+            header_text="Service desk",
+            is_newsletter="",
+        )
+
+        mailing = Mailing.objects.get()
+        self.assertEqual((mailing.header_text, mailing.is_newsletter), ("Service desk", False))
+        self.assertEqual([message.to for message in mail.outbox], [[member.email]])
+        self.assertEqual(mailing.skipped_reasons["not_member"], len(self.prospects) - 1)
+
+    def test_the_header_text_and_the_flag_survive_the_preview_step(self) -> None:
+        self.prospects = [ProspectFactory(user=UserFactory())]
+
+        notice_response = self.post_step(
+            "preview",
+            subject=POSTED_SUBJECT,
+            body=POSTED_BODY,
+            header_text="Club news",
+            is_newsletter="",
+        )
+        newsletter_response = self.post_step(
+            "preview", subject=POSTED_SUBJECT, body=POSTED_BODY, header_text="Club news"
+        )
+
+        self.assertContains(notice_response, 'name="header_text" value="Club news"')
+        self.assertNotContains(notice_response, 'name="is_newsletter"')
+        self.assertContains(newsletter_response, 'name="header_text" value="Club news"')
+        self.assertContains(newsletter_response, 'name="is_newsletter" value="on"')
+
+    def test_a_notice_with_no_member_selected_returns_to_the_form_with_an_error(self) -> None:
+        response = self.post_step(
+            "preview", subject=POSTED_SUBJECT, body=POSTED_BODY, is_newsletter=""
+        )
+
+        self.assertTemplateUsed(response, "outreach/admin/compose.html")
+        self.assertEqual(
+            response.context["form"].errors["is_newsletter"],
+            ["None of the selected prospects can receive this type of mail."],
+        )
 
     def test_save_block_does_not_block_the_other_buttons_with_browser_validation(self) -> None:
         response = self.post_step()

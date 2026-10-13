@@ -24,6 +24,7 @@ class MailVariablesTests(OutreachTestCase):
                 "action": "send_mail",
                 "_selected_action": [str(prospect.pk) for prospect in prospects],
                 "step": "send",
+                "is_newsletter": "on",
                 "subject": subject,
                 "body": body,
             },
@@ -221,7 +222,13 @@ class MailVariablesTests(OutreachTestCase):
         ]
         for valid_text in valid_texts:
             with self.subTest(valid_text=valid_text):
-                form = MessageForm({"subject": valid_text, "body": f"<p>{valid_text}</p>"})
+                form = MessageForm(
+                    {
+                        "subject": valid_text,
+                        "body": f"<p>{valid_text}</p>",
+                        "is_newsletter": "on",
+                    }
+                )
 
                 self.assertTrue(form.is_valid(), form.errors)
 

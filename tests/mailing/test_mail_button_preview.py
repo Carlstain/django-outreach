@@ -57,6 +57,7 @@ class MailButtonPreviewTests(OutreachMailTagTestCase):
                 "action": "send_mail",
                 "_selected_action": [str(prospect.pk)],
                 "step": "preview",
+                "is_newsletter": "on",
                 "subject": "Hello",
                 "body": '<p>{% button "Book" booking_url %}</p>',
             },

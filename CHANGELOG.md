@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Notices: a template or a mail not marked as newsletter is a notice to members. It has no unsubscribe footer and no `List-Unsubscribe` headers, goes to members only (new skip reason `not_member`) and still reaches members who unsubscribed from newsletters. A notice text cannot contain `{{ unsubscribe_url }}`.
+- Header text on templates and mailings, shown at the top of the mail instead of the site name when set.
+- `OUTREACH_EMAIL_LOGO_IN_HEADER` and `OUTREACH_EMAIL_LOGO_IN_FOOTER` put `OUTREACH_LOGO_STATIC_PATH` in the header and the footer of mails. The logo should be PNG or JPG: Gmail and Outlook do not show SVG.
+- Migration `0002`: `header_text` and `is_newsletter` on `EmailTemplate` and `Mailing`. Existing rows become newsletters.
 - Documentation, built with Sphinx and published on Read the Docs: installation, configuration, a user guide for the staff, topics for developers and a reference for the models, services, URLs, permissions and templates.
 - Docstrings on the public classes and functions, which feed the reference.
 

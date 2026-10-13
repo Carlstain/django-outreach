@@ -16,6 +16,8 @@ class Mailing(models.Model):
     )
     subject = models.CharField(max_length=200, verbose_name=_("subject"))
     body_html = models.TextField(verbose_name=_("message"))
+    header_text = models.CharField(max_length=120, blank=True, verbose_name=_("header text"))
+    is_newsletter = models.BooleanField(default=True, verbose_name=_("newsletter"))
     sender = models.CharField(max_length=150, verbose_name=_("sender"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"))
     sent_count = models.PositiveIntegerField(default=0, verbose_name=_("sent"))

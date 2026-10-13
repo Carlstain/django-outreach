@@ -154,18 +154,15 @@ class ProspectAdmin(ImportExportModelAdmin):
             )
             return None
         mailer = ProspectMailer(base_url=base_url, actor=request.user.get_username())
-        plan = mailer.plan(queryset)
-        if not plan.recipients:
-            self.message_user(
-                request, _("None of the selected prospects can be mailed."), messages.WARNING
-            )
-            return None
-
         step = request.POST.get("step")
         form = MessageForm(request.POST) if step else MessageForm()
         requested_step = step
         if step and not form.is_valid():
             step = None
+        is_newsletter = True
+        if requested_step:
+            posted_flag = request.POST.get("is_newsletter", "")
+            is_newsletter = posted_flag.lower() not in FALSE_VALUES
 
         permissions = self.template_permissions(request)
         selected_template = None
@@ -177,9 +174,12 @@ class ProspectAdmin(ImportExportModelAdmin):
                 form = MessageForm(
                     initial={
                         "subject": selected_template.subject,
+                        "header_text": selected_template.header_text,
+                        "is_newsletter": selected_template.is_newsletter,
                         "body": selected_template.body_html,
                     }
                 )
+                is_newsletter = selected_template.is_newsletter
                 template_applied = True
         elif requested_step == STEP_SAVE_TEMPLATE:
             save_template_form = SaveTemplateForm(request.POST)
@@ -189,9 +189,29 @@ class ProspectAdmin(ImportExportModelAdmin):
             if selected_template is not None:
                 save_template_form = SaveTemplateForm()
 
+        plan = mailer.plan(queryset, is_newsletter=is_newsletter)
+        other_type_plan = mailer.plan(queryset, is_newsletter=not is_newsletter)
+        if not plan.recipients and not other_type_plan.recipients:
+            self.message_user(
+                request, _("None of the selected prospects can be mailed."), messages.WARNING
+            )
+            return None
+        if not plan.recipients and step:
+            form.add_error(
+                "is_newsletter",
+                _("None of the selected prospects can receive this type of mail."),
+            )
+            step = None
+
         if step == STEP_SEND:
             subject = form.cleaned_data["subject"]
-            report = mailer.send(queryset, subject, form.cleaned_data["body"])
+            report = mailer.send(
+                queryset,
+                subject,
+                form.cleaned_data["body"],
+                header_text=form.cleaned_data["header_text"],
+                is_newsletter=form.cleaned_data["is_newsletter"],
+            )
             level = messages.WARNING if report.failed else messages.SUCCESS
             self.message_user(
                 request,
@@ -233,7 +253,12 @@ class ProspectAdmin(ImportExportModelAdmin):
             subject = form.cleaned_data["subject"]
             try:
                 rendered = mailer.render(
-                    preview_prospect, subject, form.cleaned_data["body"], preview=True
+                    preview_prospect,
+                    subject,
+                    form.cleaned_data["body"],
+                    header_text=form.cleaned_data["header_text"],
+                    is_newsletter=form.cleaned_data["is_newsletter"],
+                    preview=True,
                 )
             except InvalidButtonLink as error:
                 form.add_error("body", str(error))
@@ -313,6 +338,8 @@ class ProspectAdmin(ImportExportModelAdmin):
                 message_form.cleaned_data["body"],
                 request.user.get_username(),
                 overwrite,
+                header_text=message_form.cleaned_data["header_text"],
+                is_newsletter=message_form.cleaned_data["is_newsletter"],
             )
         except TemplateNameTaken:
             save_template_form.add_error(

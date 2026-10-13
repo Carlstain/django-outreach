@@ -76,7 +76,7 @@
             </tbody>
           </table>
         </div>
-        <p class="spaced-top">{% blocktrans with placeholder="{{ unsubscribe_url }}" %}<code>{{ placeholder }}</code> is the link recipients use to unsubscribe. It is added automatically at the bottom of every message, and you can also use it as the target of a link.{% endblocktrans %}</p>
+        <p class="spaced-top">{% blocktrans with placeholder="{{ unsubscribe_url }}" %}<code>{{ placeholder }}</code> is the link recipients use to unsubscribe. It is added automatically at the bottom of every newsletter, and you can also use it as the target of a link in a newsletter. A notice has no unsubscribe link.{% endblocktrans %}</p>
         <p>{% blocktrans with example="{{ first_name | there }}" %}Add a fallback after a pipe: <code>{{ example }}</code> writes “there” when the first name is empty. A name that is not in the table stops the preview, so nothing odd is ever sent.{% endblocktrans %}</p>
       </section>
       <section class="card" id="h-tags">
@@ -100,7 +100,8 @@
       <section class="card" id="h-skipped">
         <h3>{% trans "Who is skipped" %}</h3>
         <ul>
-          <li>{% trans "Prospects who unsubscribed, and addresses that unsubscribed before and were imported again." %}</li>
+          <li>{% trans "Newsletters skip prospects who unsubscribed, and addresses that unsubscribed before and were imported again." %}</li>
+          <li>{% trans "Notices skip prospects who are not members. Members who unsubscribed from newsletters still receive them." %}</li>
           <li>{% blocktrans with hours=cooldown_hours %}Prospects mailed within the last {{ hours }} hours.{% endblocktrans %}</li>
           <li>{% blocktrans with maximum=max_recipients %}Anyone past the first {{ maximum }} recipients of one send. Send again later for the rest.{% endblocktrans %}</li>
         </ul>
@@ -108,7 +109,7 @@
       </section>
       <section class="card" id="h-unsub">
         <h3>{% trans "Unsubscribing" %}</h3>
-        <p>{% trans "Every message ends with an unsubscribe link. The recipient confirms with one click on a page of their own, and no account is needed." %}</p>
+        <p>{% trans "Every newsletter ends with an unsubscribe link. The recipient confirms with one click on a page of their own, and no account is needed." %}</p>
         <p>{% trans "Unsubscribing is final. The address is never mailed again, even if the prospect is deleted and imported again." %}</p>
       </section>
       <section class="card" id="h-mailings">
