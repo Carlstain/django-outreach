@@ -416,7 +416,7 @@ class ProspectAdmin(admin.ModelAdmin):
                 name,
                 message_form.cleaned_data["subject"],
                 message_form.cleaned_data["body"],
-                request.user.get_username(),
+                request.user,
                 overwrite,
                 header_text=message_form.cleaned_data["header_text"],
                 is_newsletter=message_form.cleaned_data["is_newsletter"],

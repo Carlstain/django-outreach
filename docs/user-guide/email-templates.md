@@ -5,7 +5,7 @@ An email template is a named subject and message that you can reuse.
 - The body is sanitised like any message and may contain variables, tags and buttons.
 - Names are unique, ignoring case: "Welcome" and "welcome" are the same name.
 - Templates are shared. Every staff member who holds `outreach.view_emailtemplate` sees all of
-  them. The author is recorded for information only.
+  them. The author and the last editor are recorded for information only.
 - A mailing keeps its own copy of the subject and message, so editing or deleting a template never
   changes a mailing already sent.
 
@@ -35,5 +35,5 @@ name you type.
 - It needs `add_emailtemplate`.
 - If the name is taken, it is refused, unless you tick *Replace the template if the name already
   exists*. That box only appears if you hold `change_emailtemplate`, and replacing keeps the
-  original author.
+  original author and records you as the last editor.
 - The message must be valid, as for a preview.

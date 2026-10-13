@@ -1,15 +1,14 @@
-import uuid
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from outreach.choices import ProspectKind, ProspectStatus
+from outreach.models.base import BaseModel
 
 AVATAR_TONE_COUNT = 6
 
 
-class Prospect(models.Model):
+class Prospect(BaseModel):
     """A person or organisation that may be mailed.
 
     The address is lower-cased on save and is immutable by convention after creation. Saving a
@@ -17,9 +16,6 @@ class Prospect(models.Model):
     user with the same address, if any.
     """
 
-    uuid = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_("uuid")
-    )
     email = models.EmailField(max_length=254, unique=True, verbose_name=_("email"))
     kind = models.CharField(
         max_length=20,
@@ -50,8 +46,6 @@ class Prospect(models.Model):
     last_mailed_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("last mailed at")
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("updated at"))
 
     class Meta:
         ordering = ["-created_at"]
