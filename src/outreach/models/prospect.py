@@ -10,6 +10,13 @@ AVATAR_TONE_COUNT = 6
 
 
 class Prospect(models.Model):
+    """A person or organisation that may be mailed.
+
+    The address is lower-cased on save and is immutable by convention after creation. Saving a
+    new prospect whose address is suppressed makes it unsubscribed, and links it to the host
+    user with the same address, if any.
+    """
+
     uuid = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_("uuid")
     )

@@ -6,6 +6,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class EmailTemplate(models.Model):
+    """A named subject and body shared by every staff member who holds the permission.
+
+    The name is unique ignoring case. A mailing keeps its own copy, so deleting a template
+    never changes history.
+    """
+
     uuid = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_("uuid")
     )

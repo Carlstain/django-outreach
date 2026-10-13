@@ -7,6 +7,8 @@ from outreach.models.prospect import Prospect
 
 
 class ProspectEvent(models.Model):
+    """One entry in the history of a prospect: added, mailed, failed, unsubscribed, and so on."""
+
     prospect = models.ForeignKey(
         Prospect,
         on_delete=models.CASCADE,

@@ -27,7 +27,7 @@ BUTTON_STYLE = (
 
 
 class InvalidButtonLink(ValueError):
-    pass
+    """A ``{% button %}`` has the wrong arguments, a bad link, or sits inside a tag or link."""
 
 
 @dataclass(frozen=True)
@@ -37,7 +37,10 @@ class MailButton:
 
 
 class MailButtons:
+    """Handles ``{% button "Label" link %}``, a text construct that becomes a styled link."""
+
     def is_valid_link(self, url: str) -> bool:
+        """Accept an ``http``, ``https`` (with a host) or ``mailto`` address with no spaces."""
         stripped = url.strip()
         if any(character.isspace() for character in stripped):
             return False
@@ -87,6 +90,16 @@ class MailButtons:
         *,
         strict: bool = True,
     ) -> tuple[str, dict[str, MailButton]]:
+        """Swap each button for a random-nonce token and return the buttons by token.
+
+        Args:
+            resolve_argument: Turns a label or link argument into its final text.
+            strict: Raise on a bad button. Otherwise use a placeholder link, for previews.
+
+        Raises:
+            InvalidButtonLink: A button is misplaced, has the wrong arguments, or has a link
+                that is empty or not http, https or mailto.
+        """
         nonce = uuid.uuid4().hex
         buttons: dict[str, MailButton] = {}
         misplaced_starts = self.misplaced_button_starts(html)
@@ -118,6 +131,10 @@ class MailButtons:
         return MAIL_TAG_PATTERN.sub(substitute, html), buttons
 
     def insert(self, html: str, buttons: dict[str, MailButton], colors: EmailColors) -> str:
+        """Replace the tokens from :meth:`extract` with styled anchors.
+
+        Call it after the last sanitising pass, since nh3 strips ``style``.
+        """
         style = BUTTON_STYLE.format(background=colors.accent, text=colors.on_accent)
         spans = self.markup_spans(html)
 

@@ -7,11 +7,13 @@ from outreach.services.body import MailBodySanitizer
 
 
 class TemplateNameTaken(Exception):
-    pass
+    """A template with that name (ignoring case) exists and ``overwrite`` was not allowed."""
 
 
 @dataclass(frozen=True)
 class SavedTemplate:
+    """The saved template and whether it was created, as opposed to overwritten."""
+
     template: EmailTemplate
     created: bool
 
@@ -20,6 +22,13 @@ class EmailTemplates:
     def save(
         self, name: str, subject: str, body_html: str, author: str, overwrite: bool
     ) -> SavedTemplate:
+        """Create a template, or update the one with the same name when ``overwrite`` is true.
+
+        The body is sanitised. Overwriting keeps the original author.
+
+        Raises:
+            TemplateNameTaken: The name is taken and ``overwrite`` is false.
+        """
         clean_name = name.strip()
         clean_body = MailBodySanitizer().clean(body_html)
         existing = EmailTemplate.objects.filter(name__iexact=clean_name).first()

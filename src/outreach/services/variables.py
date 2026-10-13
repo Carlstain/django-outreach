@@ -18,6 +18,12 @@ class MailVariable:
 
 
 class MailVariables:
+    """The whitelist of ``{{ variable }}`` keys usable in a mail, replaced by regex.
+
+    A variable may carry a fallback used when its value is empty: ``{{ first_name | there }}``.
+    The template engine is never involved, so staff text cannot reach a code path.
+    """
+
     KEYS = ("first_name", "last_name", "full_name", "organization", "email", "city", "country")
     ALWAYS_ALLOWED = ("unsubscribe_url",)
 
@@ -61,6 +67,10 @@ class MailVariables:
         ]
 
     def values_for(self, prospect: Prospect) -> dict[str, str]:
+        """Return the value of each key for a prospect.
+
+        Names fall back to the linked user's when the prospect's are empty.
+        """
         user = prospect.user
         first_name = prospect.first_name or (getattr(user, "first_name", "") if user else "")
         last_name = prospect.last_name or (getattr(user, "last_name", "") if user else "")

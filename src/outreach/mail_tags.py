@@ -20,6 +20,7 @@ def to_local(moment: datetime) -> datetime:
     example=pgettext_lazy("mail tag example", "May 14, 2026"),
 )
 def today(prospect: Prospect, format: str = "DATE_FORMAT") -> str:
+    """Today's date; the optional argument is a Django date format name or format string."""
     return date_format(to_local(timezone.now()), format)
 
 
@@ -28,6 +29,7 @@ def today(prospect: Prospect, format: str = "DATE_FORMAT") -> str:
     example=pgettext_lazy("mail tag example", "Good morning"),
 )
 def greeting(prospect: Prospect) -> str:
+    """Good morning before noon, good afternoon before 18:00, good evening after."""
     hour = to_local(timezone.now()).hour
     if hour < MIDDAY_HOUR:
         return str(pgettext_lazy("mail tag greeting", "Good morning"))
@@ -41,6 +43,7 @@ def greeting(prospect: Prospect) -> str:
     example=pgettext_lazy("mail tag example", "March 2, 2024"),
 )
 def member_since(prospect: Prospect, format: str = "DATE_FORMAT") -> str:
+    """Date the linked user joined; empty for a prospect with no linked user."""
     joined_at = getattr(prospect.user, "date_joined", None)
     if joined_at is None:
         return ""

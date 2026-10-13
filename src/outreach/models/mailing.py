@@ -5,6 +5,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Mailing(models.Model):
+    """One send action that had at least one recipient.
+
+    It keeps a copy of the subject and body and counts of the skipped recipients, never their
+    names.
+    """
+
     uuid = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_("uuid")
     )
