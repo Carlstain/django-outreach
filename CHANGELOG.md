@@ -18,6 +18,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
+- A Celery retry reports "N queued, 0 skipped." like a send, instead of "N queued.". The delivery task raises the same `ImproperlyConfigured` message as the admin when `OUTREACH_BASE_URL` is not set. `ProspectMailer.from_settings(actor)` builds the mailer from the setting, and the send and retry code shares one claim step and one cooldown rule. No other behaviour changes.
+
 - A failed delivery keeps a failure kind (`MailingDelivery.failure_kind`: *refused*, *server* or *content*) instead of the error text, which could hold the address of the recipient and the reply of the mail server. The prospect history, the dashboard, the mailing page and the data download show the kind. The `outreach` logger records the delivery id, the kind and the exception class. The history of older *mail failed* events is blanked. Migrations `0008` and `0009`. `TransientDeliveryError` carries the kind, and `last_error` is gone.
 
 - The detail page of a mailing no longer shows the mail server's error for a failed recipient, which can contain the address. It shows a short message instead.

@@ -2,14 +2,19 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
+from django.contrib import messages
 from django.contrib.admin import AdminSite
 from django.contrib.auth.decorators import login_not_required
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.urls import NoReverseMatch, path, reverse
 from django.utils import translation
 from django.utils.decorators import method_decorator
+from django.utils.formats import date_format
+from django.utils.timezone import template_localtime
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import never_cache
 
@@ -18,6 +23,7 @@ from outreach.conf import outreach_settings
 from outreach.forms import OutreachAuthenticationForm
 from outreach.models import Audience, EmailTemplate, Mailing, Prospect, ProspectEvent
 from outreach.services.mail_tags import mail_tag_library
+from outreach.services.mailing import MailReport, ProspectMailer
 from outreach.services.prospect_csv import ProspectCsvColumns
 from outreach.services.variables import MailVariables
 
@@ -50,6 +56,40 @@ class OutreachAdminSite(AdminSite):
     def has_permission(self, request: HttpRequest) -> bool:
         user = request.user
         return user.is_active and user.is_staff and user.has_perm("outreach.view_prospect")
+
+    def mailer_for(self, request: HttpRequest) -> ProspectMailer | None:
+        """Return the mailer of the logged-in staff member, or post an error and return ``None``."""
+        try:
+            return ProspectMailer.from_settings(request.user.get_username())
+        except ImproperlyConfigured:
+            messages.error(
+                request, gettext("OUTREACH_BASE_URL is not set, sending is disabled.")
+            )
+            return None
+
+    def report_message(self, report: MailReport) -> tuple[str, int]:
+        """Return the text and the message level that tell staff what a send or retry did."""
+        if report.scheduled:
+            text = gettext("%(scheduled)d scheduled for %(time)s, %(skipped)d skipped.") % {
+                "scheduled": len(report.scheduled),
+                "time": date_format(
+                    template_localtime(report.mailing.scheduled_for), "DATETIME_FORMAT"
+                ),
+                "skipped": len(report.skipped),
+            }
+            return text, messages.SUCCESS
+        if report.queued:
+            text = gettext("%(queued)d queued, %(skipped)d skipped.") % {
+                "queued": len(report.queued),
+                "skipped": len(report.skipped),
+            }
+            return text, messages.SUCCESS
+        text = gettext("%(sent)d sent, %(skipped)d skipped, %(failed)d failed.") % {
+            "sent": len(report.sent),
+            "skipped": len(report.skipped),
+            "failed": len(report.failed),
+        }
+        return text, messages.WARNING if report.failed else messages.SUCCESS
 
     def in_outreach_language(
         self, view: Callable[..., HttpResponse]

@@ -8,15 +8,12 @@ from django.utils import timezone
 from outreach.choices import DeliveryStatus
 from outreach.models import Mailing
 from outreach.tasks import deliver_mail
-from tests.base import MAIL_BASE_URL, OutreachTestCase
+from tests.base import CeleryMailTestCase
 from tests.factories import ProspectFactory, create_outreach_staff_user
 from tests.routes import outreach_prospect_changelist_url
 
 
-@override_settings(
-    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
-)
-class SendMailActionScheduledTests(OutreachTestCase):
+class SendMailActionScheduledTests(CeleryMailTestCase):
     def setUp(self) -> None:
         super().setUp()
         self.client.force_login(create_outreach_staff_user())

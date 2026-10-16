@@ -1,25 +1,17 @@
 from datetime import timedelta
-from unittest.mock import patch
 
 from django.test import override_settings
 from django.utils import timezone
 
 from outreach.choices import DeliveryStatus, ProspectStatus, SkipReason
-from outreach.services.mailing import ProspectMailer
-from outreach.services.scheduling import MailingScheduler, SchedulingUnavailable
-from outreach.tasks import deliver_mail
-from tests.base import MAIL_BASE_URL, OutreachTestCase
+from outreach.services.scheduling import SchedulingUnavailable
+from tests.base import CeleryMailTestCase
 from tests.factories import ProspectFactory
 
 
-@override_settings(
-    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
-)
-class StartScheduledMailingTests(OutreachTestCase):
+class StartScheduledMailingTests(CeleryMailTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.mailer = ProspectMailer(MAIL_BASE_URL, "staff")
-        self.scheduler = MailingScheduler(self.mailer)
         self.first_prospect = ProspectFactory()
         self.second_prospect = ProspectFactory()
         self.mailing = self.scheduler.schedule(
@@ -28,9 +20,6 @@ class StartScheduledMailingTests(OutreachTestCase):
             "<p>Body</p>",
             send_at=timezone.now() + timedelta(hours=2),
         ).mailing
-        publisher = patch.object(deliver_mail, "apply_async")
-        self.apply_async = publisher.start()
-        self.addCleanup(publisher.stop)
 
     def test_starting_claims_the_recipients_and_queues_one_task_each(self) -> None:
         with self.captureOnCommitCallbacks(execute=True):

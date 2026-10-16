@@ -77,24 +77,14 @@ class MailingScheduler:
                 .filter(mailing=mailing, status=DeliveryStatus.SCHEDULED)
             )
             claimed_at = timezone.now()
-            cooldown_start = claimed_at - outreach_settings.resend_cooldown
             ready_deliveries = []
             held_deliveries = []
             for delivery in scheduled_deliveries:
-                last_mailed_at = delivery.prospect.last_mailed_at
-                if last_mailed_at and last_mailed_at > cooldown_start:
+                if ProspectMailer.is_in_cooldown(delivery.prospect.last_mailed_at, claimed_at):
                     held_deliveries.append(delivery)
                 else:
-                    delivery.status = DeliveryStatus.PENDING
-                    delivery.previous_mailed_at = last_mailed_at
-                    delivery.updated_at = claimed_at
                     ready_deliveries.append(delivery)
-            MailingDelivery.objects.bulk_update(
-                ready_deliveries, ["status", "previous_mailed_at", "updated_at"]
-            )
-            Prospect.objects.filter(
-                pk__in=[delivery.prospect_id for delivery in ready_deliveries]
-            ).update(last_mailed_at=claimed_at)
+            ProspectMailer.claim(ready_deliveries, claimed_at)
             if held_deliveries:
                 MailingDelivery.objects.filter(
                     pk__in=[delivery.pk for delivery in held_deliveries]
