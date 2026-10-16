@@ -1,7 +1,8 @@
 from collections.abc import Callable
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+from django.dispatch import Signal
 from django.test import TestCase, TransactionTestCase
 
 from outreach.models import Prospect
@@ -12,7 +13,11 @@ MAIL_BASE_URL = "https://outreach.example.test"
 
 
 class OutreachTestCase(TestCase):
-    pass
+    def connect_receiver(self, signal: Signal) -> Mock:
+        receiver = Mock()
+        signal.connect(receiver, weak=False)
+        self.addCleanup(signal.disconnect, receiver)
+        return receiver
 
 
 class OutreachTransactionTestCase(TransactionTestCase):

@@ -99,6 +99,9 @@ msgstr "Désinscrit"
 msgid "Added"
 msgstr "Ajouté"
 
+msgid "Subscribed"
+msgstr "Inscrit"
+
 msgid "Imported"
 msgstr "Importé"
 
