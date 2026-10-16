@@ -1225,6 +1225,26 @@ msgctxt "recipient"
 msgid "scheduled"
 msgstr "programmé"
 
+msgid "Send a test to me"
+msgstr "M'envoyer un test"
+
+#, python-format
+msgid "A test goes to your own address only, with the details of %(name)s."
+msgstr "Un test part uniquement vers votre adresse, avec les informations de %(name)s."
+
+msgid "Its unsubscribe link does nothing."
+msgstr "Son lien de désinscription ne fait rien."
+
+msgid "Your account has no email address, so a test can not be sent."
+msgstr "Votre compte n'a pas d'adresse e-mail, un test ne peut pas être envoyé."
+
+msgid "The test could not be sent. Check the mail settings."
+msgstr "Le test n'a pas pu être envoyé. Vérifiez les paramètres d'envoi."
+
+#, python-format
+msgid "A test was sent to %(email)s."
+msgstr "Un test a été envoyé à %(email)s."
+
 msgid "Preview as"
 msgstr "Aperçu pour"
 

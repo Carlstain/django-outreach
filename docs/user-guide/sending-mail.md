@@ -126,9 +126,19 @@ effects, which show a placeholder.
 ![Step 2, check and send](../_static/screenshots/preview.png)
 
 - *Edit message* goes back to step 1 with your text.
+- *Send a test to me* sends one copy of the mail to the address of your own account, rendered
+  with the details of the recipient shown in the preview. Use *Preview as* first to pick whose
+  details to use. You stay on step 2.
 - *Send to N prospects* sends. There is no second confirmation, and no undo.
 
 When the send finishes, the list shows a line such as *12 sent, 3 skipped, 0 failed*.
+
+A test is only a copy for you to look at in your mail app. Its subject starts with *[Test]*, its
+unsubscribe link leads to the site and does nothing, and it has no unsubscribe headers, so a
+button of your mail app can not unsubscribe the person whose details it uses. Computed tags show
+their placeholder when they declare side effects, as in the preview. A test creates no mailing,
+no history, no claim and no signal, and it is sent at once, with or without Celery. It needs an
+email address on your account and the same permission as a send.
 
 ## What happens during a send
 

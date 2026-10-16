@@ -33,6 +33,7 @@ from outreach.forms import (
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
 from outreach.services.audiences import AudienceCreator, AudienceMembers, AudienceNameTaken
 from outreach.services.erasure import ProspectEraser
+from outreach.services.failures import MessageNotAccepted
 from outreach.services.linking import UserLinker
 from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
@@ -50,6 +51,7 @@ from outreach.sites import outreach_site
 
 STEP_PREVIEW = "preview"
 STEP_SEND = "send"
+STEP_TEST = "test"
 STEP_COMPOSE = "compose"
 STEP_SAVE_TEMPLATE = "save_template"
 FALSE_VALUES = ("", "0", "false")
@@ -384,7 +386,7 @@ class ProspectAdmin(admin.ModelAdmin):
             "can_save_template": permissions["add"],
             "can_overwrite_template": permissions["change"],
         }
-        if step == STEP_PREVIEW:
+        if step in (STEP_PREVIEW, STEP_TEST):
             recipients_by_pk = {str(prospect.pk): prospect for prospect in plan.recipients}
             preview_prospect = recipients_by_pk.get(
                 request.POST.get("preview_prospect", ""), plan.recipients[0]
@@ -402,6 +404,8 @@ class ProspectAdmin(admin.ModelAdmin):
             except InvalidButtonLink as error:
                 form.add_error("body", str(error))
                 return TemplateResponse(request, "outreach/admin/compose.html", context)
+            if step == STEP_TEST:
+                self.send_test_mail(request, mailer, preview_prospect, form)
             context.update(
                 preview_prospect=preview_prospect,
                 preview_html=rendered.html,
@@ -414,6 +418,43 @@ class ProspectAdmin(admin.ModelAdmin):
             )
             return TemplateResponse(request, "outreach/admin/preview.html", context)
         return TemplateResponse(request, "outreach/admin/compose.html", context)
+
+    def send_test_mail(
+        self,
+        request: HttpRequest,
+        mailer: ProspectMailer,
+        prospect: Prospect,
+        form: MessageForm,
+    ) -> None:
+        recipient_email = getattr(request.user, request.user.get_email_field_name(), "")
+        if not recipient_email:
+            self.message_user(
+                request,
+                _("Your account has no email address, so a test can not be sent."),
+                messages.ERROR,
+            )
+            return
+        try:
+            mailer.send_sample(
+                prospect,
+                form.cleaned_data["subject"],
+                form.cleaned_data["body"],
+                recipient_email,
+                header_text=form.cleaned_data["header_text"],
+                is_newsletter=form.cleaned_data["is_newsletter"],
+            )
+        except (OSError, MessageNotAccepted):
+            self.message_user(
+                request,
+                _("The test could not be sent. Check the mail settings."),
+                messages.ERROR,
+            )
+            return
+        self.message_user(
+            request,
+            _("A test was sent to %(email)s.") % {"email": recipient_email},
+            messages.SUCCESS,
+        )
 
     def template_permissions(self, request: HttpRequest) -> dict[str, bool]:
         return {
