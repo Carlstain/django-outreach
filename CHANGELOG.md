@@ -11,6 +11,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - System checks `outreach.E002`, `outreach.E003` and `outreach.W001`.
 - Audiences: a named, static list of prospects (`Audience`, `Prospect.audiences`, migration `0005`). Prospects are added and removed with two actions of the prospect list (the add page can also create the audience from a typed name), the list can be filtered by audience, and the Audiences pages and permissions (`view`, `add`, `change`, `delete`) are new. Sending to an audience uses the existing filter, Select all and Send a mail. Two event kinds record the changes in the history of a prospect.
 - Retry failed deliveries: the detail page of a mailing lists every recipient with its status (pending, sent or failed), and a failed one can be sent again with a Retry button or Retry all failed, which needs `outreach.change_prospect`. `ProspectMailer.retry` claims the prospect again and goes through `deliver`, so an unsubscribed prospect is still skipped, and the resend cooldown is not applied. No schema change.
+- Signals `prospect_subscribed`, `prospect_unsubscribed`, `mail_sent` and `mail_failed` (module `outreach.signals`), sent after commit and without breaking the sender when a receiver raises. `ProspectSubscriptions.subscribe` creates a prospect from a host signup form, with a required consent source kept in a new *Subscribed* event kind. The event kind changes the choices of `ProspectEvent.kind` (migration).
 
 ### Changed
 

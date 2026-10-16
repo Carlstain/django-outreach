@@ -9,6 +9,7 @@ computed-tags
 theming
 i18n
 loading-users
+signals
 sending-with-celery
 custom-user-model
 security

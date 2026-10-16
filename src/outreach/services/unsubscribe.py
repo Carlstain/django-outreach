@@ -6,6 +6,7 @@ from django.utils.crypto import salted_hmac
 
 from outreach.choices import EventKind, ProspectStatus
 from outreach.models import Prospect, ProspectEvent, Suppression
+from outreach.signals import prospect_unsubscribed, send_after_commit
 
 SUPPRESSION_SALT = "outreach.suppression"
 UNSUBSCRIBE_SALT = "outreach.unsubscribe"
@@ -71,7 +72,8 @@ class ProspectUnsubscriber:
     def unsubscribe(self, prospect: Prospect, actor: str) -> None:
         """Suppress the address, mark the prospect unsubscribed and record the event.
 
-        Calling it again on an unsubscribed prospect records nothing more.
+        Calling it again on an unsubscribed prospect records nothing more. The
+        ``prospect_unsubscribed`` signal is sent after commit, once per real change.
         """
         SuppressionList().add(prospect.email)
         if prospect.status == ProspectStatus.UNSUBSCRIBED:
@@ -79,3 +81,6 @@ class ProspectUnsubscriber:
         prospect.status = ProspectStatus.UNSUBSCRIBED
         prospect.save(update_fields=["status", "updated_at"])
         ProspectEvent.record(prospect, EventKind.UNSUBSCRIBED, actor)
+        send_after_commit(
+            prospect_unsubscribed, ProspectUnsubscriber, prospect=prospect, actor=actor
+        )

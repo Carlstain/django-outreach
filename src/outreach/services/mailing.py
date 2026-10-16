@@ -29,6 +29,7 @@ from outreach.services.mail_buttons import mail_buttons
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.unsubscribe import SuppressionList, UnsubscribeTokens
 from outreach.services.variables import MailVariables
+from outreach.signals import mail_failed, mail_sent, send_after_commit
 
 
 @dataclass
@@ -441,6 +442,13 @@ class ProspectMailer:
                 self.settle(locked, DeliveryStatus.SENT)
                 self.mark_mailed(prospect, mailing.subject, mailing)
                 Mailing.objects.filter(pk=mailing.pk).update(sent_count=F("sent_count") + 1)
+                send_after_commit(
+                    mail_sent,
+                    ProspectMailer,
+                    delivery=locked,
+                    mailing=mailing,
+                    prospect=prospect,
+                )
                 return DeliveryStatus.SENT
         raise TransientDeliveryError(str(transient_error)) from transient_error
 
@@ -462,6 +470,13 @@ class ProspectMailer:
             self.actor,
             detail=str(error),
             mailing=delivery.mailing,
+        )
+        send_after_commit(
+            mail_failed,
+            ProspectMailer,
+            delivery=delivery,
+            mailing=delivery.mailing,
+            prospect=delivery.prospect,
         )
 
     @staticmethod

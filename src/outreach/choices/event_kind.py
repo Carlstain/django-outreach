@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class EventKind(models.TextChoices):
     ADDED = "added", _("Added")
+    SUBSCRIBED = "subscribed", _("Subscribed")
     IMPORTED = "imported", _("Imported")
     EDITED = "edited", _("Edited")
     LINKED = "linked", _("Linked to an account")

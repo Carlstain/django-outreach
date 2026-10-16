@@ -72,6 +72,18 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
    :members: unsubscribe
 ```
 
+## Subscribing
+
+```{eval-rst}
+.. autoclass:: outreach.services.subscription.ProspectSubscriptions
+   :members: subscribe
+
+.. autoclass:: outreach.services.subscription.SubscribeResult
+   :members:
+```
+
+The signals are listed in {doc}`../topics/signals`.
+
 ## Templates
 
 ```{eval-rst}
