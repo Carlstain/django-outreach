@@ -1,3 +1,4 @@
+import logging
 import smtplib
 from collections import Counter
 from collections.abc import Callable, Iterable
@@ -19,17 +20,21 @@ from outreach.choices import (
     DeliveryStatus,
     DispatchMode,
     EventKind,
+    FailureKind,
     ProspectStatus,
     SkipReason,
 )
 from outreach.conf import outreach_settings
 from outreach.models import Mailing, MailingDelivery, Prospect, ProspectEvent
 from outreach.services.body import MailBodySanitizer
+from outreach.services.failures import FailureClassifier, MessageNotAccepted
 from outreach.services.mail_buttons import mail_buttons
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.unsubscribe import SuppressionList, UnsubscribeTokens
 from outreach.services.variables import MailVariables
 from outreach.signals import mail_failed, mail_sent, send_after_commit
+
+logger = logging.getLogger("outreach")
 
 
 @dataclass
@@ -260,10 +265,12 @@ class ProspectMailer:
             for delivery in deliveries:
                 delivery.status = DeliveryStatus.PENDING
                 delivery.attempts = 0
+                delivery.failure_kind = ""
                 delivery.previous_mailed_at = delivery.prospect.last_mailed_at
                 delivery.updated_at = claimed_at
             MailingDelivery.objects.bulk_update(
-                deliveries, ["status", "attempts", "previous_mailed_at", "updated_at"]
+                deliveries,
+                ["status", "attempts", "failure_kind", "previous_mailed_at", "updated_at"],
             )
             Prospect.objects.filter(
                 pk__in=[delivery.prospect_id for delivery in deliveries]
@@ -435,16 +442,17 @@ class ProspectMailer:
                 )
             except Exception as error:
                 mail_connection.close()
+                failure_kind = FailureClassifier().classify(error)
                 can_retry = (
                     may_retry
                     and self.is_transient(error)
                     and locked.attempts <= outreach_settings.delivery_max_retries
                 )
                 if not can_retry:
-                    self.fail_delivery(locked, error)
+                    self.fail_delivery(locked, error, failure_kind)
                     return DeliveryStatus.FAILED
-                locked.last_error = str(error)[:255]
-                locked.save(update_fields=["attempts", "last_error", "updated_at"])
+                locked.failure_kind = failure_kind
+                locked.save(update_fields=["attempts", "failure_kind", "updated_at"])
                 transient_error = error
             else:
                 if own_connection:
@@ -460,7 +468,7 @@ class ProspectMailer:
                     prospect=prospect,
                 )
                 return DeliveryStatus.SENT
-        raise TransientDeliveryError(str(transient_error)) from transient_error
+        raise TransientDeliveryError(failure_kind.value) from transient_error
 
     @staticmethod
     def is_transient(error: Exception) -> bool:
@@ -468,9 +476,17 @@ class ProspectMailer:
             error, smtplib.SMTPRecipientsRefused
         )
 
-    def fail_delivery(self, delivery: MailingDelivery, error: Exception) -> None:
+    def fail_delivery(
+        self, delivery: MailingDelivery, error: Exception, failure_kind: FailureKind
+    ) -> None:
+        logger.warning(
+            "Delivery %s failed: %s (%s)",
+            delivery.pk,
+            failure_kind.value,
+            type(error).__name__,
+        )
         self.release(delivery.prospect, delivery.previous_mailed_at)
-        self.settle(delivery, DeliveryStatus.FAILED, error=str(error))
+        self.settle(delivery, DeliveryStatus.FAILED, failure_kind)
         Mailing.objects.filter(pk=delivery.mailing_id).update(
             failed_count=F("failed_count") + 1
         )
@@ -478,7 +494,7 @@ class ProspectMailer:
             delivery.prospect,
             EventKind.MAIL_FAILED,
             self.actor,
-            detail=str(error),
+            detail=failure_kind.value,
             mailing=delivery.mailing,
         )
         send_after_commit(
@@ -490,10 +506,14 @@ class ProspectMailer:
         )
 
     @staticmethod
-    def settle(delivery: MailingDelivery, status: DeliveryStatus, error: str = "") -> None:
+    def settle(
+        delivery: MailingDelivery,
+        status: DeliveryStatus,
+        failure_kind: str = "",
+    ) -> None:
         delivery.status = status
-        delivery.last_error = error[:255]
-        delivery.save(update_fields=["status", "attempts", "last_error", "updated_at"])
+        delivery.failure_kind = failure_kind
+        delivery.save(update_fields=["status", "attempts", "failure_kind", "updated_at"])
 
     @staticmethod
     def skip_in_mailing(mailing: Mailing, reason: SkipReason, count: int = 1) -> None:
@@ -551,7 +571,7 @@ class ProspectMailer:
         )
         message.attach_alternative(rendered.html, "text/html")
         if message.send() == 0:
-            raise RuntimeError("The mail server did not accept the message.")
+            raise MessageNotAccepted("The mail server did not accept the message.")
 
     def mark_mailed(self, prospect: Prospect, subject: str, mailing: Mailing) -> None:
         now = timezone.now()

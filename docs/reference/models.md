@@ -22,7 +22,7 @@ Prospect (outreach_prospect)             Mailing (outreach_mailing)
 
                                          MailingDelivery (outreach_mailingdelivery)
                                            mailing FK, prospect FK (both CASCADE)
-                                           status, attempts, previous_mailed_at, last_error
+                                           status, attempts, previous_mailed_at, failure_kind
                                            one row per recipient, unique (mailing, prospect)
 
 EmailTemplate (outreach_emailtemplate)   uuid pk, name (unique ignoring case), subject,

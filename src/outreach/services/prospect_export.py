@@ -48,11 +48,11 @@ class ProspectDataExporter:
                     "mailing": delivery.mailing.subject,
                     "status": delivery.status,
                     "attempts": delivery.attempts,
-                    "last_error": delivery.last_error,
+                    "failure": delivery.failure_kind,
                     "created_at": isoformat_or_none(delivery.created_at),
                 }
                 for delivery in prospect.deliveries.select_related("mailing")
-                .only("status", "attempts", "last_error", "created_at", "mailing__subject")
+                .only("status", "attempts", "failure_kind", "created_at", "mailing__subject")
                 .order_by("created_at")
             ],
         }

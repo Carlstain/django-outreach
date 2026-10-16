@@ -139,10 +139,13 @@ When the send finishes, the list shows a line such as *12 sent, 3 skipped, 0 fai
   them.
 - If a mail fails (the server refuses it, or a tag or button link is invalid for that person), only
   that person is affected. They are counted as failed, their "last mailed" date is restored, and a
-  failure event with the error is added to their history. Others still receive the mail.
+  failure event is added to their history, with the reason (refused, server or content) and not
+  the error text. Others still receive the mail.
 - A prospect who unsubscribed while the send was running is not mailed.
 - A successful mail sets a never-mailed prospect to *Contacted* and adds a *Mail sent* event.
 - Every send with at least one recipient creates a mailing, see {doc}`mailings`.
 
 If one recipient's failure is something you can fix, such as an empty button link, correct it and
-send again to that person only. They are no longer in the cooldown.
+send again to that person only. They are no longer in the cooldown. The mailing page shows why a
+recipient failed, and *Retry* is worth trying for *the mail server could not be reached*, not for
+*the message could not be built*.

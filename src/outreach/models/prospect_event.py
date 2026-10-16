@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from outreach.choices import EventKind
+from outreach.choices import EventKind, FailureKind
 from outreach.models.mailing import Mailing
 from outreach.models.prospect import Prospect
 
@@ -34,6 +34,13 @@ class ProspectEvent(models.Model):
         ordering = ["-created_at", "-pk"]
         verbose_name = _("prospect event")
         verbose_name_plural = _("prospect events")
+
+    @property
+    def detail_label(self) -> str:
+        """The detail to show: the label of the failure for a failed mail, else ``detail``."""
+        if self.kind != EventKind.MAIL_FAILED:
+            return self.detail
+        return str(FailureKind(self.detail).label) if self.detail in FailureKind.values else ""
 
     @classmethod
     def record(

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from outreach.choices import DeliveryStatus
+from outreach.choices import DeliveryStatus, FailureKind
 from outreach.models.base import BaseModel
 from outreach.models.mailing import Mailing
 from outreach.models.prospect import Prospect
@@ -35,7 +35,9 @@ class MailingDelivery(BaseModel):
     previous_mailed_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("previous mailed at")
     )
-    last_error = models.CharField(max_length=255, blank=True, verbose_name=_("last error"))
+    failure_kind = models.CharField(
+        max_length=10, choices=FailureKind.choices, blank=True, verbose_name=_("failure")
+    )
 
     class Meta:
         ordering = ["created_at", "pk"]

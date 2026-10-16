@@ -5,7 +5,7 @@ from uuid import uuid4
 from django.core.mail import EmailMultiAlternatives
 from django.test import override_settings
 
-from outreach.choices import DeliveryStatus, EventKind
+from outreach.choices import DeliveryStatus, EventKind, FailureKind
 from outreach.models import MailingDelivery, ProspectEvent
 from outreach.services.mailing import ProspectMailer
 from tests.base import MAIL_BASE_URL, OutreachTestCase
@@ -55,14 +55,13 @@ class MailingRetryAdminTests(OutreachTestCase):
         self.assertContains(response, "Chloe Durand")
         self.assertNotContains(response, "Denis Roux")
 
-    def test_detail_does_not_show_the_raw_delivery_error(self) -> None:
+    def test_detail_shows_why_a_delivery_failed(self) -> None:
         self.failed_delivery.refresh_from_db()
-        self.assertTrue(self.failed_delivery.last_error)
+        self.assertEqual(self.failed_delivery.failure_kind, FailureKind.REFUSED)
 
         response = self.client.get(outreach_mailing_change_url(self.mailing.pk))
 
-        self.assertNotContains(response, self.failed_delivery.last_error)
-        self.assertContains(response, "The mail could not be delivered.")
+        self.assertContains(response, "The mail server refused it")
 
     def test_a_mailing_without_deliveries_still_lists_its_events(self) -> None:
         legacy_mailing = MailingFactory()

@@ -17,6 +17,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
+- A failed delivery keeps a failure kind (`MailingDelivery.failure_kind`: *refused*, *server* or *content*) instead of the error text, which could hold the address of the recipient and the reply of the mail server. The prospect history, the dashboard, the mailing page and the data download show the kind. The `outreach` logger records the delivery id, the kind and the exception class. The history of older *mail failed* events is blanked. Migrations `0008` and `0009`. `TransientDeliveryError` carries the kind, and `last_error` is gone.
+
 - The detail page of a mailing no longer shows the mail server's error for a failed recipient, which can contain the address. It shows a short message instead.
 - `EmailTemplate.created_by` is now an optional foreign key to the host user model (cleared when the account is deleted) instead of a username string, and `updated_by` records who changed a template last. Migration `0004` matches the existing usernames to users through `USERNAME_FIELD`: a template whose author no longer matches an account ends up without an author. `EmailTemplates.save` and `create` take the user instead of a username.
 - `Prospect`, `MailingDelivery` and `EmailTemplate` share the abstract models `BaseModel` (uuid, `created_at`, `updated_at`) and `AuthoredModel` (adds `created_by`, `updated_by`). No schema change except the above.

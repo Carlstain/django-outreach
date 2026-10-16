@@ -29,7 +29,7 @@
               <span class="avatar tone-{{ event.prospect.avatar_tone }}{% if event.prospect.kind == 'organization' %} org{% endif %}" aria-hidden="true">{{ event.prospect.initials }}</span>
               <strong>{{ event.get_kind_display }}</strong>
               <a href="{% url 'outreach_admin:outreach_prospect_change' event.prospect.pk|admin_urlquote %}">{{ event.prospect.display_name }}</a>
-              {% if event.detail %}{{ event.detail }}{% endif %}
+              {% if event.detail_label %}{{ event.detail_label }}{% endif %}
               <small>{{ event.created_at|date:"SHORT_DATETIME_FORMAT" }} · {% include "outreach/includes/actor.html" with actor=event.actor %}</small>
             </li>
           {% endfor %}

@@ -57,8 +57,10 @@ a public issue. The same file lists the known limitations.
   erase its own copies: do not log it.
 - The data download of a prospect needs `view_prospect`, and the erase action `delete_prospect`.
   Both are the standard model permissions.
-- The delivery error text kept for a failed mail can contain the address of the person it was
-  sent to. It is part of the download and goes with the prospect when they are erased.
+- A failed mail keeps a kind (*refused*, *server* or *content*) and never the error text, which
+  can hold the address of the person and the reply of the mail server. The history, the dashboard,
+  the mailing page and the data download only show the kind. The `outreach` logger records the
+  delivery id, the kind and the class of the exception, with no address and no traceback.
 
 ## Theme
 
