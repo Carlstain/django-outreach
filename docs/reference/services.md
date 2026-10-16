@@ -8,7 +8,7 @@ a test as easily as from the admin.
 
 ```{eval-rst}
 .. autoclass:: outreach.services.mailing.ProspectMailer
-   :members: plan, render, send
+   :members: plan, render, send, retry
 
 .. autoclass:: outreach.services.mailing.MailPlan
    :members:

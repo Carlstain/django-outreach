@@ -1,14 +1,16 @@
 import smtplib
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import partial
+from uuid import UUID
 
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.mail.backends.base import BaseEmailBackend
 from django.db import transaction
 from django.db.models import F
+from django.db.models.functions import Greatest
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone, translation
@@ -217,14 +219,82 @@ class ProspectMailer:
         )
         if queued_mailing.mailing is None:
             return report
+        self.dispatch(queued_mailing.deliveries, report, is_newsletter, self.discard_delivery)
+        queued_mailing.mailing.refresh_from_db()
+        return report
+
+    def retry(self, mailing: Mailing, delivery_pk: UUID | None = None) -> MailReport:
+        """Send again the failed deliveries of a mailing, or only the given one.
+
+        Each delivery is claimed again and goes through ``deliver``, so a prospect that
+        unsubscribed since the failure is skipped. The resend cooldown is not applied: the
+        retry is an explicit choice. At most ``OUTREACH_MAX_RECIPIENTS_PER_SEND`` deliveries
+        are retried in synchronous mode, ``OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND`` with
+        Celery, and the rest stay failed.
+        """
+        deliveries = self.reopen(mailing, delivery_pk)
+        report = MailReport(mailing=mailing)
+        if deliveries:
+            self.dispatch(deliveries, report, mailing.is_newsletter, self.fail_again)
+        return report
+
+    def reopen(
+        self, mailing: Mailing, delivery_pk: UUID | None = None
+    ) -> list[MailingDelivery]:
+        with transaction.atomic():
+            failed_deliveries = (
+                MailingDelivery.objects.select_for_update(
+                    skip_locked=True, of=("self", "prospect")
+                )
+                .select_related("prospect")
+                .filter(mailing=mailing, status=DeliveryStatus.FAILED)
+            )
+            if delivery_pk is not None:
+                failed_deliveries = failed_deliveries.filter(pk=delivery_pk)
+            deliveries = list(failed_deliveries[: outreach_settings.recipient_cap])
+            if not deliveries:
+                return deliveries
+            claimed_at = timezone.now()
+            for delivery in deliveries:
+                delivery.status = DeliveryStatus.PENDING
+                delivery.attempts = 0
+                delivery.previous_mailed_at = delivery.prospect.last_mailed_at
+                delivery.updated_at = claimed_at
+            MailingDelivery.objects.bulk_update(
+                deliveries, ["status", "attempts", "previous_mailed_at", "updated_at"]
+            )
+            Prospect.objects.filter(
+                pk__in=[delivery.prospect_id for delivery in deliveries]
+            ).update(last_mailed_at=claimed_at)
+            Mailing.objects.filter(pk=mailing.pk).update(
+                failed_count=Greatest(F("failed_count") - len(deliveries), 0)
+            )
+        return deliveries
+
+    def dispatch(
+        self,
+        deliveries: list[MailingDelivery],
+        report: MailReport,
+        is_newsletter: bool,
+        abandon: Callable[[MailingDelivery], None],
+    ) -> None:
         if outreach_settings.dispatch == DispatchMode.CELERY:
-            self.enqueue(delivery.pk for delivery in queued_mailing.deliveries)
-            report.queued = [delivery.prospect for delivery in queued_mailing.deliveries]
-            return report
+            self.enqueue(delivery.pk for delivery in deliveries)
+            report.queued = [delivery.prospect for delivery in deliveries]
+            return
+        self.deliver_all(deliveries, report, is_newsletter, abandon)
+
+    def deliver_all(
+        self,
+        deliveries: list[MailingDelivery],
+        report: MailReport,
+        is_newsletter: bool,
+        abandon: Callable[[MailingDelivery], None],
+    ) -> None:
         connection = get_connection()
         delivered_pks: set[object] = set()
         try:
-            for delivery in queued_mailing.deliveries:
+            for delivery in deliveries:
                 status = self.deliver(delivery.pk, connection)
                 delivered_pks.add(delivery.pk)
                 if status == DeliveryStatus.SENT:
@@ -239,12 +309,21 @@ class ProspectMailer:
                     )
         finally:
             connection.close()
-            for delivery in queued_mailing.deliveries:
+            for delivery in deliveries:
                 if delivery.pk not in delivered_pks:
-                    self.release(delivery.prospect, delivery.previous_mailed_at)
-                    delivery.delete()
-        queued_mailing.mailing.refresh_from_db()
-        return report
+                    abandon(delivery)
+
+    def discard_delivery(self, delivery: MailingDelivery) -> None:
+        self.release(delivery.prospect, delivery.previous_mailed_at)
+        delivery.delete()
+
+    def fail_again(self, delivery: MailingDelivery) -> None:
+        self.release(delivery.prospect, delivery.previous_mailed_at)
+        delivery.status = DeliveryStatus.FAILED
+        delivery.save(update_fields=["status", "updated_at"])
+        Mailing.objects.filter(pk=delivery.mailing_id).update(
+            failed_count=F("failed_count") + 1
+        )
 
     def queue(
         self,

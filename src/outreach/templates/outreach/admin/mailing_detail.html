@@ -15,6 +15,12 @@
     </div>
     <div class="actions">
       <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Mailings" %}</a>
+      {% if can_retry and failed_total %}
+        <form method="post" action="{% url 'outreach_admin:outreach_mailing_retry' original.pk|admin_urlquote %}">
+          {% csrf_token %}
+          <button type="submit" class="btn fill">{% blocktrans with count=failed_total %}Retry all failed ({{ count }}){% endblocktrans %}</button>
+        </form>
+      {% endif %}
       {% if has_delete_permission %}
         {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
         <a class="btn danger" href="{% add_preserved_filters delete_url %}">{% trans "Delete" %}</a>
@@ -40,13 +46,41 @@
     <div class="stack">
       <div class="card">
         <h3>{% trans "Recipients" %}</h3>
-        {% if recipients %}
+        {% if deliveries %}
+          <ul class="skiplist">
+            {% for delivery in deliveries %}
+              <li>
+                <span>
+                  <strong><a href="{% url 'outreach_admin:outreach_prospect_change' delivery.prospect.pk|admin_urlquote %}">{{ delivery.prospect.display_name }}</a></strong>
+                  {% if delivery.status == "failed" %}<br><small>{% trans "The mail could not be delivered." %}</small>{% endif %}
+                  {% if delivery.attempts > 1 %}<br><small>{% blocktrans with count=delivery.attempts %}{{ count }} attempts{% endblocktrans %}</small>{% endif %}
+                </span>
+                <span>
+                  {% if delivery.status == "failed" %}
+                    {% if can_retry %}
+                      <form method="post" action="{% url 'outreach_admin:outreach_mailing_retry' original.pk|admin_urlquote %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="delivery" value="{{ delivery.pk }}">
+                        <button type="submit" class="btn small quiet">{% trans "Retry" %}</button>
+                      </form>
+                    {% endif %}
+                    <span class="badge unsub">{% trans "failed" context "recipient" %}</span>
+                  {% elif delivery.status == "pending" %}
+                    <span class="badge prospect">{% trans "pending" context "recipient" %}</span>
+                  {% else %}
+                    <span class="badge contacted">{% trans "sent" context "recipient" %}</span>
+                  {% endif %}
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% elif recipients %}
           <ul class="skiplist">
             {% for event in recipients %}
               <li>
                 <span>
                   <strong><a href="{% url 'outreach_admin:outreach_prospect_change' event.prospect.pk|admin_urlquote %}">{{ event.prospect.display_name }}</a></strong>
-                  {% if event.kind == "mail_failed" and event.detail %}<br><small>{{ event.detail }}</small>{% endif %}
+                  {% if event.kind == "mail_failed" %}<br><small>{% trans "The mail could not be delivered." %}</small>{% endif %}
                 </span>
                 {% if event.kind == "mail_failed" %}<span class="badge unsub">{% trans "failed" context "recipient" %}</span>{% else %}<span class="badge contacted">{% trans "sent" context "recipient" %}</span>{% endif %}
               </li>
