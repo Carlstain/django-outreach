@@ -84,6 +84,16 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
 
 The signals are listed in {doc}`../topics/signals`.
 
+## Access and erasure
+
+```{eval-rst}
+.. autoclass:: outreach.services.prospect_export.ProspectDataExporter
+   :members: export
+
+.. autoclass:: outreach.services.erasure.ProspectEraser
+   :members: erase
+```
+
 ## Templates
 
 ```{eval-rst}

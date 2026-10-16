@@ -29,6 +29,10 @@ def outreach_prospect_delete_url(prospect_pk: str) -> str:
     return reverse("outreach_admin:outreach_prospect_delete", args=[prospect_pk])
 
 
+def outreach_prospect_export_data_url(prospect_pk: str) -> str:
+    return reverse("outreach_admin:outreach_prospect_export_data", args=[prospect_pk])
+
+
 def outreach_prospect_import_url() -> str:
     return reverse("outreach_admin:outreach_prospect_import")
 

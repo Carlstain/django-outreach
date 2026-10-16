@@ -49,6 +49,17 @@ a public issue. The same file lists the known limitations.
   `OUTREACH_MAX_IMPORT_BYTES` are rejected before they are parsed, and files over
   `OUTREACH_MAX_IMPORT_ROWS` rows are rejected.
 
+## Access and erasure requests
+
+- Erasing a prospect keeps only the suppression hash of the address, so it is never mailed again,
+  and deletes everything else about them. Mailings hold counts, never names, and are not
+  rewritten. The `prospect_erased` signal carries the address on purpose, so that the host can
+  erase its own copies: do not log it.
+- The data download of a prospect needs `view_prospect`, and the erase action `delete_prospect`.
+  Both are the standard model permissions.
+- The delivery error text kept for a failed mail can contain the address of the person it was
+  sent to. It is part of the download and goes with the prospect when they are erased.
+
 ## Theme
 
 `outreach_theme_css` writes values from `OUTREACH_THEME` into a `<style>` block. Only validated
