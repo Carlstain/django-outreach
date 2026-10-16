@@ -753,6 +753,7 @@ a {
     input[type="search"],
     input[type="date"],
     input[type="time"],
+    input[type="datetime-local"],
     select,
     textarea
   ) {

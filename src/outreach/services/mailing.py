@@ -153,14 +153,17 @@ class ProspectMailer:
         header_text: str = "",
         is_newsletter: bool = True,
         preview: bool = False,
+        unsubscribe_url: str | None = None,
     ) -> RenderedMail:
         """Render the subject and body for one prospect, as text and HTML.
 
-        Tags run first, then variables, and the HTML is sanitised after substitution.
+        Tags run first, then variables, and the HTML is sanitised after substitution. The
+        unsubscribe link is the prospect's own unless ``unsubscribe_url`` replaces it.
         """
         variables = MailVariables()
         sanitizer = MailBodySanitizer()
-        unsubscribe_url = self.unsubscribe_url(prospect)
+        if unsubscribe_url is None:
+            unsubscribe_url = self.unsubscribe_url(prospect)
         values = {**variables.values_for(prospect), "unsubscribe_url": unsubscribe_url}
         with translation.override(outreach_settings.language):
             tagged_subject = mail_tag_library.render(
@@ -561,17 +564,60 @@ class ProspectMailer:
                 "List-Unsubscribe": f"<{self.unsubscribe_url(prospect)}>",
                 "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
             }
+        self.send_rendered(rendered, prospect.email, headers=headers, connection=connection)
+
+    def send_rendered(
+        self,
+        rendered: RenderedMail,
+        recipient_email: str,
+        *,
+        subject_prefix: str = "",
+        headers: dict[str, str] | None = None,
+        connection: BaseEmailBackend | None = None,
+    ) -> None:
         message = EmailMultiAlternatives(
-            subject=rendered.subject,
+            subject=f"{subject_prefix}{rendered.subject}",
             body=rendered.text,
             from_email=outreach_settings.from_email,
-            to=[prospect.email],
+            to=[recipient_email],
             connection=connection,
-            headers=headers,
+            headers=headers or {},
         )
         message.attach_alternative(rendered.html, "text/html")
         if message.send() == 0:
             raise MessageNotAccepted("The mail server did not accept the message.")
+
+    def send_sample(
+        self,
+        prospect: Prospect,
+        subject: str,
+        body_html: str,
+        recipient_email: str,
+        *,
+        header_text: str = "",
+        is_newsletter: bool = True,
+    ) -> None:
+        """Send one copy of a mail to ``recipient_email`` only, rendered for ``prospect``.
+
+        It is a test: the subject starts with ``[Test]``, tags render as in the preview, the
+        unsubscribe link goes to the site root and there are no ``List-Unsubscribe`` headers,
+        so nothing in the copy can unsubscribe the prospect. It writes nothing: no claim, no
+        mailing, no event and no signal.
+
+        Raises:
+            MessageNotAccepted: The mail server took the message but delivered nothing.
+            OSError: The mail server could not be reached or refused the message.
+        """
+        rendered = self.render(
+            prospect,
+            subject,
+            body_html,
+            header_text=header_text,
+            is_newsletter=is_newsletter,
+            preview=True,
+            unsubscribe_url=f"{self.base_url}/",
+        )
+        self.send_rendered(rendered, recipient_email, subject_prefix="[Test] ")
 
     def mark_mailed(self, prospect: Prospect, subject: str, mailing: Mailing) -> None:
         now = timezone.now()
