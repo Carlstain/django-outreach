@@ -12,9 +12,16 @@
       <p class="eyebrow">{% trans "Mailing" %}</p>
       <h2>{{ original.subject }}</h2>
       <p>{% blocktrans with sender=original.sender sent_at=original.created_at|date:"DATETIME_FORMAT" %}Sent by {{ sender }} on {{ sent_at }}.{% endblocktrans %} {% if original.is_newsletter %}{% trans "Newsletter." %}{% else %}{% trans "Notice to members." %}{% endif %}</p>
+      {% if is_scheduled %}<p>{% blocktrans with when=original.scheduled_for|date:"DATETIME_FORMAT" %}Scheduled for {{ when }}. It starts when the scheduler runs after that time.{% endblocktrans %}</p>{% endif %}
     </div>
     <div class="actions">
       <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Mailings" %}</a>
+      {% if can_retry and is_scheduled %}
+        <form method="post" action="{% url 'outreach_admin:outreach_mailing_cancel_schedule' original.pk|admin_urlquote %}">
+          {% csrf_token %}
+          <button type="submit" class="btn danger">{% trans "Cancel the schedule" %}</button>
+        </form>
+      {% endif %}
       {% if can_retry and failed_total %}
         <form method="post" action="{% url 'outreach_admin:outreach_mailing_retry' original.pk|admin_urlquote %}">
           {% csrf_token %}
@@ -65,6 +72,8 @@
                       </form>
                     {% endif %}
                     <span class="badge unsub">{% trans "failed" context "recipient" %}</span>
+                  {% elif delivery.status == "scheduled" %}
+                    <span class="badge prospect">{% trans "scheduled" context "recipient" %}</span>
                   {% elif delivery.status == "pending" %}
                     <span class="badge prospect">{% trans "pending" context "recipient" %}</span>
                   {% else %}

@@ -69,6 +69,44 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 Start a worker as usual (`celery -A mysite worker`).
 
+## Scheduling a send
+
+In Celery mode the compose page of a mail has a *Send at* field. Leave it empty to send now, or
+choose a time to have the mail go out then. The time is read in the time zone of the project.
+
+A scheduled mailing keeps its recipients as `scheduled` deliveries and claims nobody. When its
+time comes, the recipients are claimed, one task is queued for each, and from then on it works
+like any other send. So nobody is held back from other mailings while it waits, and a recipient
+mailed by another mailing within `OUTREACH_RESEND_COOLDOWN` in the meantime is skipped and
+counted. People who unsubscribed in the meantime are skipped when their mail is delivered, as
+always. The recipients are chosen when you schedule, with the same rules as a send.
+
+**Something has to start it.** Outreach has no clock of its own, so a scheduled mailing is only
+sent when you run one of these, every minute or so:
+
+```python
+# settings.py, with Celery beat
+CELERY_BEAT_SCHEDULE = {
+    "outreach-send-due-mailings": {
+        "task": "outreach.send_due_mailings",
+        "schedule": 60.0,
+    },
+}
+```
+
+```shell
+# or from cron, without beat
+* * * * * cd /srv/mysite && python manage.py outreach_send_due_mailings
+```
+
+Without one of them a scheduled mailing stays scheduled for ever. The mailing page says *Scheduled
+for* until it starts, and a *Cancel the schedule* button deletes it while it has not started.
+
+Scheduling is not available in synchronous mode, and the field is not shown. If you switch back to
+synchronous mode, mailings still scheduled stay scheduled and the command refuses to start them:
+cancel them or switch back. A mailing is only sent at the first run after its time, so a one
+minute schedule means up to a minute late.
+
 ## Queue and rate limit
 
 To use a separate queue, set `OUTREACH_CELERY_QUEUE = "outreach"` and start a worker for it

@@ -34,6 +34,14 @@ Fill in:
 
 The *Insert variable* button in the editor toolbar adds a variable at the cursor.
 
+## Send now or later
+
+When Outreach sends with Celery, the compose page has a *Send at* field. Empty means now. With a
+time, the preview button reads *Schedule for N prospects*, and nothing is sent until that time.
+The mailing appears in *Mailings* with its scheduled time and the recipients as *scheduled*, and
+can be cancelled from its page until it starts. Someone has to run the scheduler for it to start,
+see {doc}`../topics/sending-with-celery`.
+
 ## Newsletter or notice
 
 | | Newsletter (ticked) | Notice (unticked) |

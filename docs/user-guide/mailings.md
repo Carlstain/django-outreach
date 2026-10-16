@@ -29,6 +29,13 @@ Open a mailing to see:
 Skipped people are stored as counts, never as names. A mailing outlives the prospects it was sent
 to, and it must not keep data about someone who asked for erasure.
 
+## Scheduled mailings
+
+A mailing sent for later shows *Scheduled for* its time, with its recipients as *scheduled*, in
+the list and on its page. *Cancel the schedule* needs `outreach.change_prospect` and deletes it
+while it has not started. Once started, a mailing can not be cancelled, only deleted from the
+log. Nothing starts without the scheduler, see {doc}`../topics/sending-with-celery`.
+
 ## Retrying failed recipients
 
 A failed recipient has a **Retry** button, and **Retry all failed** sends again to every one of

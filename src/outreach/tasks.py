@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from outreach.conf import outreach_settings
 from outreach.models import MailingDelivery
 from outreach.services.mailing import ProspectMailer, TransientDeliveryError
+from outreach.services.scheduling import MailingScheduler
 
 RETRY_BASE_DELAY_SECONDS = 60
 
@@ -27,3 +28,8 @@ def deliver_mail(self, delivery_pk: str) -> str | None:
         countdown = RETRY_BASE_DELAY_SECONDS * 2**self.request.retries
         raise self.retry(exc=error, countdown=countdown, max_retries=None) from error
     return status.value if status else None
+
+
+@shared_task(name="outreach.send_due_mailings")
+def send_due_mailings() -> int:
+    return MailingScheduler.start_due()

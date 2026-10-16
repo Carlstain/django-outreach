@@ -10,7 +10,9 @@ from django.forms import ModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import URLPattern, path, reverse
+from django.utils.formats import date_format
 from django.utils.html import format_html
+from django.utils.timezone import template_localtime
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
 
@@ -41,6 +43,7 @@ from outreach.services.prospect_csv import (
     ProspectCsvImporter,
 )
 from outreach.services.prospect_export import ProspectDataExporter
+from outreach.services.scheduling import MailingScheduler
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from outreach.services.unsubscribe import ProspectUnsubscriber
 from outreach.sites import outreach_site
@@ -324,14 +327,31 @@ class ProspectAdmin(admin.ModelAdmin):
 
         if step == STEP_SEND:
             subject = form.cleaned_data["subject"]
-            report = mailer.send(
-                queryset,
-                subject,
-                form.cleaned_data["body"],
-                header_text=form.cleaned_data["header_text"],
-                is_newsletter=form.cleaned_data["is_newsletter"],
-            )
-            if report.queued:
+            send_at = form.cleaned_data.get("send_at")
+            message_fields = {
+                "header_text": form.cleaned_data["header_text"],
+                "is_newsletter": form.cleaned_data["is_newsletter"],
+            }
+            if send_at:
+                report = MailingScheduler(mailer).schedule(
+                    queryset,
+                    subject,
+                    form.cleaned_data["body"],
+                    send_at=send_at,
+                    **message_fields,
+                )
+            else:
+                report = mailer.send(
+                    queryset, subject, form.cleaned_data["body"], **message_fields
+                )
+            if report.scheduled:
+                message = _("%(scheduled)d scheduled for %(time)s, %(skipped)d skipped.") % {
+                    "scheduled": len(report.scheduled),
+                    "time": date_format(template_localtime(send_at), "DATETIME_FORMAT"),
+                    "skipped": len(report.skipped),
+                }
+                level = messages.SUCCESS
+            elif report.queued:
                 message = _("%(queued)d queued, %(skipped)d skipped.") % {
                     "queued": len(report.queued),
                     "skipped": len(report.skipped),
@@ -387,6 +407,7 @@ class ProspectAdmin(admin.ModelAdmin):
                 preview_html=rendered.html,
                 preview_subject=rendered.subject,
                 subject=subject,
+                send_at=form.cleaned_data.get("send_at"),
                 preview_choices=[
                     (str(prospect.pk), prospect.display_name) for prospect in plan.recipients
                 ],
