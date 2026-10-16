@@ -2,3 +2,4 @@
 <input type="hidden" name="body" value="{{ form.body.value }}">
 <input type="hidden" name="header_text" value="{{ form.header_text.value|default_if_none:'' }}">
 {% if form.is_newsletter.value %}<input type="hidden" name="is_newsletter" value="on">{% endif %}
+{% if form.send_at %}<input type="hidden" name="send_at" value="{{ form.send_at.value|default_if_none:'' }}">{% endif %}

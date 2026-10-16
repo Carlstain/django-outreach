@@ -68,6 +68,7 @@ class MailReport:
 
     mailing: Mailing | None = None
     queued: list[Prospect] = field(default_factory=list)
+    scheduled: list[Prospect] = field(default_factory=list)
     sent: list[Prospect] = field(default_factory=list)
     failed: list[Prospect] = field(default_factory=list)
     skipped: list[SkippedProspect] = field(default_factory=list)
@@ -333,8 +334,13 @@ class ProspectMailer:
         body_html: str,
         header_text: str,
         is_newsletter: bool,
+        send_at: datetime | None = None,
     ) -> QueuedMailing:
-        """Claim the recipients and create the mailing with one pending delivery each."""
+        """Create the mailing with one delivery per recipient, and claim the recipients.
+
+        With ``send_at`` the deliveries are ``scheduled`` and nothing is claimed: the claim
+        happens when the mailing starts, see ``MailingScheduler``.
+        """
         requested_pks = [prospect.pk for prospect in prospects]
         with transaction.atomic():
             locked_prospects = (
@@ -355,18 +361,22 @@ class ProspectMailer:
                 sender=self.actor[: Mailing._meta.get_field("sender").max_length],
                 skipped_count=len(mail_plan.skipped),
                 skipped_reasons=mail_plan.skipped_counts,
+                scheduled_for=send_at,
             )
+            status = DeliveryStatus.PENDING if send_at is None else DeliveryStatus.SCHEDULED
             deliveries = MailingDelivery.objects.bulk_create(
                 MailingDelivery(
                     mailing=mailing,
                     prospect=prospect,
-                    previous_mailed_at=prospect.last_mailed_at,
+                    status=status,
+                    previous_mailed_at=prospect.last_mailed_at if send_at is None else None,
                 )
                 for prospect in mail_plan.recipients
             )
-            Prospect.objects.filter(
-                pk__in=[prospect.pk for prospect in mail_plan.recipients]
-            ).update(last_mailed_at=timezone.now())
+            if send_at is None:
+                Prospect.objects.filter(
+                    pk__in=[prospect.pk for prospect in mail_plan.recipients]
+                ).update(last_mailed_at=timezone.now())
         return QueuedMailing(plan=mail_plan, mailing=mailing, deliveries=deliveries)
 
     @staticmethod
@@ -485,7 +495,8 @@ class ProspectMailer:
         delivery.last_error = error[:255]
         delivery.save(update_fields=["status", "attempts", "last_error", "updated_at"])
 
-    def skip_in_mailing(self, mailing: Mailing, reason: SkipReason) -> None:
+    @staticmethod
+    def skip_in_mailing(mailing: Mailing, reason: SkipReason, count: int = 1) -> None:
         locked_mailing = (
             Mailing.objects.select_for_update()
             .only("skipped_count", "skipped_reasons")
@@ -493,9 +504,9 @@ class ProspectMailer:
         )
         reasons = {skip_reason.value: 0 for skip_reason in SkipReason}
         reasons.update(locked_mailing.skipped_reasons)
-        reasons[reason.value] += 1
+        reasons[reason.value] += count
         locked_mailing.skipped_reasons = reasons
-        locked_mailing.skipped_count += 1
+        locked_mailing.skipped_count += count
         locked_mailing.save(update_fields=["skipped_count", "skipped_reasons"])
 
     def is_still_mailable(self, prospect: Prospect, is_newsletter: bool) -> bool:

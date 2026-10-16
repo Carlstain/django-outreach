@@ -40,6 +40,10 @@ class OutreachSettings:
         return getattr(settings, "OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND", 5000)
 
     @property
+    def uses_celery(self) -> bool:
+        return self.dispatch == DispatchMode.CELERY
+
+    @property
     def recipient_cap(self) -> int:
         if self.dispatch == DispatchMode.CELERY:
             return self.celery_max_recipients_per_send

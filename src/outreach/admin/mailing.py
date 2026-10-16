@@ -18,6 +18,7 @@ from outreach.choices import DeliveryStatus, EventKind
 from outreach.conf import outreach_settings
 from outreach.models import Mailing
 from outreach.services.mailing import ProspectMailer
+from outreach.services.scheduling import MailingScheduler
 from outreach.sites import outreach_site
 
 
@@ -27,6 +28,7 @@ class MailingAdmin(admin.ModelAdmin):
         "subject",
         "sender",
         "created_at",
+        "scheduled_for",
         "pending_count",
         "sent_count",
         "failed_count",
@@ -69,8 +71,35 @@ class MailingAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.retry_view),
                 name="outreach_mailing_retry",
             ),
+            path(
+                "<path:object_id>/cancel-schedule/",
+                self.admin_site.admin_view(self.cancel_schedule_view),
+                name="outreach_mailing_cancel_schedule",
+            ),
             *super().get_urls(),
         ]
+
+    def cancel_schedule_view(self, request: HttpRequest, object_id: str) -> HttpResponse:
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+        if not self.has_retry_permission(request):
+            raise PermissionDenied
+        mailing = self.get_object(request, object_id)
+        if mailing is None:
+            raise Http404
+        if MailingScheduler.cancel(mailing):
+            self.message_user(
+                request, _("The scheduled mailing was cancelled."), messages.SUCCESS
+            )
+            return HttpResponseRedirect(reverse("outreach_admin:outreach_mailing_changelist"))
+        self.message_user(
+            request,
+            _("This mailing has already started, it can not be cancelled."),
+            messages.ERROR,
+        )
+        return HttpResponseRedirect(
+            reverse("outreach_admin:outreach_mailing_change", args=[object_id])
+        )
 
     def retry_view(self, request: HttpRequest, object_id: str) -> HttpResponse:
         if request.method != "POST":
@@ -136,6 +165,9 @@ class MailingAdmin(admin.ModelAdmin):
             "can_retry": self.has_retry_permission(request),
             "failed_total": sum(
                 delivery.status == DeliveryStatus.FAILED for delivery in deliveries
+            ),
+            "is_scheduled": any(
+                delivery.status == DeliveryStatus.SCHEDULED for delivery in deliveries
             ),
             "skipped_reasons": skipped_reasons,
             **(extra_context or {}),

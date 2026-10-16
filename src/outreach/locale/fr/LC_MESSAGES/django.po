@@ -282,6 +282,9 @@ msgstr "dernier envoi"
 msgid "created at"
 msgstr "créé le"
 
+msgid "scheduled for"
+msgstr "programmé pour"
+
 msgid "updated at"
 msgstr "modifié le"
 
@@ -1166,6 +1169,50 @@ msgid_plural "Send to %(counter)s prospects"
 msgstr[0] "Envoyer à %(counter)s prospect"
 msgstr[1] "Envoyer à %(counter)s prospects"
 
+#, python-format
+msgid "Schedule for %(counter)s prospect"
+msgid_plural "Schedule for %(counter)s prospects"
+msgstr[0] "Programmer pour %(counter)s prospect"
+msgstr[1] "Programmer pour %(counter)s prospects"
+
+#, python-format
+msgid "It will go out on %(when)s."
+msgstr "Il partira le %(when)s."
+
+msgid "Send at"
+msgstr "Envoyer à"
+
+msgid "Choose a time in the future."
+msgstr "Choisissez une heure dans le futur."
+
+msgid ""
+"Leave empty to send now. A scheduled mail goes out when the scheduler runs, "
+"see the documentation."
+msgstr ""
+"Laissez vide pour envoyer tout de suite. Un mail programmé part quand le "
+"planificateur s'exécute, voir la documentation."
+
+#, python-format
+msgid "%(scheduled)d scheduled for %(time)s, %(skipped)d skipped."
+msgstr "%(scheduled)d programmés pour le %(time)s, %(skipped)d ignorés."
+
+msgid "The scheduled mailing was cancelled."
+msgstr "L'envoi programmé a été annulé."
+
+msgid "This mailing has already started, it can not be cancelled."
+msgstr "Cet envoi a déjà commencé, il ne peut plus être annulé."
+
+msgid "Cancel the schedule"
+msgstr "Annuler la programmation"
+
+#, python-format
+msgid "Scheduled for %(when)s. It starts when the scheduler runs after that time."
+msgstr "Programmé pour le %(when)s. Il démarre quand le planificateur s'exécute après cette heure."
+
+msgctxt "recipient"
+msgid "scheduled"
+msgstr "programmé"
+
 msgid "Preview as"
 msgstr "Aperçu pour"
 
@@ -1483,6 +1530,9 @@ msgstr "Celery"
 
 msgid "Pending"
 msgstr "En attente"
+
+msgid "Scheduled"
+msgstr "Programmé"
 
 msgid "attempts"
 msgstr "tentatives"

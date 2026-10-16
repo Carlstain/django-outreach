@@ -20,6 +20,9 @@ class Mailing(models.Model):
     is_newsletter = models.BooleanField(default=True, verbose_name=_("newsletter"))
     sender = models.CharField(max_length=150, verbose_name=_("sender"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"))
+    scheduled_for = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("scheduled for")
+    )
     sent_count = models.PositiveIntegerField(default=0, verbose_name=_("sent"))
     failed_count = models.PositiveIntegerField(default=0, verbose_name=_("failed"))
     skipped_count = models.PositiveIntegerField(default=0, verbose_name=_("skipped"))

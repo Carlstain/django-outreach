@@ -20,10 +20,11 @@
         <p class="eyebrow">{% blocktrans with current=2 total=2 %}Step {{ current }} of {{ total }}{% endblocktrans %}</p>
         <h2>{% trans "Check and send" %}</h2>
         <p>{% blocktrans count counter=recipient_count %}This is what the recipient will get, with their own details filled in.{% plural %}This is what each of the {{ counter }} recipients will get, with their own details filled in.{% endblocktrans %}</p>
+        {% if send_at %}<p>{% blocktrans with when=send_at|date:"DATETIME_FORMAT" %}It will go out on {{ when }}.{% endblocktrans %}</p>{% endif %}
       </div>
       <div class="actions">
         <button class="btn quiet" type="submit" name="step" value="compose" formnovalidate><svg class="ico"><use href="#i-back"/></svg>{% trans "Edit message" %}</button>
-        <button class="btn fill" type="submit" name="step" value="send"{% if not recipient_count %} disabled{% endif %}><svg class="ico"><use href="#i-send"/></svg>{% blocktrans count counter=recipient_count %}Send to {{ counter }} prospect{% plural %}Send to {{ counter }} prospects{% endblocktrans %}</button>
+        <button class="btn fill" type="submit" name="step" value="send"{% if not recipient_count %} disabled{% endif %}><svg class="ico"><use href="#i-send"/></svg>{% if send_at %}{% blocktrans count counter=recipient_count %}Schedule for {{ counter }} prospect{% plural %}Schedule for {{ counter }} prospects{% endblocktrans %}{% else %}{% blocktrans count counter=recipient_count %}Send to {{ counter }} prospect{% plural %}Send to {{ counter }} prospects{% endblocktrans %}{% endif %}</button>
       </div>
     </div>
   </form>
