@@ -1,24 +1,17 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from django.test import override_settings
 from django.utils import timezone
 
 from outreach.models import Mailing, MailingDelivery
-from outreach.services.mailing import ProspectMailer
-from outreach.services.scheduling import MailingScheduler
 from outreach.tasks import deliver_mail
-from tests.base import MAIL_BASE_URL, OutreachTestCase
+from tests.base import CeleryMailTestCase
 from tests.factories import ProspectFactory
 
 
-@override_settings(
-    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
-)
-class CancelScheduledMailingTests(OutreachTestCase):
+class CancelScheduledMailingTests(CeleryMailTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.scheduler = MailingScheduler(ProspectMailer(MAIL_BASE_URL, "staff"))
         self.mailing = self.scheduler.schedule(
             [ProspectFactory()],
             "Subject",

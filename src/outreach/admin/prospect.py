@@ -10,9 +10,7 @@ from django.forms import ModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import URLPattern, path, reverse
-from django.utils.formats import date_format
 from django.utils.html import format_html
-from django.utils.timezone import template_localtime
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
 
@@ -269,15 +267,9 @@ class ProspectAdmin(admin.ModelAdmin):
     def send_mail(
         self, request: HttpRequest, queryset: QuerySet[Prospect]
     ) -> HttpResponse | None:
-        base_url = outreach_settings.base_url
-        if base_url is None:
-            self.message_user(
-                request,
-                _("OUTREACH_BASE_URL is not set, sending is disabled."),
-                messages.ERROR,
-            )
+        mailer = self.admin_site.mailer_for(request)
+        if mailer is None:
             return None
-        mailer = ProspectMailer(base_url=base_url, actor=request.user.get_username())
         step = request.POST.get("step")
         form = MessageForm(request.POST) if step else MessageForm()
         requested_step = step
@@ -327,13 +319,16 @@ class ProspectAdmin(admin.ModelAdmin):
             )
             step = None
 
-        if step == STEP_SEND:
-            subject = form.cleaned_data["subject"]
-            send_at = form.cleaned_data.get("send_at")
+        message_fields = {}
+        if step in (STEP_PREVIEW, STEP_TEST, STEP_SEND):
             message_fields = {
                 "header_text": form.cleaned_data["header_text"],
                 "is_newsletter": form.cleaned_data["is_newsletter"],
             }
+
+        if step == STEP_SEND:
+            subject = form.cleaned_data["subject"]
+            send_at = form.cleaned_data.get("send_at")
             if send_at:
                 report = MailingScheduler(mailer).schedule(
                     queryset,
@@ -346,27 +341,7 @@ class ProspectAdmin(admin.ModelAdmin):
                 report = mailer.send(
                     queryset, subject, form.cleaned_data["body"], **message_fields
                 )
-            if report.scheduled:
-                message = _("%(scheduled)d scheduled for %(time)s, %(skipped)d skipped.") % {
-                    "scheduled": len(report.scheduled),
-                    "time": date_format(template_localtime(send_at), "DATETIME_FORMAT"),
-                    "skipped": len(report.skipped),
-                }
-                level = messages.SUCCESS
-            elif report.queued:
-                message = _("%(queued)d queued, %(skipped)d skipped.") % {
-                    "queued": len(report.queued),
-                    "skipped": len(report.skipped),
-                }
-                level = messages.SUCCESS
-            else:
-                message = _("%(sent)d sent, %(skipped)d skipped, %(failed)d failed.") % {
-                    "sent": len(report.sent),
-                    "skipped": len(report.skipped),
-                    "failed": len(report.failed),
-                }
-                level = messages.WARNING if report.failed else messages.SUCCESS
-            self.message_user(request, message, level)
+            self.message_user(request, *self.admin_site.report_message(report))
             return None
 
         context = {
@@ -397,15 +372,14 @@ class ProspectAdmin(admin.ModelAdmin):
                     preview_prospect,
                     subject,
                     form.cleaned_data["body"],
-                    header_text=form.cleaned_data["header_text"],
-                    is_newsletter=form.cleaned_data["is_newsletter"],
                     preview=True,
+                    **message_fields,
                 )
             except InvalidButtonLink as error:
                 form.add_error("body", str(error))
                 return TemplateResponse(request, "outreach/admin/compose.html", context)
             if step == STEP_TEST:
-                self.send_test_mail(request, mailer, preview_prospect, form)
+                self.send_test_mail(request, mailer, preview_prospect, form, message_fields)
             context.update(
                 preview_prospect=preview_prospect,
                 preview_html=rendered.html,
@@ -425,6 +399,7 @@ class ProspectAdmin(admin.ModelAdmin):
         mailer: ProspectMailer,
         prospect: Prospect,
         form: MessageForm,
+        message_fields: dict[str, Any],
     ) -> None:
         recipient_email = getattr(request.user, request.user.get_email_field_name(), "")
         if not recipient_email:
@@ -440,8 +415,7 @@ class ProspectAdmin(admin.ModelAdmin):
                 form.cleaned_data["subject"],
                 form.cleaned_data["body"],
                 recipient_email,
-                header_text=form.cleaned_data["header_text"],
-                is_newsletter=form.cleaned_data["is_newsletter"],
+                **message_fields,
             )
         except (OSError, MessageNotAccepted):
             self.message_user(

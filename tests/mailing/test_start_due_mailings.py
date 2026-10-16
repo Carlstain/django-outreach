@@ -1,32 +1,22 @@
 from datetime import timedelta
 from io import StringIO
-from unittest.mock import patch
 
 from django.core.management import CommandError, call_command
 from django.test import override_settings
 from django.utils import timezone
 
 from outreach.choices import DeliveryStatus
-from outreach.services.mailing import ProspectMailer
-from outreach.services.scheduling import MailingScheduler
-from outreach.tasks import deliver_mail, send_due_mailings
-from tests.base import MAIL_BASE_URL, OutreachTestCase
+from outreach.tasks import send_due_mailings
+from tests.base import CeleryMailTestCase
 from tests.factories import ProspectFactory
 
 
-@override_settings(
-    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
-)
-class StartDueMailingsTests(OutreachTestCase):
+class StartDueMailingsTests(CeleryMailTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.scheduler = MailingScheduler(ProspectMailer(MAIL_BASE_URL, "staff"))
         self.now = timezone.now()
         self.due_mailing = self.schedule(self.now - timedelta(minutes=1))
         self.later_mailing = self.schedule(self.now + timedelta(hours=1))
-        publisher = patch.object(deliver_mail, "apply_async")
-        self.apply_async = publisher.start()
-        self.addCleanup(publisher.stop)
 
     def schedule(self, send_at):
         return self.scheduler.schedule(

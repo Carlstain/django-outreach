@@ -2,22 +2,15 @@ from smtplib import SMTPRecipientsRefused
 from unittest.mock import patch
 
 from django.core.mail import EmailMultiAlternatives
-from django.test import override_settings
 
 from outreach.choices import DeliveryStatus
-from outreach.services.mailing import ProspectMailer
-from outreach.tasks import deliver_mail
-from tests.base import MAIL_BASE_URL, OutreachTestCase
+from tests.base import CeleryMailTestCase
 from tests.factories import ProspectFactory
 
 
-@override_settings(
-    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
-)
-class CeleryRetryTests(OutreachTestCase):
+class CeleryRetryTests(CeleryMailTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.mailer = ProspectMailer(MAIL_BASE_URL, "staff")
         self.prospect = ProspectFactory()
         with self.captureOnCommitCallbacks(execute=False):
             queued_mailing = self.mailer.queue(
@@ -29,9 +22,6 @@ class CeleryRetryTests(OutreachTestCase):
             EmailMultiAlternatives, "send", side_effect=SMTPRecipientsRefused({})
         ):
             self.mailer.deliver(self.delivery.pk, may_retry=True)
-        publisher = patch.object(deliver_mail, "apply_async")
-        self.apply_async = publisher.start()
-        self.addCleanup(publisher.stop)
 
     def test_the_reopened_delivery_is_queued_with_its_attempts_reset(self) -> None:
         with self.captureOnCommitCallbacks(execute=True):

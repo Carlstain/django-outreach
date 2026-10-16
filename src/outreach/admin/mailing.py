@@ -15,9 +15,7 @@ from django.urls import URLPattern, path, reverse
 from django.utils.translation import gettext_lazy as _
 
 from outreach.choices import DeliveryStatus, EventKind
-from outreach.conf import outreach_settings
 from outreach.models import Mailing
-from outreach.services.mailing import ProspectMailer
 from outreach.services.scheduling import MailingScheduler
 from outreach.sites import outreach_site
 
@@ -110,32 +108,16 @@ class MailingAdmin(admin.ModelAdmin):
         if mailing is None:
             raise Http404
         detail_url = reverse("outreach_admin:outreach_mailing_change", args=[mailing.pk])
-        base_url = outreach_settings.base_url
-        if base_url is None:
-            self.message_user(
-                request,
-                _("OUTREACH_BASE_URL is not set, sending is disabled."),
-                messages.ERROR,
-            )
+        mailer = self.admin_site.mailer_for(request)
+        if mailer is None:
             return HttpResponseRedirect(detail_url)
         posted_delivery = request.POST.get("delivery")
         try:
             delivery_pk = UUID(posted_delivery) if posted_delivery else None
         except ValueError:
             raise Http404 from None
-        mailer = ProspectMailer(base_url=base_url, actor=request.user.get_username())
         report = mailer.retry(mailing, delivery_pk)
-        if report.queued:
-            message = _("%(queued)d queued.") % {"queued": len(report.queued)}
-            level = messages.SUCCESS
-        else:
-            message = _("%(sent)d sent, %(skipped)d skipped, %(failed)d failed.") % {
-                "sent": len(report.sent),
-                "skipped": len(report.skipped),
-                "failed": len(report.failed),
-            }
-            level = messages.WARNING if report.failed else messages.SUCCESS
-        self.message_user(request, message, level)
+        self.message_user(request, *self.admin_site.report_message(report))
         return HttpResponseRedirect(detail_url)
 
     def change_view(

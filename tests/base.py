@@ -3,11 +3,13 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 from django.dispatch import Signal
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase, override_settings
 
 from outreach.models import Prospect
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.mailing import ProspectMailer, RenderedMail
+from outreach.services.scheduling import MailingScheduler
+from outreach.tasks import deliver_mail
 
 MAIL_BASE_URL = "https://outreach.example.test"
 
@@ -22,6 +24,19 @@ class OutreachTestCase(TestCase):
 
 class OutreachTransactionTestCase(TransactionTestCase):
     pass
+
+
+@override_settings(
+    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
+)
+class CeleryMailTestCase(OutreachTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.mailer = ProspectMailer(MAIL_BASE_URL, "staff")
+        self.scheduler = MailingScheduler(self.mailer)
+        publisher = patch.object(deliver_mail, "apply_async")
+        self.apply_async = publisher.start()
+        self.addCleanup(publisher.stop)
 
 
 class OutreachMailTagTestCase(OutreachTestCase):

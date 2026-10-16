@@ -1,25 +1,14 @@
-from unittest.mock import patch
-
 from django.core import mail
 from django.test import override_settings
 
-from outreach.services.mailing import ProspectMailer
-from outreach.tasks import deliver_mail
-from tests.base import MAIL_BASE_URL, OutreachTestCase
+from tests.base import CeleryMailTestCase
 from tests.factories import ProspectFactory
 
 
-@override_settings(
-    OUTREACH_BASE_URL=MAIL_BASE_URL, OUTREACH_LANGUAGE="en", OUTREACH_DISPATCH="celery"
-)
-class CeleryDispatchTests(OutreachTestCase):
+class CeleryDispatchTests(CeleryMailTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.mailer = ProspectMailer(MAIL_BASE_URL, "staff")
         self.prospects = [ProspectFactory(), ProspectFactory()]
-        publisher = patch.object(deliver_mail, "apply_async")
-        self.apply_async = publisher.start()
-        self.addCleanup(publisher.stop)
 
     def test_one_task_is_published_per_delivery_after_the_commit(self) -> None:
         with self.captureOnCommitCallbacks(execute=False) as callbacks:

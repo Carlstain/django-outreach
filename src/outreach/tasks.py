@@ -1,7 +1,5 @@
 from celery import shared_task
-from django.core.exceptions import ImproperlyConfigured
 
-from outreach.conf import outreach_settings
 from outreach.models import MailingDelivery
 from outreach.services.mailing import ProspectMailer, TransientDeliveryError
 from outreach.services.scheduling import MailingScheduler
@@ -18,10 +16,7 @@ def deliver_mail(self, delivery_pk: str) -> str | None:
     )
     if sender is None:
         return None
-    base_url = outreach_settings.base_url
-    if base_url is None:
-        raise ImproperlyConfigured("OUTREACH_BASE_URL is not set, mail cannot be delivered.")
-    mailer = ProspectMailer(base_url=base_url, actor=sender)
+    mailer = ProspectMailer.from_settings(sender)
     try:
         status = mailer.deliver(delivery_pk, may_retry=True)
     except TransientDeliveryError as error:

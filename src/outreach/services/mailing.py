@@ -7,6 +7,7 @@ from datetime import datetime
 from functools import partial
 from uuid import UUID
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.mail.backends.base import BaseEmailBackend
 from django.db import transaction
@@ -107,6 +108,24 @@ class ProspectMailer:
         self.actor = actor
         self.tokens = UnsubscribeTokens()
 
+    @classmethod
+    def from_settings(cls, actor: str) -> "ProspectMailer":
+        """Build the mailer from ``OUTREACH_BASE_URL``.
+
+        Raises:
+            ImproperlyConfigured: ``OUTREACH_BASE_URL`` is not set.
+        """
+        base_url = outreach_settings.base_url
+        if base_url is None:
+            raise ImproperlyConfigured("OUTREACH_BASE_URL is not set, sending is disabled.")
+        return cls(base_url=base_url, actor=actor)
+
+    @staticmethod
+    def is_in_cooldown(last_mailed_at: datetime | None, now: datetime) -> bool:
+        return bool(
+            last_mailed_at and last_mailed_at > now - outreach_settings.resend_cooldown
+        )
+
     def plan(self, prospects: Iterable[Prospect], *, is_newsletter: bool = True) -> MailPlan:
         """Split prospects into recipients and skipped ones.
 
@@ -119,7 +138,7 @@ class ProspectMailer:
         suppressed_emails = SuppressionList().filter_suppressed(
             prospect.email for prospect in prospect_list
         )
-        cooldown_start = timezone.now() - outreach_settings.resend_cooldown
+        now = timezone.now()
         maximum = outreach_settings.recipient_cap
         mail_plan = MailPlan()
         for prospect in prospect_list:
@@ -130,7 +149,7 @@ class ProspectMailer:
                 reason = SkipReason.SUPPRESSED
             elif not is_newsletter and prospect.user_id is None:
                 reason = SkipReason.NOT_MEMBER
-            elif prospect.last_mailed_at and prospect.last_mailed_at > cooldown_start:
+            elif self.is_in_cooldown(prospect.last_mailed_at, now):
                 reason = SkipReason.COOLDOWN
             elif len(mail_plan.recipients) >= maximum:
                 reason = SkipReason.OVER_LIMIT
@@ -264,24 +283,28 @@ class ProspectMailer:
             deliveries = list(failed_deliveries[: outreach_settings.recipient_cap])
             if not deliveries:
                 return deliveries
-            claimed_at = timezone.now()
-            for delivery in deliveries:
-                delivery.status = DeliveryStatus.PENDING
-                delivery.attempts = 0
-                delivery.failure_kind = ""
-                delivery.previous_mailed_at = delivery.prospect.last_mailed_at
-                delivery.updated_at = claimed_at
-            MailingDelivery.objects.bulk_update(
-                deliveries,
-                ["status", "attempts", "failure_kind", "previous_mailed_at", "updated_at"],
-            )
-            Prospect.objects.filter(
-                pk__in=[delivery.prospect_id for delivery in deliveries]
-            ).update(last_mailed_at=claimed_at)
+            self.claim(deliveries, timezone.now())
             Mailing.objects.filter(pk=mailing.pk).update(
                 failed_count=Greatest(F("failed_count") - len(deliveries), 0)
             )
         return deliveries
+
+    @staticmethod
+    def claim(deliveries: list[MailingDelivery], claimed_at: datetime) -> None:
+        """Make the deliveries pending, as new, and claim their prospects, in one update each."""
+        for delivery in deliveries:
+            delivery.status = DeliveryStatus.PENDING
+            delivery.attempts = 0
+            delivery.failure_kind = ""
+            delivery.previous_mailed_at = delivery.prospect.last_mailed_at
+            delivery.updated_at = claimed_at
+        MailingDelivery.objects.bulk_update(
+            deliveries,
+            ["status", "attempts", "failure_kind", "previous_mailed_at", "updated_at"],
+        )
+        Prospect.objects.filter(
+            pk__in=[delivery.prospect_id for delivery in deliveries]
+        ).update(last_mailed_at=claimed_at)
 
     def dispatch(
         self,
@@ -416,7 +439,7 @@ class ProspectMailer:
         with transaction.atomic():
             locked = (
                 MailingDelivery.objects.select_for_update(skip_locked=True, of=("self",))
-                .select_related("mailing", "prospect")
+                .select_related("mailing", "prospect__user")
                 .filter(pk=delivery_pk, status=DeliveryStatus.PENDING)
                 .first()
             )
