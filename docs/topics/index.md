@@ -6,6 +6,7 @@ Guides for developers who integrate django-outreach into a project.
 :maxdepth: 1
 
 computed-tags
+host-variables
 theming
 i18n
 loading-users

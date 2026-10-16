@@ -80,7 +80,8 @@ Add a fallback after a pipe for when the value is empty: `{{ first_name | there 
 "there" for a prospect with no first name. For a member whose own first and last name are empty,
 the name of the linked user account is used.
 
-Only these names work. An unknown or malformed one is refused when you preview, with the list of
+Only these names work, and the ones your project adds, which show in the *Insert variable* menu
+and in *How to use*. An unknown or malformed one is refused when you preview, with the list of
 valid names.
 
 ## Computed tags

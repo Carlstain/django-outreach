@@ -24,7 +24,7 @@ class MessageContentForm:
                 _("Unknown variable(s): %(unknown)s. Use one of: %(allowed)s."),
                 params={
                     "unknown": ", ".join(sorted(unknown_keys)),
-                    "allowed": ", ".join(variables.KEYS),
+                    "allowed": ", ".join(variable.key for variable in variables.catalog()),
                 },
             )
         if variables.has_malformed_braces(text):
