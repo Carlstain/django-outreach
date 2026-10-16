@@ -46,7 +46,7 @@ class MailRetryTests(OutreachTestCase):
         self.assertEqual(self.mailing.failed_count, 0)
         self.assertEqual(self.mailing.sent_count, 2)
         self.assertEqual(self.delivery_of(self.first_prospect).status, DeliveryStatus.SENT)
-        self.assertEqual(self.delivery_of(self.first_prospect).last_error, "")
+        self.assertEqual(self.delivery_of(self.first_prospect).failure_kind, "")
 
     def test_only_the_given_deliveries_are_retried(self) -> None:
         chosen = self.delivery_of(self.second_prospect)

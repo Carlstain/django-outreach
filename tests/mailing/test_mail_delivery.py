@@ -5,7 +5,7 @@ from django.core import mail
 from django.core.mail import EmailMultiAlternatives
 from django.test import override_settings
 
-from outreach.choices import DeliveryStatus, EventKind, ProspectStatus, SkipReason
+from outreach.choices import DeliveryStatus, EventKind, FailureKind, ProspectStatus, SkipReason
 from outreach.models import MailingDelivery, ProspectEvent
 from outreach.services.mailing import ProspectMailer, TransientDeliveryError
 from tests.base import MAIL_BASE_URL, OutreachTestCase
@@ -96,7 +96,7 @@ class MailDeliveryTests(OutreachTestCase):
         self.prospect.refresh_from_db()
         self.assertEqual(self.delivery.status, DeliveryStatus.PENDING)
         self.assertEqual(self.delivery.attempts, 1)
-        self.assertEqual(self.delivery.last_error, "down")
+        self.assertEqual(self.delivery.failure_kind, FailureKind.SERVER)
         self.assertIsNotNone(self.prospect.last_mailed_at)
 
     @override_settings(OUTREACH_DELIVERY_MAX_RETRIES=1)

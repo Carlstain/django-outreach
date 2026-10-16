@@ -19,7 +19,8 @@ Open a mailing to see:
 - The subject and message exactly as they were sent (variables not replaced), in a frame cut off
   from the rest of the page.
 - The recipients of the mailing with their status: pending, sent or failed. A failed recipient
-  shows a short message, not the mail server's error. A prospect that was deleted since no longer
+  shows why: the mail server refused it, the mail server could not be reached, or the message
+  could not be built. The server's own reply is never kept. A prospect that was deleted since no longer
   appears. Mailings sent before deliveries were recorded list the recipients from the events of
   the mailing instead, with no status of their own.
 - The number of skipped recipients per reason: unsubscribed, suppressed, contacted recently, over

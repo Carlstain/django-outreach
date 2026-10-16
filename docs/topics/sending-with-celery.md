@@ -22,6 +22,11 @@ outcome on the delivery and the mailing counts.
 - A permanent error (recipient refused, empty button link, a tag that raises, a server that
   accepts nothing) fails the recipient at once. The claim is restored and a `mail_failed` event
   is recorded, as in synchronous mode.
+- A failed delivery keeps a kind, shown to staff: `refused` (recipient or message refused by the
+  server), `server` (the server could not be reached, authentication, any other connection
+  error) or `content` (the message could not be built for that person). A refused recipient is never
+  retried, but a server that rejects the sender or the data can be, since it may be a temporary
+  reply, so *refused* is not always final at the first attempt. The log of the `outreach` logger has the delivery id, the kind and the exception class.
 - Recipients are capped by `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` (default 5000) instead of
   `OUTREACH_MAX_RECIPIENTS_PER_SEND`.
 

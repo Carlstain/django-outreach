@@ -1117,6 +1117,18 @@ msgstr "%(count)s tentatives"
 msgid "The mail could not be delivered."
 msgstr "L’e-mail n’a pas pu être livré."
 
+msgid "The mail server refused it"
+msgstr "Le serveur de messagerie l'a refusé"
+
+msgid "The mail server could not be reached"
+msgstr "Le serveur de messagerie est injoignable"
+
+msgid "The message could not be built"
+msgstr "Le message n'a pas pu être construit"
+
+msgid "failure"
+msgstr "échec"
+
 #, python-format
 msgid "%(queued)d queued."
 msgstr "%(queued)d en file d'attente."

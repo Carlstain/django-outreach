@@ -33,7 +33,7 @@ def forget_in_crm(sender, prospect, actor, **kwargs):
 
 Connect receivers in your own `AppConfig.ready`. Only `prospect_erased` carries an address, because the host needs it to erase its own copy.
 A signal never carries the error text of a failed
-delivery: read `delivery.last_error` if you need it, knowing it can contain the address.
+delivery, and none is stored: `mail_failed` gives you the `delivery`, whose `failure_kind` says why.
 
 There is deliberately no signal on `Prospect.save`: an account or an import is not consent, and
 the events above are the ones that mean something.

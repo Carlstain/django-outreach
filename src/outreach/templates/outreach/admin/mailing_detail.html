@@ -59,7 +59,7 @@
               <li>
                 <span>
                   <strong><a href="{% url 'outreach_admin:outreach_prospect_change' delivery.prospect.pk|admin_urlquote %}">{{ delivery.prospect.display_name }}</a></strong>
-                  {% if delivery.status == "failed" %}<br><small>{% trans "The mail could not be delivered." %}</small>{% endif %}
+                  {% if delivery.status == "failed" %}<br><small>{% firstof delivery.get_failure_kind_display _("The mail could not be delivered.") %}</small>{% endif %}
                   {% if delivery.attempts > 1 %}<br><small>{% blocktrans with count=delivery.attempts %}{{ count }} attempts{% endblocktrans %}</small>{% endif %}
                 </span>
                 <span>
@@ -89,7 +89,7 @@
               <li>
                 <span>
                   <strong><a href="{% url 'outreach_admin:outreach_prospect_change' event.prospect.pk|admin_urlquote %}">{{ event.prospect.display_name }}</a></strong>
-                  {% if event.kind == "mail_failed" %}<br><small>{% trans "The mail could not be delivered." %}</small>{% endif %}
+                  {% if event.kind == "mail_failed" %}<br><small>{% firstof event.detail_label _("The mail could not be delivered.") %}</small>{% endif %}
                 </span>
                 {% if event.kind == "mail_failed" %}<span class="badge unsub">{% trans "failed" context "recipient" %}</span>{% else %}<span class="badge contacted">{% trans "sent" context "recipient" %}</span>{% endif %}
               </li>

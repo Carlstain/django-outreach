@@ -1,7 +1,7 @@
 from django.core import mail
 from django.test import override_settings
 
-from outreach.choices import EventKind
+from outreach.choices import EventKind, FailureKind
 from outreach.models import ProspectEvent
 from outreach.services.mailing import ProspectMailer
 from tests.base import MAIL_BASE_URL, OutreachMailTagTestCase
@@ -34,4 +34,4 @@ class MailButtonSendTests(OutreachMailTagTestCase):
             failure = ProspectEvent.objects.get(
                 prospect=failed_prospect, kind=EventKind.MAIL_FAILED
             )
-            self.assertIn("button 'Book'", failure.detail)
+            self.assertEqual(failure.detail, FailureKind.CONTENT)

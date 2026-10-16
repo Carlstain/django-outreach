@@ -2,6 +2,7 @@ from outreach.choices.actors import ACTOR_IMPORT, ACTOR_RECIPIENT, ACTOR_SYSTEM
 from outreach.choices.delivery_status import DeliveryStatus
 from outreach.choices.dispatch_mode import DispatchMode
 from outreach.choices.event_kind import EventKind
+from outreach.choices.failure_kind import FailureKind
 from outreach.choices.import_row_status import ImportRowStatus
 from outreach.choices.prospect_kind import ProspectKind
 from outreach.choices.prospect_status import ProspectStatus
@@ -14,6 +15,7 @@ __all__ = [
     "DeliveryStatus",
     "DispatchMode",
     "EventKind",
+    "FailureKind",
     "ImportRowStatus",
     "ProspectKind",
     "ProspectStatus",
