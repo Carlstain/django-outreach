@@ -10,9 +10,11 @@ All notable changes to this project are documented here. The format follows [Kee
 - Migration `0003`: the `MailingDelivery` model, one row per recipient of a mailing. The Mailing admin shows how many are pending.
 - System checks `outreach.E002`, `outreach.E003` and `outreach.W001`.
 - Audiences: a named, static list of prospects (`Audience`, `Prospect.audiences`, migration `0005`). Prospects are added and removed with two actions of the prospect list (the add page can also create the audience from a typed name), the list can be filtered by audience, and the Audiences pages and permissions (`view`, `add`, `change`, `delete`) are new. Sending to an audience uses the existing filter, Select all and Send a mail. Two event kinds record the changes in the history of a prospect.
+- Retry failed deliveries: the detail page of a mailing lists every recipient with its status (pending, sent or failed), and a failed one can be sent again with a Retry button or Retry all failed, which needs `outreach.change_prospect`. `ProspectMailer.retry` claims the prospect again and goes through `deliver`, so an unsubscribed prospect is still skipped, and the resend cooldown is not applied. No schema change.
 
 ### Changed
 
+- The detail page of a mailing no longer shows the mail server's error for a failed recipient, which can contain the address. It shows a short message instead.
 - `EmailTemplate.created_by` is now an optional foreign key to the host user model (cleared when the account is deleted) instead of a username string, and `updated_by` records who changed a template last. Migration `0004` matches the existing usernames to users through `USERNAME_FIELD`: a template whose author no longer matches an account ends up without an author. `EmailTemplates.save` and `create` take the user instead of a username.
 - `Prospect`, `MailingDelivery` and `EmailTemplate` share the abstract models `BaseModel` (uuid, `created_at`, `updated_at`) and `AuthoredModel` (adds `created_by`, `updated_by`). No schema change except the above.
 - Synchronous sending stays the default but is not recommended in production: `outreach.W001` reports it in `check --deploy`. Its behaviour and the `OUTREACH_MAX_RECIPIENTS_PER_SEND` limit (100) are unchanged.

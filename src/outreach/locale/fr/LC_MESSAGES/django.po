@@ -1058,6 +1058,28 @@ msgstr "envoyé"
 msgid "No recipient is kept for this mailing."
 msgstr "Aucun destinataire n’est conservé pour cet envoi."
 
+msgctxt "recipient"
+msgid "pending"
+msgstr "en attente"
+
+msgid "Retry"
+msgstr "Réessayer"
+
+#, python-format
+msgid "Retry all failed (%(count)s)"
+msgstr "Réessayer tous les échecs (%(count)s)"
+
+#, python-format
+msgid "%(count)s attempts"
+msgstr "%(count)s tentatives"
+
+msgid "The mail could not be delivered."
+msgstr "L’e-mail n’a pas pu être livré."
+
+#, python-format
+msgid "%(queued)d queued."
+msgstr "%(queued)d en file d'attente."
+
 msgid "Open a prospect to see every mailing that reached them."
 msgstr "Ouvrez un prospect pour voir tous les envois qui l’ont atteint."
 

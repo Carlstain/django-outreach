@@ -53,6 +53,10 @@ def outreach_mailing_delete_url(mailing_pk: str) -> str:
     return reverse("outreach_admin:outreach_mailing_delete", args=[mailing_pk])
 
 
+def outreach_mailing_retry_url(mailing_pk: str) -> str:
+    return reverse("outreach_admin:outreach_mailing_retry", args=[mailing_pk])
+
+
 def outreach_emailtemplate_changelist_url() -> str:
     return reverse("outreach_admin:outreach_emailtemplate_changelist")
 
