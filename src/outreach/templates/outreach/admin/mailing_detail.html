@@ -12,7 +12,7 @@
       <p class="eyebrow">{% trans "Mailing" %}</p>
       <h2>{{ original.subject }}</h2>
       <p>{% blocktrans with sender=original.sender sent_at=original.created_at|date:"DATETIME_FORMAT" %}Sent by {{ sender }} on {{ sent_at }}.{% endblocktrans %} {% if original.is_newsletter %}{% trans "Newsletter." %}{% else %}{% trans "Notice to members." %}{% endif %}</p>
-      {% if is_scheduled %}<p>{% blocktrans with when=original.scheduled_for|date:"DATETIME_FORMAT" %}Scheduled for {{ when }}. It starts when the scheduler runs after that time.{% endblocktrans %}</p>{% endif %}
+      {% if is_scheduled %}<p>{% blocktrans with when=original.scheduled_for|date:"DATETIME_FORMAT" %}Scheduled for {{ when }}; it starts when the scheduler runs after that time.{% endblocktrans %}</p>{% endif %}
     </div>
     <div class="actions">
       <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Mailings" %}</a>

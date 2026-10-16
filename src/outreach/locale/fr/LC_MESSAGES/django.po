@@ -1188,8 +1188,8 @@ msgstr[0] "Programmer pour %(counter)s prospect"
 msgstr[1] "Programmer pour %(counter)s prospects"
 
 #, python-format
-msgid "It will go out on %(when)s."
-msgstr "Il partira le %(when)s."
+msgid "It will go out on %(when)s"
+msgstr "Il partira le %(when)s"
 
 msgid "Send at"
 msgstr "Envoyer à"
@@ -1218,8 +1218,8 @@ msgid "Cancel the schedule"
 msgstr "Annuler la programmation"
 
 #, python-format
-msgid "Scheduled for %(when)s. It starts when the scheduler runs after that time."
-msgstr "Programmé pour le %(when)s. Il démarre quand le planificateur s'exécute après cette heure."
+msgid "Scheduled for %(when)s; it starts when the scheduler runs after that time."
+msgstr "Programmé pour le %(when)s ; il démarre quand le planificateur s'exécute après cette heure."
 
 msgctxt "recipient"
 msgid "scheduled"
