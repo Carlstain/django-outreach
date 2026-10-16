@@ -32,6 +32,12 @@ class SuppressionList:
     def add(self, email: str) -> None:
         Suppression.objects.get_or_create(email_hash=self.hash(email))
 
+    def add_many(self, emails: Iterable[str]) -> None:
+        Suppression.objects.bulk_create(
+            [Suppression(email_hash=self.hash(email)) for email in emails],
+            ignore_conflicts=True,
+        )
+
     def filter_suppressed(self, emails: Iterable[str]) -> set[str]:
         email_by_hash = {
             email_hash: email for email in emails for email_hash in self.hashes(email)

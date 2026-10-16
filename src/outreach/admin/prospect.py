@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from django.contrib import admin, messages
@@ -6,7 +7,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.forms import ModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import URLPattern, path, reverse
 from django.utils.html import format_html
@@ -29,6 +30,7 @@ from outreach.forms import (
 )
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
 from outreach.services.audiences import AudienceCreator, AudienceMembers, AudienceNameTaken
+from outreach.services.erasure import ProspectEraser
 from outreach.services.linking import UserLinker
 from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
@@ -38,6 +40,7 @@ from outreach.services.prospect_csv import (
     ProspectCsvExporter,
     ProspectCsvImporter,
 )
+from outreach.services.prospect_export import ProspectDataExporter
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from outreach.services.unsubscribe import ProspectUnsubscriber
 from outreach.sites import outreach_site
@@ -67,6 +70,7 @@ class ProspectAdmin(admin.ModelAdmin):
         "add_to_audience",
         "remove_from_audience",
         "unsubscribe_selected",
+        "erase_selected",
         "link_users",
         "export_csv",
     ]
@@ -155,8 +159,26 @@ class ProspectAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.process_import_view),
                 name="outreach_prospect_process_import",
             ),
+            path(
+                "<path:object_id>/export-data/",
+                self.admin_site.admin_view(self.export_data_view),
+                name="outreach_prospect_export_data",
+            ),
             *super().get_urls(),
         ]
+
+    def export_data_view(self, request: HttpRequest, object_id: str) -> HttpResponse:
+        if not self.has_view_permission(request):
+            raise PermissionDenied
+        prospect = self.get_object(request, object_id)
+        if prospect is None:
+            raise Http404
+        response = HttpResponse(
+            json.dumps(ProspectDataExporter().export(prospect), indent=2, ensure_ascii=False),
+            content_type="application/json; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="prospect-{prospect.pk}.json"'
+        return response
 
     def import_response(self, request: HttpRequest, **context: Any) -> HttpResponse:
         return TemplateResponse(
@@ -555,6 +577,33 @@ class ProspectAdmin(admin.ModelAdmin):
             "%(count)d prospect unsubscribed.", "%(count)d prospects unsubscribed.", count
         )
         self.message_user(request, message % {"count": count}, messages.SUCCESS)
+
+    @admin.action(
+        description=gettext_lazy("Erase and suppress the selected prospects"),
+        permissions=["delete"],
+    )
+    def erase_selected(
+        self, request: HttpRequest, queryset: QuerySet[Prospect]
+    ) -> HttpResponse | None:
+        if request.POST.get("apply"):
+            count = ProspectEraser().erase(queryset, request.user.get_username())
+            message = ngettext(
+                "%(count)d prospect erased and suppressed.",
+                "%(count)d prospects erased and suppressed.",
+                count,
+            )
+            self.message_user(request, message % {"count": count}, messages.SUCCESS)
+            return None
+        context = {
+            **self.admin_site.each_context(request),
+            **self.selection_context(request),
+            "title": _("Erase and suppress"),
+            "opts": self.model._meta,
+            "action_name": "erase_selected",
+            "selected_count": queryset.count(),
+            "media": self.media,
+        }
+        return TemplateResponse(request, "outreach/admin/erase_confirmation.html", context)
 
     @admin.action(
         description=gettext_lazy("Link to user accounts"),

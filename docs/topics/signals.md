@@ -13,6 +13,7 @@ Django on the `django.dispatch` logger and never breaks a send or an unsubscribe
 |---|---|---|
 | `prospect_subscribed` | `ProspectSubscriptions.subscribe` created a prospect that is not unsubscribed | `prospect`, `consent_source` |
 | `prospect_unsubscribed` | A prospect becomes unsubscribed, by link, by staff or by the API. Not sent again for one that already is | `prospect`, `actor` |
+| `prospect_erased` | Staff erased a prospect with *Erase and suppress*. The prospect no longer exists | `email`, `actor` |
 | `mail_sent` | A delivery was handed to the mail server | `delivery`, `mailing`, `prospect` |
 | `mail_failed` | A delivery failed for good, after any retries | `delivery`, `mailing`, `prospect` |
 
@@ -30,7 +31,8 @@ def forget_in_crm(sender, prospect, actor, **kwargs):
     crm.unsubscribe(prospect.email)
 ```
 
-Connect receivers in your own `AppConfig.ready`. A signal never carries the error text of a failed
+Connect receivers in your own `AppConfig.ready`. Only `prospect_erased` carries an address, because the host needs it to erase its own copy.
+A signal never carries the error text of a failed
 delivery: read `delivery.last_error` if you need it, knowing it can contain the address.
 
 There is deliberately no signal on `Prospect.save`: an account or an import is not consent, and

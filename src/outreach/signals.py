@@ -5,6 +5,7 @@ from django.dispatch import Signal
 
 prospect_subscribed = Signal()
 prospect_unsubscribed = Signal()
+prospect_erased = Signal()
 mail_sent = Signal()
 mail_failed = Signal()
 

@@ -30,6 +30,9 @@
     <div class="actions">
       {% if has_view_permission %}
         <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Prospects" %}</a>
+        {% if change and original %}
+          <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_export_data' original.pk|admin_urlquote %}">{% trans "Download their data" %}</a>
+        {% endif %}
       {% endif %}
     </div>
   </div>

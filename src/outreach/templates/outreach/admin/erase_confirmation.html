@@ -1,0 +1,26 @@
+{% extends "outreach/admin/base.html" %}
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} erase-confirmation{% endblock %}
+
+{% block page_subtitle %}<p>{% blocktrans count counter=selected_count %}{{ counter }} prospect selected.{% plural %}{{ counter }} prospects selected.{% endblocktrans %}</p>{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <form class="form" method="post">
+      {% csrf_token %}
+      {% include "outreach/admin/includes/selection_hidden_fields.html" %}
+      <div class="notice err wide" role="alert">
+        <p>{% trans "This can not be undone." %}</p>
+      </div>
+      <div class="wide">
+        <p>{% trans "The selected prospects are deleted with their history, their deliveries and their audience memberships. Their addresses are added to the suppression list, so they are never mailed again, even if they are imported again." %}</p>
+        <p class="hint">{% trans "Mailings keep their counts, never their names. The user accounts of members are not touched." %}</p>
+      </div>
+      <div class="wide row2">
+        <button class="btn danger" type="submit" name="apply" value="1">{% trans "Erase and suppress" %}</button>
+        <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_changelist' %}">{% trans "Cancel" %}</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

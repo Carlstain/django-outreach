@@ -72,6 +72,41 @@ msgid_plural "%(count)d prospects unsubscribed."
 msgstr[0] "%(count)d prospect désinscrit."
 msgstr[1] "%(count)d prospects désinscrits."
 
+msgid "Erase and suppress the selected prospects"
+msgstr "Effacer et supprimer de la liste d'envoi les prospects sélectionnés"
+
+#, python-format
+msgid "%(count)d prospect erased and suppressed."
+msgid_plural "%(count)d prospects erased and suppressed."
+msgstr[0] "%(count)d prospect effacé et supprimé de la liste d'envoi."
+msgstr[1] "%(count)d prospects effacés et supprimés de la liste d'envoi."
+
+msgid "Erase and suppress"
+msgstr "Effacer et supprimer de la liste d'envoi"
+
+msgid "This can not be undone."
+msgstr "Cette action est irréversible."
+
+msgid ""
+"The selected prospects are deleted with their history, their deliveries and "
+"their audience memberships. Their addresses are added to the suppression "
+"list, so they are never mailed again, even if they are imported again."
+msgstr ""
+"Les prospects sélectionnés sont supprimés avec leur historique, leurs envois "
+"et leurs appartenances aux audiences. Leurs adresses sont ajoutées à la liste "
+"de suppression : elles ne recevront plus jamais de mail, même si elles sont "
+"importées de nouveau."
+
+msgid ""
+"Mailings keep their counts, never their names. The user accounts of members "
+"are not touched."
+msgstr ""
+"Les envois conservent leurs compteurs, jamais les noms. Les comptes "
+"utilisateurs des membres ne sont pas modifiés."
+
+msgid "Download their data"
+msgstr "Télécharger leurs données"
+
 msgid "Link to user accounts"
 msgstr "Lier aux comptes utilisateurs"
 
