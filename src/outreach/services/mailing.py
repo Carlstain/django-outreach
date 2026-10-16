@@ -183,7 +183,9 @@ class ProspectMailer:
         sanitizer = MailBodySanitizer()
         if unsubscribe_url is None:
             unsubscribe_url = self.unsubscribe_url(prospect)
-        values = {**variables.values_for(prospect), "unsubscribe_url": unsubscribe_url}
+        values = variables.values_for(
+            prospect, preview=preview, extra={"unsubscribe_url": unsubscribe_url}
+        )
         with translation.override(outreach_settings.language):
             tagged_subject = mail_tag_library.render(
                 subject, prospect, values, html=False, preview=preview

@@ -18,6 +18,9 @@ its return value is written where the tag is.
 | `{% greeting %}` | Good morning, afternoon or evening, from the server's local time at send |
 | `{% member_since %}` | The `date_joined` of the linked user, empty for a prospect with no user |
 
+A computed tag takes arguments. To add a plain value that staff write as `{{ name | fallback }}`, see
+{doc}`host-variables`.
+
 ## Registering your own
 
 Register tags in a `mail_tags.py` module of any installed app. They are found at startup, like

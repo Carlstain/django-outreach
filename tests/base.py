@@ -7,6 +7,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 
 from outreach.models import Prospect
 from outreach.services.mail_tags import mail_tag_library
+from outreach.services.mail_variables import mail_variable_library
 from outreach.services.mailing import ProspectMailer, RenderedMail
 from outreach.services.scheduling import MailingScheduler
 from outreach.tasks import deliver_mail
@@ -42,15 +43,21 @@ class CeleryMailTestCase(OutreachTestCase):
 class OutreachMailTagTestCase(OutreachTestCase):
     def setUp(self) -> None:
         super().setUp()
-        registry_patcher = patch.dict(mail_tag_library.tags)
-        registry_patcher.start()
-        self.addCleanup(registry_patcher.stop)
+        for registry in (mail_tag_library.tags, mail_variable_library.variables):
+            registry_patcher = patch.dict(registry)
+            registry_patcher.start()
+            self.addCleanup(registry_patcher.stop)
         self.echo_calls: list[tuple[str, ...]] = []
 
     def register_tag(
         self, function: Callable[..., str], name: str, example: str = "SAMPLE"
     ) -> None:
         mail_tag_library.register(label=name, example=example, name=name)(function)
+
+    def register_variable(
+        self, function: Callable[..., object], name: str, example: str = "SAMPLE"
+    ) -> None:
+        mail_variable_library.register(label=name, example=example, name=name)(function)
 
     def register_echo_tag(self) -> None:
         def echo(prospect: Prospect, *arguments: str) -> str:

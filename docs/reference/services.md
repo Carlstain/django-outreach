@@ -52,6 +52,13 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
 .. autofunction:: outreach.mail_tags.member_since
 ```
 
+## Host variables
+
+```{eval-rst}
+.. autoclass:: outreach.services.mail_variables.MailVariableLibrary
+   :members: register, catalog
+```
+
 ## Message bodies
 
 ```{eval-rst}
