@@ -2,13 +2,13 @@
 
 ## Supported versions
 
-django-outreach is in beta. Only the latest release on PyPI receives security fixes.
+django-outreach is at version 0.x, so use it in production with caution. Only the latest release on PyPI receives security fixes.
 
 ## Reporting a vulnerability
 
 Please do not open a public issue for a security problem. Use GitHub's private reporting: open the **Security** tab of the repository, choose **Report a vulnerability**, and describe the problem, the version, and how to reproduce it.
 
-Reports are handled on a best-effort basis by a single maintainer. A fix is released as a new beta version and named in the changelog once it is out.
+Reports are handled on a best-effort basis by a single maintainer. A fix is released as a new version and named in the changelog once it is out.
 
 ## Scope
 
@@ -23,7 +23,7 @@ The `example/` project is a demonstration only. It has a public secret key, `DEB
 
 ## Known limitations
 
-These are understood and accepted for the beta. They are not vulnerabilities, but you should know them when you deploy:
+These are understood and accepted for the 0.x versions. They are not vulnerabilities, but you should know them when you deploy:
 
 - By default sending is synchronous, runs inside the admin request, and is capped per action. Celery dispatch (`OUTREACH_DISPATCH = "celery"`) removes that, and delivers each mail at least once.
 - If a send fails after the SMTP server may already have accepted the message (a timeout, for example), the claim on the recipient is restored and a later send can reach them again.

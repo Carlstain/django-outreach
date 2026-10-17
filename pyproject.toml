@@ -12,7 +12,6 @@ license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 authors = [{ name = "Mahadi Eric", email = "33723198+Carlstain@users.noreply.github.com" }]
 classifiers = [
-    "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
     "Framework :: Django",
     "Framework :: Django :: 5.1",

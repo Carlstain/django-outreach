@@ -2,6 +2,8 @@
 
 A reusable Django app for prospect lists, reusable email templates and bulk mail. It runs on its own admin site, separate from `/admin/`, and brings its own models, templates, static files and translations (English, French, Spanish, Portuguese and Brazilian Portuguese).
 
+> Version 0.x: use it in production with caution. Until 1.0 a minor version may change the interface, see [Status](#status).
+
 What it does:
 
 - Prospects (person or organisation) with an optional OneToOne link to the host project's user model.
@@ -47,7 +49,7 @@ Pin a version range in your own requirements, for example `django-outreach>=0.1,
 
 ### Status
 
-The first release that is not a beta is `0.1.0`. Migrations are never edited once released, so an installation can be upgraded without resetting its tables. The Spanish and Portuguese catalogues are drafts that a native speaker has not reviewed yet. Known limits: by default sending runs synchronously in the admin request with a per-send cap (Celery dispatch is available and recommended in production, see the documentation), and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
+django-outreach is at version 0.x. Use it in production with caution: until 1.0, a minor version (`0.2`, `0.3`, ...) may change the interface, and every change is listed in the changelog. Read the changelog before you upgrade, and test an upgrade on a copy of your data first. Migrations are never edited once released, so an installation can be upgraded without resetting its tables. The Spanish and Portuguese catalogues are drafts that a native speaker has not reviewed yet. Known limits: by default sending runs synchronously in the admin request with a per-send cap (Celery dispatch is available and recommended in production, see the documentation), and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
 
 ## Try the example project
 

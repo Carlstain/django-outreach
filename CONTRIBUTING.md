@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking at django-outreach. It is a small beta, so keep changes focused.
+Thanks for looking at django-outreach. It is a small project, so keep changes focused.
 
 ## Setup
 

@@ -6,7 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [0.1.0] - 2026-10-17
 
-The first release that is not a beta. It includes everything since `0.1.0b6`.
+It includes everything since `0.1.0b6`. django-outreach is at version 0.x: use it in production with caution, since a minor version before 1.0 may change the interface.
 
 ### Added
 
