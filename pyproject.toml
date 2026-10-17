@@ -47,7 +47,7 @@ dev = [
     "pytest",
     "pytest-django",
     "factory-boy",
-    "ruff==0.16.10",
+    "ruff==0.17.0",
     "pre-commit",
     "Babel",
     "psycopg[binary]",
