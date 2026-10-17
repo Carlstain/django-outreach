@@ -25,7 +25,7 @@ class AdminLanguageTests(OutreachTestCase):
 
         response = self.client.get(outreach_index_url())
 
-        self.assertContains(response, "Encerrar sessão")
+        self.assertContains(response, "Inscrição cancelada")
 
     @requires_translations
     def test_an_invalid_cookie_falls_back_to_the_site_language(self) -> None:
