@@ -4,10 +4,12 @@ django-outreach is a reusable Django app for prospect lists, reusable email temp
 mail with one-click unsubscribe. It runs on its own admin site, separate from `/admin/`, and
 brings its own models, templates, static files and translations (English, French, Spanish, Portuguese and Brazilian Portuguese).
 
-:::{note}
-Version `0.1.0` is the first release that is not a beta. Migrations are never edited once
-released, so an installation can be upgraded without resetting its tables. The Spanish and
-Portuguese catalogues are drafts that a native speaker has not reviewed yet.
+:::{warning}
+django-outreach is at version 0.x. Use it in production with caution: until 1.0, a minor
+version (`0.2`, `0.3`, ...) may change the interface, and every change is listed in the
+changelog. Read the changelog before you upgrade, and test an upgrade on a copy of your data
+first. Migrations are never edited once released. The Spanish and Portuguese catalogues are
+drafts that a native speaker has not reviewed yet.
 :::
 
 ## What it does
