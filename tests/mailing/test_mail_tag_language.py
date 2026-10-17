@@ -1,15 +1,8 @@
-from unittest import skipUnless
-
-from django.conf import settings
 from django.test import override_settings
 from django.utils import translation
 
-from tests.base import OutreachMailTagTestCase
+from tests.base import OutreachMailTagTestCase, requires_translations
 from tests.factories import ProspectFactory
-
-requires_translations = skipUnless(
-    settings.USE_I18N, "Nothing is translated when USE_I18N is False."
-)
 
 
 @override_settings(OUTREACH_LANGUAGE="fr", TIME_ZONE="UTC")

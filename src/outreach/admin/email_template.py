@@ -23,7 +23,7 @@ from outreach.sites import outreach_site
 @admin.register(EmailTemplate, site=outreach_site)
 class EmailTemplateAdmin(admin.ModelAdmin):
     form = EmailTemplateForm
-    list_display = ["name", "subject", "kind_badge", "updated_at", "created_by"]
+    list_display = ["name", "subject", "kind_badge", "language", "updated_at", "created_by"]
     list_select_related = ["created_by"]
     search_fields = ["name", "subject"]
     ordering = ["name"]

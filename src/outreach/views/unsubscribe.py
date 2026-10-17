@@ -7,7 +7,7 @@ from django.views import View
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 
-from outreach.choices import ACTOR_RECIPIENT
+from outreach.choices import ACTOR_RECIPIENT, OutreachLanguage
 from outreach.conf import outreach_settings
 from outreach.models import Prospect
 from outreach.services.unsubscribe import ProspectUnsubscriber, UnsubscribeTokens
@@ -18,7 +18,8 @@ class UnsubscribeView(View):
     http_method_names = ["get", "post", "head", "options"]
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        with translation.override(outreach_settings.language):
+        language = OutreachLanguage.parse(request.GET.get("lang"))
+        with translation.override(language or outreach_settings.language):
             response = super().dispatch(request, *args, **kwargs)
         response["Referrer-Policy"] = "no-referrer"
         return response

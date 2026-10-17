@@ -1,0 +1,7 @@
+{% load i18n %}
+<div class="f wide">
+  {{ form.language.errors }}
+  {{ form.language.label_tag }}
+  {{ form.language }}
+  <span class="hint">{% trans "Language of the unsubscribe link and page, the greeting and the dates. Your own text is not translated." %}</span>
+</div>

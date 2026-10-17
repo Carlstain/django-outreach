@@ -30,6 +30,7 @@ class EmailTemplates:
         *,
         header_text: str = "",
         is_newsletter: bool = True,
+        language: str = "",
     ) -> SavedTemplate:
         """Create a template, or update the one with the same name when ``overwrite`` is true.
 
@@ -51,6 +52,7 @@ class EmailTemplates:
                     author,
                     header_text=header_text,
                     is_newsletter=is_newsletter,
+                    language=language,
                 )
             except IntegrityError as error:
                 existing = EmailTemplate.objects.filter(name__iexact=clean_name).first()
@@ -62,6 +64,7 @@ class EmailTemplates:
         existing.body_html = clean_body
         existing.header_text = header_text
         existing.is_newsletter = is_newsletter
+        existing.language = language
         existing.updated_by = author
         existing.save(
             update_fields=[
@@ -69,6 +72,7 @@ class EmailTemplates:
                 "body_html",
                 "header_text",
                 "is_newsletter",
+                "language",
                 "updated_by",
                 "updated_at",
             ]
@@ -84,6 +88,7 @@ class EmailTemplates:
         *,
         header_text: str = "",
         is_newsletter: bool = True,
+        language: str = "",
     ) -> SavedTemplate:
         with transaction.atomic():
             template = EmailTemplate.objects.create(
@@ -92,6 +97,7 @@ class EmailTemplates:
                 body_html=body_html,
                 header_text=header_text,
                 is_newsletter=is_newsletter,
+                language=language,
                 created_by=author,
                 updated_by=author,
             )

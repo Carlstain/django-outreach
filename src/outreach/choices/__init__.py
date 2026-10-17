@@ -4,6 +4,7 @@ from outreach.choices.dispatch_mode import DispatchMode
 from outreach.choices.event_kind import EventKind
 from outreach.choices.failure_kind import FailureKind
 from outreach.choices.import_row_status import ImportRowStatus
+from outreach.choices.outreach_language import OutreachLanguage
 from outreach.choices.prospect_kind import ProspectKind
 from outreach.choices.prospect_status import ProspectStatus
 from outreach.choices.skip_reason import SkipReason
@@ -17,6 +18,7 @@ __all__ = [
     "EventKind",
     "FailureKind",
     "ImportRowStatus",
+    "OutreachLanguage",
     "ProspectKind",
     "ProspectStatus",
     "SkipReason",
