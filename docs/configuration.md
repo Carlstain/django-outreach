@@ -53,7 +53,8 @@ OUTREACH_IMPORT_HEADER_ALIASES = {
 
 Import rules:
 
-- Rows whose email already exists are skipped, never updated.
+- Rows whose email already exists are skipped, unless the import is asked to update them, see
+  {doc}`user-guide/prospects`.
 - One invalid row stops the whole file.
 - A blank `kind` means `individual`.
 - An address on the suppression list is imported as unsubscribed.

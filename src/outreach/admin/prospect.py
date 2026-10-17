@@ -200,13 +200,18 @@ class ProspectAdmin(admin.ModelAdmin):
     def import_view(self, request: HttpRequest) -> HttpResponse:
         if not self.has_import_permission(request):
             raise PermissionDenied
-        form = OutreachImportForm(request.POST or None, request.FILES or None)
+        form = OutreachImportForm(
+            request.POST or None,
+            request.FILES or None,
+            can_update=self.has_change_permission(request),
+        )
         if request.method != "POST" or not form.is_valid():
             return self.import_response(request, form=form)
         upload = form.cleaned_data["import_file"]
+        update_existing = form.cleaned_data.get("update_existing", False)
         try:
             csv_text = upload.read().decode("utf-8-sig")
-            preview = ProspectCsvImporter().preview(csv_text)
+            preview = ProspectCsvImporter().preview(csv_text, update_existing)
         except UnicodeDecodeError:
             form.add_error("import_file", _("The file must be UTF-8 text."))
             return self.import_response(request, form=form)
@@ -216,7 +221,11 @@ class ProspectAdmin(admin.ModelAdmin):
         if preview.invalid_rows:
             return self.import_response(request, form=form, preview=preview)
         confirm_form = OutreachImportConfirmForm(
-            initial={"csv_text": csv_text, "file_name": upload.name}
+            initial={
+                "csv_text": csv_text,
+                "file_name": upload.name,
+                "update_existing": update_existing,
+            }
         )
         return self.import_response(
             request, form=form, preview=preview, confirm_form=confirm_form
@@ -229,27 +238,41 @@ class ProspectAdmin(admin.ModelAdmin):
         confirm_form = OutreachImportConfirmForm(request.POST or None)
         if request.method != "POST" or not confirm_form.is_valid():
             return HttpResponseRedirect(import_url)
+        update_existing = confirm_form.cleaned_data["update_existing"]
+        if update_existing and not self.has_change_permission(request):
+            raise PermissionDenied
         importer = ProspectCsvImporter()
         try:
-            preview = importer.preview(confirm_form.cleaned_data["csv_text"])
+            preview = importer.preview(confirm_form.cleaned_data["csv_text"], update_existing)
         except CsvImportError as error:
             self.message_user(request, str(error), messages.ERROR)
             return HttpResponseRedirect(import_url)
         if preview.invalid_rows:
-            return self.import_response(request, form=OutreachImportForm(), preview=preview)
-        created_count = importer.apply(preview, confirm_form.cleaned_data["file_name"])
-        message = ngettext(
-            "%(count)d prospect imported.", "%(count)d prospects imported.", created_count
+            form = OutreachImportForm(can_update=self.has_change_permission(request))
+            return self.import_response(request, form=form, preview=preview)
+        result = importer.apply(preview, confirm_form.cleaned_data["file_name"])
+        summary = [
+            ngettext(
+                "%(count)d prospect imported.", "%(count)d prospects imported.", result.created
+            )
+            % {"count": result.created}
+        ]
+        if result.updated:
+            summary.append(
+                ngettext(
+                    "%(count)d prospect updated.",
+                    "%(count)d prospects updated.",
+                    result.updated,
+                )
+                % {"count": result.updated}
+            )
+        summary.append(
+            ngettext(
+                "%(count)d row skipped.", "%(count)d rows skipped.", preview.skipped_count
+            )
+            % {"count": preview.skipped_count}
         )
-        skipped_message = ngettext(
-            "%(count)d row skipped.", "%(count)d rows skipped.", preview.skipped_count
-        )
-        self.message_user(
-            request,
-            f"{message % {'count': created_count}} "
-            f"{skipped_message % {'count': preview.skipped_count}}",
-            messages.SUCCESS,
-        )
+        self.message_user(request, " ".join(summary), messages.SUCCESS)
         return HttpResponseRedirect(reverse("outreach_admin:outreach_prospect_changelist"))
 
     def save_model(
