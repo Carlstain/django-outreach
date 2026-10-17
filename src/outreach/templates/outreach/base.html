@@ -39,6 +39,7 @@
           <input type="search" name="q" placeholder="{% trans 'Search prospects' %}" aria-label="{% trans 'Search prospects' %}">
         </form>
         <span class="spacer"></span>
+        {% include "outreach/includes/language_form.html" %}
         {% if django_admin_url %}<a class="linkout" href="{{ django_admin_url }}">{% trans "Open Django admin" %} <svg class="ico xs"><use href="#i-out"/></svg></a>{% endif %}
         <form method="post" action="{% url 'outreach_admin:logout' %}">
           {% csrf_token %}

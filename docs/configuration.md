@@ -10,7 +10,8 @@ so `override_settings` works in tests.
 | `OUTREACH_SITE_NAME` | `"Outreach"` | Name shown in the header, the title, the mails and the public pages |
 | `OUTREACH_BASE_URL` | none | Absolute base URL put in front of unsubscribe links, for example `https://example.org`. Never taken from the request. Sending is refused while it is empty |
 | `OUTREACH_FROM_EMAIL` | `DEFAULT_FROM_EMAIL` | Sender address of the mails |
-| `OUTREACH_LANGUAGE` | `LANGUAGE_CODE` | Language of the Outreach pages, the unsubscribe pages and the mails |
+| `OUTREACH_LANGUAGE` | `LANGUAGE_CODE` | Default language of the Outreach pages and the unsubscribe pages. Each staff member can pick another for their own screens, see {doc}`topics/languages` |
+| `OUTREACH_MAIL_LANGUAGE` | `OUTREACH_LANGUAGE` | Language the compose page starts on. A mail's language is chosen per mail, see {doc}`topics/languages`. One of `en`, `fr`, `es`, `pt`, `pt-br`, checked by `outreach.E004` |
 | `OUTREACH_DISPATCH` | `"sync"` | `"sync"` sends inside the admin request, `"celery"` queues one task per recipient, see {doc}`topics/sending-with-celery`. Sync is not recommended in production |
 | `OUTREACH_MAX_RECIPIENTS_PER_SEND` | `100` | Recipients per send action in sync mode, the rest are skipped as over the limit |
 | `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` | `5000` | Same limit in Celery mode |

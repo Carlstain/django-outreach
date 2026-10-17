@@ -4,6 +4,8 @@ An email template is a named subject and message that you can reuse.
 
 - The body is sanitised like any message and may contain variables, tags and buttons.
 - Names are unique, ignoring case: "Welcome" and "welcome" are the same name.
+- A template stores a language, which fills in the *Language* field when it is used. Leave it on
+  *Mail default* to follow the site setting.
 - Templates are shared. Every staff member who holds `outreach.view_emailtemplate` sees all of
   them. The author and the last editor are recorded for information only.
 - A mailing keeps its own copy of the subject and message, so editing or deleting a template never

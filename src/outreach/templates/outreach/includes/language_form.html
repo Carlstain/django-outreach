@@ -1,0 +1,10 @@
+{% load i18n %}
+<form class="language-form" method="post" action="{% url 'outreach_admin:set_language' %}">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <label class="visually-hidden" for="language-select">{% trans "Interface language" %}</label>
+  <select id="language-select" name="language">
+    {% for code, name in languages %}<option value="{{ code }}"{% if code == interface_language %} selected{% endif %}>{{ name }}</option>{% endfor %}
+  </select>
+  <button class="btn quiet" type="submit">{% trans "Change" context "interface language" %}</button>
+</form>

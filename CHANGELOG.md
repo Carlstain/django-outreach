@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Mail language and Spanish and Portuguese: a *Language* field on the compose page and on templates picks the language of the footer, the unsubscribe page, `{% greeting %}`, `{% today %}` and `{% member_since %}` (staff text is never translated). A mailing keeps its language, the unsubscribe link carries `?lang=` when it differs from the site, and the new setting `OUTREACH_MAIL_LANGUAGE` (check `outreach.E004`) sets the compose default. Each staff member can pick the language of the screens in a header menu, stored in the `outreach_language` cookie. New catalogues `es`, `pt` and `pt_BR` (drafts, to be reviewed by a native speaker) next to `fr`. Migration `0010` adds `Mailing.language` and `EmailTemplate.language`. See the topic *Languages*.
 - Celery dispatch: `OUTREACH_DISPATCH = "celery"` queues one `outreach.deliver_mail` task per recipient, with retries on transient SMTP errors, instead of sending inside the admin request. The task uses the Celery app of the host project. New settings `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` (default 5000), `OUTREACH_CELERY_QUEUE` and `OUTREACH_DELIVERY_MAX_RETRIES` (default 3), the `celery` extra and the `outreach_resume_deliveries` command.
 - Migration `0003`: the `MailingDelivery` model, one row per recipient of a mailing. The Mailing admin shows how many are pending.
 - System checks `outreach.E002`, `outreach.E003` and `outreach.W001`.

@@ -52,8 +52,8 @@ Use the same ones Django's admin requires: the sessions, authentication, message
 middleware, and the `request`, `auth` and `messages` context processors, with `APP_DIRS = True`
 or the app templates otherwise reachable.
 
-No `LocaleMiddleware` is needed. The app activates `OUTREACH_LANGUAGE` itself for its own pages,
-see {doc}`topics/i18n`.
+No `LocaleMiddleware` is needed. The app activates the language itself for its own pages, see
+{doc}`topics/i18n` and {doc}`topics/languages`.
 
 ### 3. Mount the URLs
 

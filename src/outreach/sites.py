@@ -7,18 +7,19 @@ from django.contrib.admin import AdminSite
 from django.contrib.auth.decorators import login_not_required
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Count
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.urls import NoReverseMatch, path, reverse
 from django.utils import translation
 from django.utils.decorators import method_decorator
 from django.utils.formats import date_format
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.timezone import template_localtime
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import never_cache
 
-from outreach.choices import ProspectStatus
+from outreach.choices import OutreachLanguage, ProspectStatus
 from outreach.conf import outreach_settings
 from outreach.forms import OutreachAuthenticationForm
 from outreach.models import Audience, EmailTemplate, Mailing, Prospect, ProspectEvent
@@ -29,13 +30,16 @@ from outreach.services.variables import MailVariables
 
 RECENT_EVENTS_LIMIT = 8
 SECONDS_PER_HOUR = 3600
+LANGUAGE_COOKIE_NAME = "outreach_language"
+LANGUAGE_COOKIE_MAX_AGE = 365 * 24 * SECONDS_PER_HOUR
 
 
 class OutreachAdminSite(AdminSite):
     """Second admin site, instance name ``outreach_admin``, for staff who manage outreach.
 
     Access needs an active staff user with ``outreach.view_prospect``. Every view runs under
-    ``OUTREACH_LANGUAGE``.
+    the language the staff member picked in the language menu (a cookie), or
+    ``OUTREACH_LANGUAGE`` when none is set.
     """
 
     enable_nav_sidebar = False
@@ -91,12 +95,38 @@ class OutreachAdminSite(AdminSite):
         }
         return text, messages.WARNING if report.failed else messages.SUCCESS
 
+    def interface_language(self, request: HttpRequest) -> str:
+        chosen = OutreachLanguage.parse(request.COOKIES.get(LANGUAGE_COOKIE_NAME))
+        return chosen or outreach_settings.language
+
+    @method_decorator(login_not_required)
+    def set_language_view(self, request: HttpRequest) -> HttpResponse:
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+        next_url = request.POST.get("next", "")
+        if not url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            next_url = reverse("outreach_admin:index")
+        response = HttpResponseRedirect(next_url)
+        chosen = OutreachLanguage.parse(request.POST.get("language"))
+        if chosen:
+            response.set_cookie(
+                LANGUAGE_COOKIE_NAME,
+                chosen,
+                max_age=LANGUAGE_COOKIE_MAX_AGE,
+                httponly=True,
+                samesite="Lax",
+                secure=request.is_secure(),
+            )
+        return response
+
     def in_outreach_language(
         self, view: Callable[..., HttpResponse]
     ) -> Callable[..., HttpResponse]:
         @wraps(view)
         def inner(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-            with translation.override(outreach_settings.language):
+            with translation.override(self.interface_language(request)):
                 response = view(request, *args, **kwargs)
                 # INFO - M.E. - 07/10/26 - a TemplateResponse renders after the view
                 # returns, so it is rendered here while the language is still active
@@ -125,6 +155,8 @@ class OutreachAdminSite(AdminSite):
             "django_admin_url": self.django_admin_url(),
             "theme": outreach_settings.theme,
             "counts": self.prospect_counts(),
+            "languages": OutreachLanguage.choices,
+            "interface_language": translation.get_language(),
         }
 
     def django_admin_url(self) -> str | None:
@@ -151,6 +183,7 @@ class OutreachAdminSite(AdminSite):
     def get_urls(self) -> list:
         return [
             path("help/", self.admin_view(self.help_view), name="help"),
+            path("language/", never_cache(self.set_language_view), name="set_language"),
             *super().get_urls(),
         ]
 

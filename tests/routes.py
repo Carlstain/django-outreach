@@ -108,3 +108,7 @@ def outreach_unsubscribe_prefix() -> str:
 
 def django_admin_index_url() -> str:
     return reverse("admin:index")
+
+
+def outreach_set_language_url() -> str:
+    return reverse("outreach_admin:set_language")
