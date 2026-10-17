@@ -29,6 +29,10 @@ def outreach_prospect_delete_url(prospect_pk: str) -> str:
     return reverse("outreach_admin:outreach_prospect_delete", args=[prospect_pk])
 
 
+def outreach_prospect_export_data_url(prospect_pk: str) -> str:
+    return reverse("outreach_admin:outreach_prospect_export_data", args=[prospect_pk])
+
+
 def outreach_prospect_import_url() -> str:
     return reverse("outreach_admin:outreach_prospect_import")
 
@@ -53,6 +57,14 @@ def outreach_mailing_delete_url(mailing_pk: str) -> str:
     return reverse("outreach_admin:outreach_mailing_delete", args=[mailing_pk])
 
 
+def outreach_mailing_cancel_schedule_url(mailing_pk: str) -> str:
+    return reverse("outreach_admin:outreach_mailing_cancel_schedule", args=[mailing_pk])
+
+
+def outreach_mailing_retry_url(mailing_pk: str) -> str:
+    return reverse("outreach_admin:outreach_mailing_retry", args=[mailing_pk])
+
+
 def outreach_emailtemplate_changelist_url() -> str:
     return reverse("outreach_admin:outreach_emailtemplate_changelist")
 
@@ -69,6 +81,22 @@ def outreach_emailtemplate_delete_url(template_pk: str) -> str:
     return reverse("outreach_admin:outreach_emailtemplate_delete", args=[template_pk])
 
 
+def outreach_audience_changelist_url() -> str:
+    return reverse("outreach_admin:outreach_audience_changelist")
+
+
+def outreach_audience_add_url() -> str:
+    return reverse("outreach_admin:outreach_audience_add")
+
+
+def outreach_audience_change_url(audience_pk: str) -> str:
+    return reverse("outreach_admin:outreach_audience_change", args=[audience_pk])
+
+
+def outreach_audience_delete_url(audience_pk: str) -> str:
+    return reverse("outreach_admin:outreach_audience_delete", args=[audience_pk])
+
+
 def outreach_unsubscribe_url(token: str) -> str:
     return reverse("outreach:unsubscribe", args=[token])
 
@@ -80,3 +108,7 @@ def outreach_unsubscribe_prefix() -> str:
 
 def django_admin_index_url() -> str:
     return reverse("admin:index")
+
+
+def outreach_set_language_url() -> str:
+    return reverse("outreach_admin:set_language")

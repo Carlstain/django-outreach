@@ -1,9 +1,17 @@
 from django.test import Client, override_settings
 
-from outreach.models import EmailTemplate
+from outreach.models import Audience, EmailTemplate
 from tests.base import OutreachTestCase
-from tests.factories import EmailTemplateFactory, ProspectFactory, create_outreach_staff_user
+from tests.factories import (
+    AudienceFactory,
+    EmailTemplateFactory,
+    ProspectFactory,
+    create_outreach_staff_user,
+)
 from tests.routes import (
+    outreach_audience_add_url,
+    outreach_audience_change_url,
+    outreach_audience_delete_url,
     outreach_emailtemplate_add_url,
     outreach_emailtemplate_change_url,
     outreach_emailtemplate_delete_url,
@@ -17,6 +25,10 @@ PERMISSIONS = [
     "add_emailtemplate",
     "change_emailtemplate",
     "delete_emailtemplate",
+    "view_audience",
+    "add_audience",
+    "change_audience",
+    "delete_audience",
 ]
 TEMPLATE_FIELDS = {"name": "Welcome", "subject": "Hello", "body_html": "<p>Body</p>"}
 
@@ -84,3 +96,44 @@ class CsrfEnforcementTests(OutreachTestCase):
         template.refresh_from_db()
         self.assertEqual(template.name, "Original")
         self.assertEqual(EmailTemplate.objects.count(), 1)
+
+    def test_audience_admin_writes_refuse_a_post_without_a_token(self) -> None:
+        audience = AudienceFactory(name="Original")
+
+        add_response = self.client.post(outreach_audience_add_url(), {"name": "Added"})
+        change_response = self.client.post(
+            outreach_audience_change_url(audience.pk), {"name": "Hijacked"}
+        )
+        delete_response = self.client.post(
+            outreach_audience_delete_url(audience.pk), {"post": "yes"}
+        )
+
+        self.assertEqual(
+            (
+                add_response.status_code,
+                change_response.status_code,
+                delete_response.status_code,
+            ),
+            (403, 403, 403),
+        )
+        audience.refresh_from_db()
+        self.assertEqual(audience.name, "Original")
+        self.assertEqual(Audience.objects.count(), 1)
+
+    def test_the_audience_actions_refuse_a_post_without_a_token(self) -> None:
+        audience = AudienceFactory()
+
+        for action in ("add_to_audience", "remove_from_audience"):
+            with self.subTest(action=action):
+                response = self.client.post(
+                    outreach_prospect_changelist_url(),
+                    {
+                        "action": action,
+                        "_selected_action": [str(self.prospect.pk)],
+                        "apply": "1",
+                        "audience": str(audience.pk),
+                    },
+                )
+                self.assertEqual(response.status_code, 403)
+
+        self.assertFalse(audience.prospects.exists())

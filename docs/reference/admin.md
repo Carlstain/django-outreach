@@ -13,7 +13,8 @@ all.
 
 | Model admin | Notes |
 |---|---|
-| `ProspectAdmin` | CSV import with a preview step. Actions: send mail, unsubscribe, link users, export as CSV. The email, status, last mailed date and user are read-only once saved |
+| `ProspectAdmin` | CSV import with a preview step. Actions: send mail, add to or remove from an audience, unsubscribe, link users, export as CSV. The email, status, last mailed date and user are read-only once saved |
+| `AudienceAdmin` | Full CRUD. Shows the number of prospects of each audience |
 | `MailingAdmin` | Read and delete only: it can not add or change |
 | `EmailTemplateAdmin` | Full CRUD. Shows a sandboxed sample preview that never runs tags |
 
@@ -34,6 +35,7 @@ Mounted with `include("outreach.urls")`. With the prefix `outreach/`:
 | `outreach_admin:outreach_prospect_add` / `change` / `delete` / `history` | `outreach/outreach/prospect/add/`, `<id>/change/`, … | Prospect CRUD |
 | `outreach_admin:outreach_prospect_import` / `process_import` | `outreach/outreach/prospect/import/`, … | CSV import and its confirmation |
 | `outreach_admin:outreach_mailing_changelist` / `change` / `delete` | `outreach/outreach/mailing/` | Mailings |
+| `outreach_admin:outreach_audience_changelist` / `add` / `change` / `delete` | `outreach/outreach/audience/` | Audiences |
 | `outreach_admin:outreach_emailtemplate_changelist` / `add` / `change` / `delete` | `outreach/outreach/emailtemplate/` | Templates |
 
 The send flow is a Django admin action on the prospect list, not a URL of its own.
@@ -48,8 +50,12 @@ permissions are the standard model permissions:
 |---|---|
 | `outreach.view_prospect` | Open the site, list and read prospects, export them as CSV, the help page and the dashboard |
 | `outreach.add_prospect` | Add a prospect, import a CSV file |
-| `outreach.change_prospect` | Edit a prospect, send a mail, unsubscribe selected, link to user accounts |
+| `outreach.change_prospect` | Edit a prospect, send a mail, add to or remove from an audience, unsubscribe selected, link to user accounts |
 | `outreach.delete_prospect` | Delete prospects |
+| `outreach.view_audience` | See the Audiences list |
+| `outreach.add_audience` | Create audiences |
+| `outreach.change_audience` | Edit audiences |
+| `outreach.delete_audience` | Delete audiences |
 | `outreach.view_mailing` | Read the Mailings list and detail |
 | `outreach.delete_mailing` | Delete a mailing log entry (mailings can not be added or changed) |
 | `outreach.view_emailtemplate` | See the Templates list, use a template on the compose page |

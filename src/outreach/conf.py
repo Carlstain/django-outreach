@@ -6,6 +6,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.utils.module_loading import import_string
 
+from outreach.choices import DispatchMode, OutreachLanguage
 from outreach.theme import OutreachTheme
 
 
@@ -24,11 +25,50 @@ class OutreachSettings:
 
     @property
     def language(self) -> str:
-        return getattr(settings, "OUTREACH_LANGUAGE", None) or settings.LANGUAGE_CODE
+        configured = getattr(settings, "OUTREACH_LANGUAGE", None) or settings.LANGUAGE_CODE
+        return OutreachLanguage.parse(configured) or configured
+
+    @property
+    def configured_mail_language(self) -> str | None:
+        return getattr(settings, "OUTREACH_MAIL_LANGUAGE", None) or None
+
+    @property
+    def mail_language(self) -> str:
+        return (
+            OutreachLanguage.parse(self.configured_mail_language)
+            or OutreachLanguage.parse(self.language)
+            or OutreachLanguage.EN.value
+        )
 
     @property
     def max_recipients_per_send(self) -> int:
         return getattr(settings, "OUTREACH_MAX_RECIPIENTS_PER_SEND", 100)
+
+    @property
+    def dispatch(self) -> str:
+        return getattr(settings, "OUTREACH_DISPATCH", DispatchMode.SYNC)
+
+    @property
+    def celery_max_recipients_per_send(self) -> int:
+        return getattr(settings, "OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND", 5000)
+
+    @property
+    def uses_celery(self) -> bool:
+        return self.dispatch == DispatchMode.CELERY
+
+    @property
+    def recipient_cap(self) -> int:
+        if self.dispatch == DispatchMode.CELERY:
+            return self.celery_max_recipients_per_send
+        return self.max_recipients_per_send
+
+    @property
+    def celery_queue(self) -> str | None:
+        return getattr(settings, "OUTREACH_CELERY_QUEUE", None)
+
+    @property
+    def delivery_max_retries(self) -> int:
+        return getattr(settings, "OUTREACH_DELIVERY_MAX_RETRIES", 3)
 
     @property
     def resend_cooldown(self) -> timedelta:

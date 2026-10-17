@@ -753,6 +753,7 @@ a {
     input[type="search"],
     input[type="date"],
     input[type="time"],
+    input[type="datetime-local"],
     select,
     textarea
   ) {
@@ -1366,7 +1367,12 @@ fieldset.module > .fieldset-heading,
   background: var(--st-user-bg);
 }
 
-.import-preview tr.skipped {
+.import-preview tr.update {
+  background: var(--st-contacted-bg);
+}
+
+.import-preview tr.skipped,
+.import-preview tr.repeated {
   background: var(--line-soft);
 }
 
@@ -2552,4 +2558,21 @@ label.f {
   height: 280px;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.language-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.language-form select {
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
+.language-form .btn {
+  padding: 2px 8px;
+  font-size: 12px;
 }

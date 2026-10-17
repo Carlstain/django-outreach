@@ -49,6 +49,10 @@
             <div class="readonly">{% if original.is_newsletter %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</div>
           </div>
           <div class="f wide">
+            <span>{% trans "Language" %}</span>
+            <div class="readonly">{{ original.get_language_display|default:_("Mail default") }}</div>
+          </div>
+          <div class="f wide">
             <span>{% trans "Message" %}</span>
             <iframe class="email-frame template-body-frame" sandbox title="{% trans 'Message as written' %}" srcdoc="{% filter force_escape %}<!DOCTYPE html><html><body style='font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.6; color: {{ theme.email.text }}; margin: 16px;'>{{ original.body_html|safe }}</body></html>{% endfilter %}"></iframe>
           </div>
@@ -83,6 +87,7 @@
               <label class="check">{{ form.is_newsletter }} {% trans "Newsletter" %}</label>
               <span class="hint">{% trans "A newsletter carries an unsubscribe link. Untick it for a notice, which goes to members only." %}</span>
             </div>
+            {% include "outreach/admin/includes/language_field.html" %}
             <div class="f wide">
               {{ form.body_html.errors }}
               <span>{{ form.body_html.label }}</span>

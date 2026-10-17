@@ -4,6 +4,43 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-17
+
+The first release that is not a beta. It includes everything since `0.1.0b6`.
+
+### Added
+
+- Mail language and Spanish and Portuguese: a *Language* field on the compose page and on templates picks the language of the footer, the unsubscribe page, `{% greeting %}`, `{% today %}` and `{% member_since %}` (staff text is never translated). A mailing keeps its language, the unsubscribe link carries `?lang=` when it differs from the site, and the new setting `OUTREACH_MAIL_LANGUAGE` (check `outreach.E004`) sets the compose default. Each staff member can pick the language of the screens in a header menu, stored in the `outreach_language` cookie. New catalogues `es`, `pt` and `pt_BR` (drafts, to be reviewed by a native speaker) next to `fr`. Migration `0010` adds `Mailing.language` and `EmailTemplate.language`. See the topic *Languages*.
+- Celery dispatch: `OUTREACH_DISPATCH = "celery"` queues one `outreach.deliver_mail` task per recipient, with retries on transient SMTP errors, instead of sending inside the admin request. The task uses the Celery app of the host project. New settings `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` (default 5000), `OUTREACH_CELERY_QUEUE` and `OUTREACH_DELIVERY_MAX_RETRIES` (default 3), the `celery` extra and the `outreach_resume_deliveries` command.
+- Migration `0003`: the `MailingDelivery` model, one row per recipient of a mailing. The Mailing admin shows how many are pending.
+- System checks `outreach.E002`, `outreach.E003` and `outreach.W001`.
+- Audiences: a named, static list of prospects (`Audience`, `Prospect.audiences`, migration `0005`). Prospects are added and removed with two actions of the prospect list (the add page can also create the audience from a typed name), the list can be filtered by audience, and the Audiences pages and permissions (`view`, `add`, `change`, `delete`) are new. Sending to an audience uses the existing filter, Select all and Send a mail. Two event kinds record the changes in the history of a prospect.
+- Retry failed deliveries: the detail page of a mailing lists every recipient with its status (pending, sent or failed), and a failed one can be sent again with a Retry button or Retry all failed, which needs `outreach.change_prospect`. `ProspectMailer.retry` claims the prospect again and goes through `deliver`, so an unsubscribed prospect is still skipped, and the resend cooldown is not applied. No schema change.
+- Signals `prospect_subscribed`, `prospect_unsubscribed`, `mail_sent` and `mail_failed` (module `outreach.signals`), sent after commit and without breaking the sender when a receiver raises. `ProspectSubscriptions.subscribe` creates a prospect from a host signup form, with a required consent source kept in a new *Subscribed* event kind. The event kind changes the choices of `ProspectEvent.kind` (migration).
+- CSV import duplicate detection: the preview tells a new row, a row whose email exists, a row that repeats an earlier row of the file and a row that will update apart, with a count of each. An option, for staff with `change_prospect`, updates existing prospects: a filled cell replaces the stored value, an empty cell or a missing column changes nothing, and the email, status, account link, last mailed date and audiences are never changed. An update adds an *Edited* event by `import`. The existing emails are looked up in chunks instead of one query per row. `ProspectCsvImporter.apply` returns an `ImportResult`, and the new row statuses are *Will update* and *Repeated in the file*. No schema change.
+- Host variables: a project registers its own `{{ name | fallback }}` variables with `@mail_variable_library.register(label=..., example=...)` in a `mail_variables.py` module of an installed app, found at startup. They are computed only for the messages that use them, `None` or empty takes the fallback, a function that raises fails that recipient, and they appear in the editor menu, the help page and the email template preview. A tag can not take the name of a variable. See the topic *Host variables*.
+- *Send a test to me* on step 2 of a send: one copy of the mail goes to the address of the staff member, rendered for the prospect shown in the preview, with a `[Test]` subject, a dead unsubscribe link and no `List-Unsubscribe` headers. Nothing is written and no signal is sent. `ProspectMailer.send_sample`, and an optional `unsubscribe_url` for `ProspectMailer.render`.
+- Scheduled send, Celery mode only: a *Send at* field on the compose page stores the mailing with `scheduled` deliveries and claims nobody. The task `outreach.send_due_mailings` (Celery beat) or the command `outreach_send_due_mailings` (cron) starts what is due, re-checks the cooldown and queues the deliveries. A mailing can be cancelled until it starts. `MailingScheduler` is the service. Migration `0007` adds `Mailing.scheduled_for` and the `scheduled` delivery status.
+- Answering requests about a person: a prospect page downloads everything stored about them as JSON (`view_prospect`), and the action *Erase and suppress the selected prospects* (`delete_prospect`, with a confirmation page) deletes prospects with their history, deliveries and audience memberships and keeps only the suppression hash of the address. A new `prospect_erased` signal carries the address so the host can erase its own copies. No schema change.
+
+### Changed
+
+- A Celery retry reports "N queued, 0 skipped." like a send, instead of "N queued.". The delivery task raises the same `ImproperlyConfigured` message as the admin when `OUTREACH_BASE_URL` is not set. `ProspectMailer.from_settings(actor)` builds the mailer from the setting, and the send and retry code shares one claim step and one cooldown rule. No other behaviour changes.
+
+- A failed delivery keeps a failure kind (`MailingDelivery.failure_kind`: *refused*, *server* or *content*) instead of the error text, which could hold the address of the recipient and the reply of the mail server. The prospect history, the dashboard, the mailing page and the data download show the kind. The `outreach` logger records the delivery id, the kind and the exception class. The history of older *mail failed* events is blanked. Migrations `0008` and `0009`. `TransientDeliveryError` carries the kind, and `last_error` is gone.
+
+- The detail page of a mailing no longer shows the mail server's error for a failed recipient, which can contain the address. It shows a short message instead.
+- `EmailTemplate.created_by` is now an optional foreign key to the host user model (cleared when the account is deleted) instead of a username string, and `updated_by` records who changed a template last. Migration `0004` matches the existing usernames to users through `USERNAME_FIELD`: a template whose author no longer matches an account ends up without an author. `EmailTemplates.save` and `create` take the user instead of a username.
+- `Prospect`, `MailingDelivery` and `EmailTemplate` share the abstract models `BaseModel` (uuid, `created_at`, `updated_at`) and `AuthoredModel` (adds `created_by`, `updated_by`). No schema change except the above.
+- Synchronous sending stays the default but is not recommended in production: `outreach.W001` reports it in `check --deploy`. Its behaviour and the `OUTREACH_MAX_RECIPIENTS_PER_SEND` limit (100) are unchanged.
+- `ProspectMailer.send` goes through the new `queue` and `deliver` steps, and `MailReport` has a `queued` list, filled in Celery mode.
+
+### Notes
+
+- Upgrading from `0.1.0b6`: run `migrate`. Migrations `0002` to `0010` are new. `0004` links template authors to users and drops the author of a template with no matching account, and `0009` blanks the details of old *mail failed* events.
+- The `es`, `pt` and `pt_BR` catalogues are drafts that no native speaker has reviewed yet.
+- Scheduled send needs Celery beat or cron to start a mailing, see the Celery topic.
+
 ## [0.1.0b6] - 2026-10-13
 
 ### Changed

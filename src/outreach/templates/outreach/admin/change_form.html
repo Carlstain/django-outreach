@@ -30,6 +30,9 @@
     <div class="actions">
       {% if has_view_permission %}
         <a class="btn quiet" href="{% add_preserved_filters changelist_url %}"><svg class="ico"><use href="#i-back"/></svg>{% trans "Prospects" %}</a>
+        {% if change and original %}
+          <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_export_data' original.pk|admin_urlquote %}">{% trans "Download their data" %}</a>
+        {% endif %}
       {% endif %}
     </div>
   </div>
@@ -111,7 +114,7 @@
               {% for event in events %}
                 <li>
                   <strong>{{ event.get_kind_display }}</strong>
-                  {% if event.mailing_id and perms.outreach.view_mailing %}<a href="{% url 'outreach_admin:outreach_mailing_change' event.mailing_id|admin_urlquote %}">{{ event.detail|default:event.get_kind_display }}</a>{% elif event.detail %}{{ event.detail }}{% endif %}
+                  {% if event.mailing_id and perms.outreach.view_mailing %}<a href="{% url 'outreach_admin:outreach_mailing_change' event.mailing_id|admin_urlquote %}">{{ event.detail_label|default:event.get_kind_display }}</a>{% elif event.detail_label %}{{ event.detail_label }}{% endif %}
                   <small>{{ event.created_at|date:"SHORT_DATETIME_FORMAT" }} · {% include "outreach/includes/actor.html" with actor=event.actor %}</small>
                 </li>
               {% endfor %}

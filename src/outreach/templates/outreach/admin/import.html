@@ -16,6 +16,12 @@
         {{ form.import_file }}
         <span class="hint">{% trans "A UTF-8 CSV file with a header row and an email column." %}</span>
       </div>
+      {% if form.update_existing %}
+        <div class="wide">
+          <label class="check">{{ form.update_existing }} {{ form.update_existing.label }}</label>
+          <span class="hint">{{ form.update_existing.help_text }}</span>
+        </div>
+      {% endif %}
       <div class="wide actions">
         <button class="btn fill" type="submit">{% trans "Preview import" %}</button>
         <a class="btn quiet" href="{% url 'outreach_admin:outreach_prospect_changelist' %}">{% trans "Cancel" %}</a>
@@ -51,6 +57,7 @@
   {% else %}
     <div class="card">
       <h3>{% trans "Preview" %}</h3>
+      <p>{% blocktrans with new=preview.new_rows|length update=preview.update_rows|length kept=preview.kept_rows|length repeated=preview.repeated_rows|length %}{{ new }} new, {{ update }} to update, {{ kept }} kept as they are, {{ repeated }} repeated in the file.{% endblocktrans %}</p>
       <table class="import-preview">
         <thead>
           <tr>
@@ -61,13 +68,16 @@
         <tbody>
           {% for row in preview.rows %}
             <tr class="{{ row.status.value }}">
-              <td>{{ row.status.label }}</td>
+              <td>
+                {{ row.status.label }}
+                {% for field_name, change in row.changes.items %}<br><small>{{ field_name }}: {{ change.0|default:"-" }} &rarr; {{ change.1 }}</small>{% endfor %}
+              </td>
               {% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}
             </tr>
           {% endfor %}
         </tbody>
       </table>
-      {% if preview.new_rows %}
+      {% if preview.new_rows or preview.update_rows %}
         <form method="post" action="{% url 'outreach_admin:outreach_prospect_process_import' %}">
           {% csrf_token %}
           {{ confirm_form }}

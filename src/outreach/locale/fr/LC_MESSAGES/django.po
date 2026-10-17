@@ -72,6 +72,41 @@ msgid_plural "%(count)d prospects unsubscribed."
 msgstr[0] "%(count)d prospect désinscrit."
 msgstr[1] "%(count)d prospects désinscrits."
 
+msgid "Erase and suppress the selected prospects"
+msgstr "Effacer et supprimer de la liste d'envoi les prospects sélectionnés"
+
+#, python-format
+msgid "%(count)d prospect erased and suppressed."
+msgid_plural "%(count)d prospects erased and suppressed."
+msgstr[0] "%(count)d prospect effacé et supprimé de la liste d'envoi."
+msgstr[1] "%(count)d prospects effacés et supprimés de la liste d'envoi."
+
+msgid "Erase and suppress"
+msgstr "Effacer et supprimer de la liste d'envoi"
+
+msgid "This can not be undone."
+msgstr "Cette action est irréversible."
+
+msgid ""
+"The selected prospects are deleted with their history, their deliveries and "
+"their audience memberships. Their addresses are added to the suppression "
+"list, so they are never mailed again, even if they are imported again."
+msgstr ""
+"Les prospects sélectionnés sont supprimés avec leur historique, leurs envois "
+"et leurs appartenances aux audiences. Leurs adresses sont ajoutées à la liste "
+"de suppression : elles ne recevront plus jamais de mail, même si elles sont "
+"importées de nouveau."
+
+msgid ""
+"Mailings keep their counts, never their names. The user accounts of members "
+"are not touched."
+msgstr ""
+"Les envois conservent leurs compteurs, jamais les noms. Les comptes "
+"utilisateurs des membres ne sont pas modifiés."
+
+msgid "Download their data"
+msgstr "Télécharger leurs données"
+
 msgid "Link to user accounts"
 msgstr "Lier aux comptes utilisateurs"
 
@@ -98,6 +133,9 @@ msgstr "Désinscrit"
 
 msgid "Added"
 msgstr "Ajouté"
+
+msgid "Subscribed"
+msgstr "Inscrit"
 
 msgid "Imported"
 msgstr "Importé"
@@ -243,6 +281,9 @@ msgstr "dernier envoi"
 
 msgid "created at"
 msgstr "créé le"
+
+msgid "scheduled for"
+msgstr "programmé pour"
 
 msgid "updated at"
 msgstr "modifié le"
@@ -713,15 +754,6 @@ msgstr ""
 "indique la ligne."
 
 msgid ""
-"The search box looks in names, organisations and emails. The chips above the"
-" list filter by type, status and member. Filters combine, and they also "
-"decide what Select all takes."
-msgstr ""
-"La recherche porte sur les noms, les organisations et les e-mails. Les puces"
-" au-dessus de la liste filtrent par type, statut et membre. Les filtres se "
-"combinent, et ils décident aussi de ce que prend Tout sélectionner."
-
-msgid ""
 "Tick the prospects in the list. To take every match of the current filters, "
 "use Select all under the list."
 msgstr ""
@@ -1067,6 +1099,36 @@ msgstr "envoyé"
 msgid "No recipient is kept for this mailing."
 msgstr "Aucun destinataire n’est conservé pour cet envoi."
 
+msgctxt "recipient"
+msgid "pending"
+msgstr "en attente"
+
+msgid "Retry"
+msgstr "Réessayer"
+
+#, python-format
+msgid "Retry all failed (%(count)s)"
+msgstr "Réessayer tous les échecs (%(count)s)"
+
+#, python-format
+msgid "%(count)s attempts"
+msgstr "%(count)s tentatives"
+
+msgid "The mail could not be delivered."
+msgstr "L’e-mail n’a pas pu être livré."
+
+msgid "The mail server refused it"
+msgstr "Le serveur de messagerie l'a refusé"
+
+msgid "The mail server could not be reached"
+msgstr "Le serveur de messagerie est injoignable"
+
+msgid "The message could not be built"
+msgstr "Le message n'a pas pu être construit"
+
+msgid "failure"
+msgstr "échec"
+
 msgid "Open a prospect to see every mailing that reached them."
 msgstr "Ouvrez un prospect pour voir tous les envois qui l’ont atteint."
 
@@ -1114,6 +1176,70 @@ msgid "Send to %(counter)s prospect"
 msgid_plural "Send to %(counter)s prospects"
 msgstr[0] "Envoyer à %(counter)s prospect"
 msgstr[1] "Envoyer à %(counter)s prospects"
+
+#, python-format
+msgid "Schedule for %(counter)s prospect"
+msgid_plural "Schedule for %(counter)s prospects"
+msgstr[0] "Programmer pour %(counter)s prospect"
+msgstr[1] "Programmer pour %(counter)s prospects"
+
+#, python-format
+msgid "It will go out on %(when)s"
+msgstr "Il partira le %(when)s"
+
+msgid "Send at"
+msgstr "Envoyer à"
+
+msgid "Choose a time in the future."
+msgstr "Choisissez une heure dans le futur."
+
+msgid ""
+"Leave empty to send now. A scheduled mail goes out when the scheduler runs, "
+"see the documentation."
+msgstr ""
+"Laissez vide pour envoyer tout de suite. Un mail programmé part quand le "
+"planificateur s'exécute, voir la documentation."
+
+#, python-format
+msgid "%(scheduled)d scheduled for %(time)s, %(skipped)d skipped."
+msgstr "%(scheduled)d programmés pour le %(time)s, %(skipped)d ignorés."
+
+msgid "The scheduled mailing was cancelled."
+msgstr "L'envoi programmé a été annulé."
+
+msgid "This mailing has already started, it can not be cancelled."
+msgstr "Cet envoi a déjà commencé, il ne peut plus être annulé."
+
+msgid "Cancel the schedule"
+msgstr "Annuler la programmation"
+
+#, python-format
+msgid "Scheduled for %(when)s; it starts when the scheduler runs after that time."
+msgstr "Programmé pour le %(when)s ; il démarre quand le planificateur s'exécute après cette heure."
+
+msgctxt "recipient"
+msgid "scheduled"
+msgstr "programmé"
+
+msgid "Send a test to me"
+msgstr "M'envoyer un test"
+
+#, python-format
+msgid "A test goes to your own address only, with the details of %(name)s."
+msgstr "Un test part uniquement vers votre adresse, avec les informations de %(name)s."
+
+msgid "Its unsubscribe link does nothing."
+msgstr "Son lien de désinscription ne fait rien."
+
+msgid "Your account has no email address, so a test can not be sent."
+msgstr "Votre compte n'a pas d'adresse e-mail, un test ne peut pas être envoyé."
+
+msgid "The test could not be sent. Check the mail settings."
+msgstr "Le test n'a pas pu être envoyé. Vérifiez les paramètres d'envoi."
+
+#, python-format
+msgid "A test was sent to %(email)s."
+msgstr "Un test a été envoyé à %(email)s."
 
 msgid "Preview as"
 msgstr "Aperçu pour"
@@ -1423,3 +1549,237 @@ msgstr[1] "%(count)d lignes ignorées."
 
 msgid "Export the selected prospects as CSV"
 msgstr "Exporter les prospects sélectionnés en CSV"
+
+msgid "Synchronous"
+msgstr "Synchrone"
+
+msgid "Celery"
+msgstr "Celery"
+
+msgid "Pending"
+msgstr "En attente"
+
+msgid "Scheduled"
+msgstr "Programmé"
+
+msgid "attempts"
+msgstr "tentatives"
+
+msgid "previous mailed at"
+msgstr "précédent envoi le"
+
+msgid "last error"
+msgstr "dernière erreur"
+
+msgid "mailing delivery"
+msgstr "envoi du mailing"
+
+msgid "mailing deliveries"
+msgstr "envois du mailing"
+
+msgid "pending"
+msgstr "en attente"
+
+#, python-format
+msgid "%(queued)d queued, %(skipped)d skipped."
+msgstr "%(queued)d en file d'attente, %(skipped)d ignorés."
+
+msgid "updated by"
+msgstr "modifié par"
+
+msgid "Audience"
+msgstr "Audience"
+
+msgid "Audiences"
+msgstr "Audiences"
+
+msgid "audience"
+msgstr "audience"
+
+msgid "audiences"
+msgstr "audiences"
+
+msgid "description"
+msgstr "description"
+
+msgid "Named lists of prospects. Filter the prospects by an audience to send a mail to it."
+msgstr "Des listes nommées de prospects. Filtrez les prospects par audience pour lui envoyer un e-mail."
+
+msgid "Add audience"
+msgstr "Ajouter une audience"
+
+msgid "No audiences yet"
+msgstr "Aucune audience pour l’instant"
+
+msgid "Create an audience, then add prospects to it from the prospect list."
+msgstr "Créez une audience, puis ajoutez-y des prospects depuis la liste des prospects."
+
+msgid "Add and remove its prospects from the prospect list. Deleting an audience never deletes its prospects."
+msgstr "Ajoutez et retirez ses prospects depuis la liste des prospects. Supprimer une audience ne supprime jamais ses prospects."
+
+msgid "An audience with this name already exists."
+msgstr "Une audience portant ce nom existe déjà."
+
+msgid "Added to an audience"
+msgstr "Ajouté à une audience"
+
+msgid "Removed from an audience"
+msgstr "Retiré d’une audience"
+
+msgid "Add to an audience"
+msgstr "Ajouter à une audience"
+
+msgid "Remove from an audience"
+msgstr "Retirer d’une audience"
+
+msgid "Add the selected prospects to an audience"
+msgstr "Ajouter les prospects sélectionnés à une audience"
+
+msgid "Remove the selected prospects from an audience"
+msgstr "Retirer les prospects sélectionnés d’une audience"
+
+msgid "Prospects already in the audience are left as they are. Unsubscribed prospects can be members, but are never mailed."
+msgstr "Les prospects déjà dans l’audience ne changent pas. Les prospects désinscrits peuvent en être membres, mais ne reçoivent jamais d’e-mail."
+
+msgid "Add to the audience"
+msgstr "Ajouter à l’audience"
+
+msgid "Remove from the audience"
+msgstr "Retirer de l’audience"
+
+msgid "Back to prospects"
+msgstr "Retour aux prospects"
+
+msgid "An audience is a named list of prospects you mail again and again, such as the visitors of an event. A prospect can be in several audiences."
+msgstr "Une audience est une liste nommée de prospects que vous écrivez régulièrement, par exemple les visiteurs d’un événement. Un prospect peut figurer dans plusieurs audiences."
+
+msgid "Create an audience under Audiences in the menu. In the prospect list, tick people and choose Add the selected prospects to an audience in the Action menu. Choose Remove the selected prospects from an audience to take them out."
+msgstr "Créez une audience dans Audiences, dans le menu. Dans la liste des prospects, cochez des personnes et choisissez Ajouter les prospects sélectionnés à une audience dans le menu Action. Choisissez Retirer les prospects sélectionnés d’une audience pour les en sortir."
+
+msgid "To send a message to an audience, filter the prospect list by that audience, use Select all under the list, then choose Send a mail. The usual rules apply: unsubscribed prospects stay in the audience but are never mailed."
+msgstr "Pour envoyer un message à une audience, filtrez la liste des prospects par cette audience, utilisez Tout sélectionner sous la liste, puis choisissez Envoyer un e-mail. Les règles habituelles s’appliquent : les prospects désinscrits restent dans l’audience mais ne reçoivent jamais d’e-mail."
+
+msgid "View audiences"
+msgstr "Voir les audiences"
+
+msgid "See the list of audiences."
+msgstr "Voir la liste des audiences."
+
+msgid "Add audiences"
+msgstr "Ajouter des audiences"
+
+msgid "Create an audience."
+msgstr "Créer une audience."
+
+msgid "Change audiences"
+msgstr "Modifier les audiences"
+
+msgid "Rename an audience or change its description."
+msgstr "Renommer une audience ou changer sa description."
+
+msgid "Delete audiences"
+msgstr "Supprimer des audiences"
+
+msgid "Delete an audience. Its prospects are kept."
+msgstr "Supprimer une audience. Ses prospects sont conservés."
+
+msgid "Adding and removing prospects needs the permission to change prospects."
+msgstr "Ajouter et retirer des prospects demande la permission de modifier les prospects."
+
+msgid "The search box looks in names, organisations and emails. The chips above the list filter by type, status, member and audience. Filters combine, and they also decide what Select all takes."
+msgstr "La recherche porte sur les noms, les organisations et les e-mails. Les puces au-dessus de la liste filtrent par type, statut, membre et audience. Les filtres se combinent, et ils décident aussi de ce que prend Tout sélectionner."
+
+msgid "%(counter)s prospect selected."
+msgid_plural "%(counter)s prospects selected."
+msgstr[0] "%(counter)s prospect sélectionné."
+msgstr[1] "%(counter)s prospects sélectionnés."
+
+msgid "%(count)d prospect added to %(audience)s."
+msgid_plural "%(count)d prospects added to %(audience)s."
+msgstr[0] "%(count)d prospect ajouté à %(audience)s."
+msgstr[1] "%(count)d prospects ajoutés à %(audience)s."
+
+msgid "%(count)d prospect removed from %(audience)s."
+msgid_plural "%(count)d prospects removed from %(audience)s."
+msgstr[0] "%(count)d prospect retiré de %(audience)s."
+msgstr[1] "%(count)d prospects retirés de %(audience)s."
+
+msgid "Choose an audience"
+msgstr "Choisir une audience"
+
+msgid "Or create a new audience"
+msgstr "Ou créer une nouvelle audience"
+
+msgid "Creates the audience and adds the selected prospects to it."
+msgstr "Crée l’audience et y ajoute les prospects sélectionnés."
+
+msgid "Choose an audience, or type the name of a new one."
+msgstr "Choisissez une audience, ou saisissez le nom d’une nouvelle audience."
+
+msgid "Choose an audience or type a new name, not both."
+msgstr "Choisissez une audience ou saisissez un nouveau nom, pas les deux."
+
+msgid "The audience %(audience)s was created."
+msgstr "L’audience %(audience)s a été créée."
+
+msgid "There is nothing to remove the prospects from."
+msgstr "Il n’y a aucune audience dont retirer les prospects."
+
+msgid "On that page you can also type the name of a new audience instead of choosing one. It is created and the selected prospects are added to it."
+msgstr "Sur cette page, vous pouvez aussi saisir le nom d’une nouvelle audience au lieu d’en choisir une. Elle est créée et les prospects sélectionnés y sont ajoutés."
+
+msgid "Will update"
+msgstr "Sera mis à jour"
+
+msgid "Repeated in the file"
+msgstr "Répété dans le fichier"
+
+msgid "Update the prospects that already exist"
+msgstr "Mettre à jour les prospects qui existent déjà"
+
+msgid ""
+"A filled cell of the file replaces the stored value, an empty cell changes "
+"nothing. The email, status, account link and audiences are never changed."
+msgstr ""
+"Une cellule remplie du fichier remplace la valeur enregistrée, une cellule "
+"vide ne change rien. L'e-mail, le statut, le lien avec le compte et les "
+"audiences ne changent jamais."
+
+#, python-format
+msgid ""
+"%(new)s new, %(update)s to update, %(kept)s kept as they are, %(repeated)s "
+"repeated in the file."
+msgstr ""
+"%(new)s nouveaux, %(update)s à mettre à jour, %(kept)s conservés tels quels, "
+"%(repeated)s répétés dans le fichier."
+
+#, python-format
+msgid "%(count)d prospect updated."
+msgid_plural "%(count)d prospects updated."
+msgstr[0] "%(count)d prospect mis à jour."
+msgstr[1] "%(count)d prospects mis à jour."
+
+msgid "language"
+msgstr "langue"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Mail default"
+msgstr "Langue par défaut des mails"
+
+msgid "Language of the unsubscribe link and page, the greeting and the dates. Your own text is not translated."
+msgstr "Langue du lien et de la page de désinscription, de la formule de politesse et des dates. Votre propre texte n’est pas traduit."
+
+msgid "Mail language: %(language)s."
+msgstr "Langue du mail : %(language)s."
+
+msgid "Language: %(language)s."
+msgstr "Langue : %(language)s."
+
+msgid "Interface language"
+msgstr "Langue de l’interface"
+
+msgctxt "interface language"
+msgid "Change"
+msgstr "Changer"

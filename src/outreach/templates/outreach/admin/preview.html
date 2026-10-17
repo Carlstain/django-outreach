@@ -12,7 +12,7 @@
   {% with recipient_count=plan.recipients|length %}
   <form method="post" id="send-form">
     {% csrf_token %}
-    {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+    {% include "outreach/admin/includes/selection_hidden_fields.html" with action_name="send_mail" %}
     {% include "outreach/admin/includes/mail_message_fields.html" %}
     <input type="hidden" name="preview_prospect" value="{{ preview_prospect.pk }}">
     <div class="head">
@@ -20,10 +20,14 @@
         <p class="eyebrow">{% blocktrans with current=2 total=2 %}Step {{ current }} of {{ total }}{% endblocktrans %}</p>
         <h2>{% trans "Check and send" %}</h2>
         <p>{% blocktrans count counter=recipient_count %}This is what the recipient will get, with their own details filled in.{% plural %}This is what each of the {{ counter }} recipients will get, with their own details filled in.{% endblocktrans %}</p>
+        <p>{% blocktrans with language=language_label %}Mail language: {{ language }}.{% endblocktrans %}</p>
+        {% if send_at %}<p>{% blocktrans with when=send_at|date:"DATETIME_FORMAT" %}It will go out on {{ when }}{% endblocktrans %}</p>{% endif %}
+        <p class="hint">{% blocktrans with name=preview_prospect.display_name %}A test goes to your own address only, with the details of {{ name }}.{% endblocktrans %}{% if form.is_newsletter.value %} {% trans "Its unsubscribe link does nothing." %}{% endif %}</p>
       </div>
       <div class="actions">
         <button class="btn quiet" type="submit" name="step" value="compose" formnovalidate><svg class="ico"><use href="#i-back"/></svg>{% trans "Edit message" %}</button>
-        <button class="btn fill" type="submit" name="step" value="send"{% if not recipient_count %} disabled{% endif %}><svg class="ico"><use href="#i-send"/></svg>{% blocktrans count counter=recipient_count %}Send to {{ counter }} prospect{% plural %}Send to {{ counter }} prospects{% endblocktrans %}</button>
+        <button class="btn quiet" type="submit" name="step" value="test" formnovalidate>{% trans "Send a test to me" %}</button>
+        <button class="btn fill" type="submit" name="step" value="send"{% if not recipient_count %} disabled{% endif %}><svg class="ico"><use href="#i-send"/></svg>{% if send_at %}{% blocktrans count counter=recipient_count %}Schedule for {{ counter }} prospect{% plural %}Schedule for {{ counter }} prospects{% endblocktrans %}{% else %}{% blocktrans count counter=recipient_count %}Send to {{ counter }} prospect{% plural %}Send to {{ counter }} prospects{% endblocktrans %}{% endif %}</button>
       </div>
     </div>
   </form>
@@ -33,7 +37,7 @@
 {% block content %}
   <form method="post" class="previewas" id="preview-form">
     {% csrf_token %}
-    {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+    {% include "outreach/admin/includes/selection_hidden_fields.html" with action_name="send_mail" %}
     {% include "outreach/admin/includes/mail_message_fields.html" %}
     <input type="hidden" name="step" value="preview">
     <label for="preview-prospect">{% trans "Preview as" %}</label>

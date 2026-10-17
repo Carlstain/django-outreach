@@ -23,7 +23,8 @@ from outreach.sites import outreach_site
 @admin.register(EmailTemplate, site=outreach_site)
 class EmailTemplateAdmin(admin.ModelAdmin):
     form = EmailTemplateForm
-    list_display = ["name", "subject", "kind_badge", "updated_at", "created_by"]
+    list_display = ["name", "subject", "kind_badge", "language", "updated_at", "created_by"]
+    list_select_related = ["created_by"]
     search_fields = ["name", "subject"]
     ordering = ["name"]
     list_per_page = 20
@@ -55,8 +56,8 @@ class EmailTemplateAdmin(admin.ModelAdmin):
         self, request: HttpRequest, obj: EmailTemplate, form: ModelForm, change: bool
     ) -> None:
         if not change:
-            created_by_max_length = EmailTemplate._meta.get_field("created_by").max_length
-            obj.created_by = request.user.get_username()[:created_by_max_length]
+            obj.created_by = request.user
+        obj.updated_by = request.user
         super().save_model(request, obj, form, change)
 
     def render_change_form(

@@ -8,7 +8,7 @@ a test as easily as from the admin.
 
 ```{eval-rst}
 .. autoclass:: outreach.services.mailing.ProspectMailer
-   :members: plan, render, send
+   :members: from_settings, plan, render, send, retry
 
 .. autoclass:: outreach.services.mailing.MailPlan
    :members:
@@ -52,6 +52,13 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
 .. autofunction:: outreach.mail_tags.member_since
 ```
 
+## Host variables
+
+```{eval-rst}
+.. autoclass:: outreach.services.mail_variables.MailVariableLibrary
+   :members: register, catalog
+```
+
 ## Message bodies
 
 ```{eval-rst}
@@ -72,6 +79,28 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
    :members: unsubscribe
 ```
 
+## Subscribing
+
+```{eval-rst}
+.. autoclass:: outreach.services.subscription.ProspectSubscriptions
+   :members: subscribe
+
+.. autoclass:: outreach.services.subscription.SubscribeResult
+   :members:
+```
+
+The signals are listed in {doc}`../topics/signals`.
+
+## Access and erasure
+
+```{eval-rst}
+.. autoclass:: outreach.services.prospect_export.ProspectDataExporter
+   :members: export
+
+.. autoclass:: outreach.services.erasure.ProspectEraser
+   :members: erase
+```
+
 ## Templates
 
 ```{eval-rst}
@@ -82,6 +111,18 @@ button helper is `outreach.services.mail_buttons.mail_buttons`. The built-in tag
    :members:
 
 .. autoexception:: outreach.services.templates.TemplateNameTaken
+```
+
+## Audiences
+
+```{eval-rst}
+.. autoclass:: outreach.services.audiences.AudienceCreator
+   :members: create
+
+.. autoexception:: outreach.services.audiences.AudienceNameTaken
+
+.. autoclass:: outreach.services.audiences.AudienceMembers
+   :members: add, remove
 ```
 
 ## CSV import and export

@@ -6,6 +6,7 @@
   {% url 'outreach_admin:outreach_prospect_changelist' as prospects_url %}
   {% url 'outreach_admin:outreach_mailing_changelist' as mailings_url %}
   {% url 'outreach_admin:outreach_emailtemplate_changelist' as templates_url %}
+  {% url 'outreach_admin:outreach_audience_changelist' as audiences_url %}
   {% url 'outreach_admin:help' as help_url %}
   {% with url_name=request.resolver_match.url_name|default:'' unsubscribed_filter=request.GET.status__exact %}
   <a class="skip-link" href="#content-start">{% trans "Skip to main content" %}</a>
@@ -16,8 +17,9 @@
         <p class="nav-label">{% trans "Outreach" %}</p>
         <nav class="nav" aria-label="{% trans 'Outreach' %}">
           <a href="{{ dashboard_url }}"{% if url_name == "index" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-grid"/></svg>{% trans "Dashboard" %}</a>
-          <a href="{{ prospects_url }}"{% if url_name != "index" and url_name != "help" and unsubscribed_filter != "unsubscribed" and "mailing" not in url_name and "emailtemplate" not in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-users"/></svg>{% trans "Prospects" %}{% if counts %}<span class="count">{{ counts.total }}</span>{% endif %}</a>
+          <a href="{{ prospects_url }}"{% if url_name != "index" and url_name != "help" and unsubscribed_filter != "unsubscribed" and "mailing" not in url_name and "emailtemplate" not in url_name and "audience" not in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-users"/></svg>{% trans "Prospects" %}{% if counts %}<span class="count">{{ counts.total }}</span>{% endif %}</a>
           <a href="{{ prospects_url }}?status__exact=unsubscribed"{% if unsubscribed_filter == "unsubscribed" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-ban"/></svg>{% trans "Unsubscribed" %}{% if counts %}<span class="count">{{ counts.unsubscribed }}</span>{% endif %}</a>
+          {% if perms.outreach.view_audience %}<a href="{{ audiences_url }}"{% if "audience" in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-list"/></svg>{% trans "Audiences" %}{% if counts %}<span class="count">{{ counts.audiences }}</span>{% endif %}</a>{% endif %}
           {% if perms.outreach.view_mailing %}<a href="{{ mailings_url }}"{% if "mailing" in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-mail"/></svg>{% trans "Mailings" %}{% if counts %}<span class="count">{{ counts.mailings }}</span>{% endif %}</a>{% endif %}
           {% if perms.outreach.view_emailtemplate %}<a href="{{ templates_url }}"{% if "emailtemplate" in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-file"/></svg>{% trans "Templates" %}{% if counts %}<span class="count">{{ counts.email_templates }}</span>{% endif %}</a>{% endif %}
           <a href="{{ help_url }}"{% if url_name == "help" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-help"/></svg>{% trans "How to use" %}</a>
@@ -37,6 +39,7 @@
           <input type="search" name="q" placeholder="{% trans 'Search prospects' %}" aria-label="{% trans 'Search prospects' %}">
         </form>
         <span class="spacer"></span>
+        {% include "outreach/includes/language_form.html" %}
         {% if django_admin_url %}<a class="linkout" href="{{ django_admin_url }}">{% trans "Open Django admin" %} <svg class="ico xs"><use href="#i-out"/></svg></a>{% endif %}
         <form method="post" action="{% url 'outreach_admin:logout' %}">
           {% csrf_token %}
@@ -59,7 +62,8 @@
 
       <nav class="tabbar" aria-label="{% trans 'Outreach' %}">
         <a href="{{ dashboard_url }}"{% if url_name == "index" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-grid"/></svg>{% trans "Dashboard" %}</a>
-        <a href="{{ prospects_url }}"{% if url_name != "index" and url_name != "help" and unsubscribed_filter != "unsubscribed" and "mailing" not in url_name and "emailtemplate" not in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-users"/></svg>{% trans "Prospects" %}</a>
+        <a href="{{ prospects_url }}"{% if url_name != "index" and url_name != "help" and unsubscribed_filter != "unsubscribed" and "mailing" not in url_name and "emailtemplate" not in url_name and "audience" not in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-users"/></svg>{% trans "Prospects" %}</a>
+        {% if perms.outreach.view_audience %}<a href="{{ audiences_url }}"{% if "audience" in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-list"/></svg>{% trans "Audiences" %}</a>{% endif %}
         {% if perms.outreach.view_mailing %}<a href="{{ mailings_url }}"{% if "mailing" in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-mail"/></svg>{% trans "Mailings" %}</a>{% endif %}
         {% if perms.outreach.view_emailtemplate %}<a href="{{ templates_url }}"{% if "emailtemplate" in url_name %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-file"/></svg>{% trans "Templates" %}</a>{% endif %}
         <a href="{{ help_url }}"{% if url_name == "help" %} aria-current="page"{% endif %}><svg class="ico"><use href="#i-help"/></svg>{% trans "Help" %}</a>

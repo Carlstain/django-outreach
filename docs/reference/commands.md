@@ -22,3 +22,29 @@ Users selected: 120. Prospects created: 97 (unsubscribed: 2). Already prospects:
 
 A `OUTREACH_USER_PROSPECT_FIELDS` callable that returns a key outside `kind`, `first_name`,
 `last_name`, `organization`, `city` and `country` makes the command fail with an error.
+
+## `outreach_send_due_mailings`
+
+Starts the scheduled mailings whose time has come. Run it every minute or so from cron, or use the
+`outreach.send_due_mailings` task with Celery beat. See {doc}`../topics/sending-with-celery`.
+
+```shell
+python manage.py outreach_send_due_mailings
+```
+
+It needs `OUTREACH_DISPATCH = "celery"`, and prints `Mailings started: N.`.
+A scheduled delivery is not `pending`, so `outreach_resume_deliveries` never queues it early.
+
+## `outreach_resume_deliveries`
+
+Queues again the deliveries left `pending`, for example after a Celery worker was killed. See
+{doc}`../topics/sending-with-celery`.
+
+```shell
+python manage.py outreach_resume_deliveries [--older-than MINUTES] [--dry-run]
+```
+
+| Option | Effect |
+|---|---|
+| `--older-than` | Only deliveries pending for more than this many minutes (default 30) |
+| `--dry-run` | Prints the count and queues nothing |

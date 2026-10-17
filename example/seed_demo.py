@@ -19,6 +19,7 @@ from outreach.choices import (  # noqa: E402
     ACTOR_RECIPIENT,
     ACTOR_SYSTEM,
     EventKind,
+    FailureKind,
     ProspectKind,
     ProspectStatus,
 )
@@ -129,7 +130,9 @@ def seed_mailing(
         prospect.last_mailed_at = sent_at
         prospect.save(update_fields=["status", "last_mailed_at"])
     for prospect in failed:
-        ProspectEvent.record(prospect, EventKind.MAIL_FAILED, sender, "Mailbox full", mailing)
+        ProspectEvent.record(
+            prospect, EventKind.MAIL_FAILED, sender, FailureKind.REFUSED.value, mailing
+        )
 
 
 TEMPLATES = [
@@ -157,7 +160,7 @@ TEMPLATES = [
 
 def seed_templates() -> None:
     for name, subject, body_html in TEMPLATES:
-        EmailTemplates().save(name, subject, body_html, "demo", overwrite=True)
+        EmailTemplates().save(name, subject, body_html, None, overwrite=True)
 
 
 def seed() -> None:

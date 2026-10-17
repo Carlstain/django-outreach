@@ -2,7 +2,7 @@ import factory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 
-from outreach.models import EmailTemplate, Mailing, Prospect
+from outreach.models import Audience, EmailTemplate, Mailing, Prospect
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -31,6 +31,13 @@ class MailingFactory(factory.django.DjangoModelFactory):
     sender = "staff"
 
 
+class AudienceFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Audience
+
+    name = factory.Sequence(lambda sequence_number: f"Audience {sequence_number}")
+
+
 class EmailTemplateFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EmailTemplate
@@ -38,7 +45,6 @@ class EmailTemplateFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda sequence_number: f"Template {sequence_number}")
     subject = factory.Sequence(lambda sequence_number: f"Template subject {sequence_number}")
     body_html = "<p>Hello from the template</p>"
-    created_by = "template-author"
 
 
 OUTREACH_PROSPECT_PERMISSIONS = [
@@ -46,6 +52,13 @@ OUTREACH_PROSPECT_PERMISSIONS = [
     "add_prospect",
     "change_prospect",
     "delete_prospect",
+]
+
+OUTREACH_AUDIENCE_PERMISSIONS = [
+    "view_audience",
+    "add_audience",
+    "change_audience",
+    "delete_audience",
 ]
 
 OUTREACH_TEMPLATE_PERMISSIONS = [

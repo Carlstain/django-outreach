@@ -16,18 +16,19 @@
   <div class="cols">
     <form class="stack" method="post">
       {% csrf_token %}
-      {% include "outreach/admin/includes/mail_hidden_fields.html" %}
+      {% include "outreach/admin/includes/selection_hidden_fields.html" with action_name="send_mail" %}
       <input type="hidden" name="step" value="compose">
       <button class="visually-hidden-submit" type="submit" name="step" value="preview" formnovalidate tabindex="-1" aria-hidden="true"></button>
       <div class="card">
         <div class="form">
-          {% if form.non_field_errors or form.subject.errors or form.header_text.errors or form.is_newsletter.errors or form.body.errors %}
+          {% if form.non_field_errors or form.subject.errors or form.header_text.errors or form.is_newsletter.errors or form.body.errors or form.send_at.errors %}
             <div class="notice err wide" role="alert">
               {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
               {% for error in form.subject.errors %}<p>{{ error }}</p>{% endfor %}
               {% for error in form.header_text.errors %}<p>{{ error }}</p>{% endfor %}
               {% for error in form.is_newsletter.errors %}<p>{{ error }}</p>{% endfor %}
               {% for error in form.body.errors %}<p>{{ error }}</p>{% endfor %}
+              {% for error in form.send_at.errors %}<p>{{ error }}</p>{% endfor %}
             </div>
           {% endif %}
           {% if email_templates or perms.outreach.view_emailtemplate %}
@@ -63,6 +64,14 @@
             <label class="check">{{ form.is_newsletter }} {% trans "Newsletter" %}</label>
             <span class="hint">{% trans "A newsletter carries an unsubscribe link and skips people who unsubscribed. Untick it for a notice, which goes to members only." %}</span>
           </div>
+          {% include "outreach/admin/includes/language_field.html" %}
+          {% if form.send_at %}
+            <div class="f wide">
+              {{ form.send_at.label_tag }}
+              {{ form.send_at }}
+              <span class="hint">{% trans "Leave empty to send now. A scheduled mail goes out when the scheduler runs, see the documentation." %}</span>
+            </div>
+          {% endif %}
           <div class="f wide">
             <span>{{ form.body.label }}</span>
             <div class="editor">

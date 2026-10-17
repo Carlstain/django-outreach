@@ -1,7 +1,7 @@
 from django.core import mail
 from django.test import override_settings
 
-from outreach.choices import EventKind, ProspectStatus
+from outreach.choices import EventKind, FailureKind, ProspectStatus
 from outreach.models import Prospect, ProspectEvent
 from outreach.services.mailing import ProspectMailer
 from tests.base import MAIL_BASE_URL, OutreachMailTagTestCase
@@ -34,6 +34,6 @@ class MailTagSendTests(OutreachMailTagTestCase):
         self.assertIsNone(broken.last_mailed_at)
         self.assertEqual(broken.status, ProspectStatus.PROSPECT)
         failure = ProspectEvent.objects.get(prospect=broken, kind=EventKind.MAIL_FAILED)
-        self.assertIn("tag exploded", failure.detail)
+        self.assertEqual(failure.detail, FailureKind.CONTENT)
         self.assertEqual(report.mailing.failed_count, 1)
         self.assertEqual(report.mailing.sent_count, 2)

@@ -19,7 +19,7 @@ filter and count on the dashboard.
 
 The list shows the name, email, status, whether the prospect is a member and the date of the last
 mail. Search covers the email, first name, last name and organisation. Filters cover the kind
-(individual or organization), the status and membership.
+(individual or organization), the status, membership and audience, see {doc}`audiences`.
 
 ## Adding and editing a prospect
 
@@ -41,16 +41,25 @@ prospect, `change_prospect` to edit one and `delete_prospect` to delete one.
 ## Importing a file
 
 *Import CSV* on the dashboard takes a CSV file in UTF-8 with a header row. It needs
-`add_prospect`. You first see a preview of the new and the skipped rows, then confirm.
+`add_prospect`. You first see a preview of the rows, with a count of each kind, then confirm.
 
 - The columns are `email`, `first_name`, `last_name`, `organization`, `city`, `country` and
   `kind`. Headers are lower-cased and stripped, and your developer may have added aliases. The
   *How to use* page lists what your site accepts.
-- A row whose email already exists is skipped, never updated.
+- The preview tells each row apart: *New* (will be created), *Skipped* (the email already exists and
+  the row changes nothing), *Will update* (see below) and *Repeated in the file* (the same email as an
+  earlier row, which is the one imported).
+- **Updating existing prospects.** Tick *Update the prospects that already exist* before the preview. It
+  needs `change_prospect`. A row whose email exists then becomes *Will update* when a filled cell
+  differs from the stored value, and the preview shows each change as old to new. A filled cell replaces
+  the stored value, an empty cell changes nothing, and a column the file does not have changes nothing
+  either. The email, status, account link, last mailed date and audiences are never changed, and an
+  unsubscribed prospect stays unsubscribed. Each update adds an *Edited* event by `import` to the
+  history, with the names of the fields. Without the option an existing prospect is never changed. A
+  stale file can overwrite newer data, so read the preview first.
 - One invalid row stops the whole file. Nothing is imported until every row is valid.
 - A blank `kind` means individual.
 - An address on the suppression list is imported as unsubscribed.
-- A repeated email in the same file is imported once.
 - A file over the row or size limit is rejected.
 
 ## Exporting
@@ -63,13 +72,36 @@ anything someone typed into a name.
 
 ## Actions on selected prospects
 
-Tick prospects in the list, pick an action and press *Go*. All three need `change_prospect`.
+Tick prospects in the list, pick an action and press *Go*. All but the export and the erasure need `change_prospect`.
 
 | Action | Effect |
 |---|---|
 | Send a mail to the selected prospects | Opens the mail steps, see {doc}`sending-mail` |
+| Add the selected prospects to an audience / Remove the selected prospects from an audience | Puts them in a named list or takes them out, see {doc}`audiences` |
 | Unsubscribe the selected prospects | Marks them unsubscribed and puts their address on the suppression list. There is no way back |
+| Erase and suppress the selected prospects | Deletes them for good, see below. Needs `delete_prospect` |
 | Link to user accounts | Links each unlinked prospect to the user account with the same email, when exactly one such user exists and that user has no prospect yet |
+
+## Answering a request for access or erasure
+
+**Access.** Open a prospect and press *Download their data*. It needs `view_prospect`. The JSON
+file holds everything stored about them: their details, the name of the linked account, their
+audiences, their history and their deliveries, with the subject of each mailing. Nothing about
+other people is in it.
+
+**Erasure.** Tick the prospects and choose *Erase and suppress the selected prospects*. A page
+asks you to confirm, and nothing is deleted before you do. It needs `outreach.delete_prospect`.
+
+- The prospects are deleted with their history, their deliveries and their audience memberships.
+  The audiences themselves stay.
+- Their addresses are added to the suppression list, which keeps only a hash. They are never
+  mailed again, even if the address is imported again: it comes back as unsubscribed.
+- Mailings keep their counts and never name anyone, so they are left as they are.
+- A user account linked to a prospect is not touched. Deleting the account is the host project's
+  job, and the `prospect_erased` signal tells it when to do so, see {doc}`../topics/signals`.
+
+This is different from the plain *Delete* of Django, which removes the prospect but leaves the
+address mailable if it is imported again.
 
 Prospects are also linked automatically when they are created. A user account is not a prospect
 and not consent to bulk mail, so nothing creates prospects from users by itself. A developer can

@@ -1,4 +1,5 @@
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from html import unescape
 
@@ -6,6 +7,7 @@ from django.utils.html import escape
 from django.utils.translation import pgettext_lazy
 
 from outreach.models import Prospect
+from outreach.services.mail_variables import HostVariableValues, mail_variable_library
 
 VARIABLE_PATTERN = re.compile(r"\{\{\s*(\w+)\s*(?:\|\s*([^{}|]*?)\s*)?\}\}")
 
@@ -28,6 +30,14 @@ class MailVariables:
     ALWAYS_ALLOWED = ("unsubscribe_url",)
 
     def catalog(self) -> list[MailVariable]:
+        """Return the built-in variables, then the ones a host registered by name."""
+        host_variables = [
+            MailVariable(variable.name, variable.label, variable.example)
+            for variable in mail_variable_library.catalog()
+        ]
+        return [*self.built_in_catalog(), *host_variables]
+
+    def built_in_catalog(self) -> list[MailVariable]:
         return [
             MailVariable(
                 "first_name",
@@ -66,15 +76,23 @@ class MailVariables:
             ),
         ]
 
-    def values_for(self, prospect: Prospect) -> dict[str, str]:
+    def values_for(
+        self,
+        prospect: Prospect,
+        *,
+        preview: bool = False,
+        extra: Mapping[str, str] | None = None,
+    ) -> Mapping[str, str]:
         """Return the value of each key for a prospect.
 
-        Names fall back to the linked user's when the prospect's are empty.
+        Names fall back to the linked user's when the prospect's are empty. A variable a host
+        registered is computed the first time a message reads it. ``extra`` adds fixed values,
+        such as the unsubscribe link.
         """
         user = prospect.user
         first_name = prospect.first_name or (getattr(user, "first_name", "") if user else "")
         last_name = prospect.last_name or (getattr(user, "last_name", "") if user else "")
-        return {
+        fixed_values = {
             "first_name": first_name,
             "last_name": last_name,
             "full_name": f"{first_name} {last_name}".strip(),
@@ -82,10 +100,12 @@ class MailVariables:
             "email": prospect.email,
             "city": prospect.city,
             "country": prospect.country,
+            **(extra or {}),
         }
+        return HostVariableValues(fixed_values, mail_variable_library, prospect, preview)
 
     def allowed_keys(self) -> set[str]:
-        return set(self.KEYS) | set(self.ALWAYS_ALLOWED)
+        return set(self.KEYS) | set(self.ALWAYS_ALLOWED) | set(mail_variable_library.variables)
 
     def used_keys(self, text: str) -> set[str]:
         return {match.group(1) for match in VARIABLE_PATTERN.finditer(text)}
@@ -97,7 +117,7 @@ class MailVariables:
         remainder = VARIABLE_PATTERN.sub("", text)
         return "{{" in remainder or "}}" in remainder
 
-    def render(self, text: str, values: dict[str, str], *, html: bool) -> str:
+    def render(self, text: str, values: Mapping[str, str], *, html: bool) -> str:
         def substitute(match: re.Match[str]) -> str:
             key = match.group(1)
             if key not in values:

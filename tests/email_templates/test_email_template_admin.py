@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.forms.models import BaseModelForm
 from django.urls import reverse
@@ -10,6 +9,7 @@ from tests.base import OutreachTestCase
 from tests.factories import (
     OUTREACH_TEMPLATE_PERMISSIONS,
     EmailTemplateFactory,
+    UserFactory,
     create_outreach_staff_user,
 )
 from tests.html_inspector import inspect_page
@@ -73,10 +73,12 @@ class EmailTemplateAdminTests(OutreachTestCase):
         template = EmailTemplate.objects.get()
         self.assertEqual(template.name, "Welcome")
         self.assertEqual(template.body_html, "<p>Body</p>")
-        self.assertEqual(template.created_by, self.staff_user.get_username())
+        self.assertEqual(template.created_by, self.staff_user)
+        self.assertEqual(template.updated_by, self.staff_user)
 
-    def test_change_updates_the_template_and_keeps_its_author(self) -> None:
-        template = EmailTemplateFactory(created_by="original-author")
+    def test_change_updates_the_template_and_records_who_changed_it(self) -> None:
+        original_author = UserFactory()
+        template = EmailTemplateFactory(created_by=original_author)
 
         response = self.client.post(
             outreach_emailtemplate_change_url(template.pk),
@@ -87,7 +89,8 @@ class EmailTemplateAdminTests(OutreachTestCase):
         template.refresh_from_db()
         self.assertEqual(template.name, "Renamed")
         self.assertEqual(template.subject, "Hello {{ first_name }}")
-        self.assertEqual(template.created_by, "original-author")
+        self.assertEqual(template.created_by, original_author)
+        self.assertEqual(template.updated_by, self.staff_user)
 
     def test_delete_removes_the_template(self) -> None:
         template = EmailTemplateFactory()
@@ -232,14 +235,6 @@ class EmailTemplateAdminTests(OutreachTestCase):
         response = self.client.get(outreach_emailtemplate_changelist_url())
 
         self.assertEqual(response.context["counts"]["email_templates"], 3)
-
-    def test_author_is_truncated_to_the_stored_length_when_saving_in_the_admin(self) -> None:
-        long_username = "u" * 240 + "@example.test"
-
-        with patch.object(get_user_model(), "get_username", return_value=long_username):
-            self.client.post(outreach_emailtemplate_add_url(), FORM_FIELDS)
-
-        self.assertEqual(EmailTemplate.objects.get().created_by, long_username[:150])
 
     def test_a_name_clash_that_slips_past_validation_is_a_form_error_not_a_server_error(
         self,

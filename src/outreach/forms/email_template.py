@@ -9,7 +9,7 @@ from outreach.widgets import TrixWidget
 class EmailTemplateForm(MessageContentForm, forms.ModelForm):
     class Meta:
         model = EmailTemplate
-        fields = ["name", "subject", "header_text", "is_newsletter", "body_html"]
+        fields = ["name", "subject", "header_text", "is_newsletter", "language", "body_html"]
         widgets = {"body_html": TrixWidget}
 
     def clean_name(self) -> str:

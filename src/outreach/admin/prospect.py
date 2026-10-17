@@ -1,22 +1,33 @@
+import json
 from typing import Any
 
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import QuerySet
 from django.forms import ModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import URLPattern, path, reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
 
+from outreach.admin.audience_filter import AudienceFilter
 from outreach.admin.member_filter import MemberFilter
 from outreach.admin.prospect_event_inline import ProspectEventInline
-from outreach.choices import ACTOR_SYSTEM, EventKind, ProspectKind, ProspectStatus
+from outreach.choices import (
+    ACTOR_SYSTEM,
+    EventKind,
+    OutreachLanguage,
+    ProspectKind,
+    ProspectStatus,
+)
 from outreach.conf import outreach_settings
 from outreach.forms import (
+    AUDIENCE_NAME_TAKEN,
+    AudienceChoiceForm,
     MessageForm,
     OutreachImportConfirmForm,
     OutreachImportForm,
@@ -24,6 +35,9 @@ from outreach.forms import (
     SaveTemplateForm,
 )
 from outreach.models import EmailTemplate, Prospect, ProspectEvent
+from outreach.services.audiences import AudienceCreator, AudienceMembers, AudienceNameTaken
+from outreach.services.erasure import ProspectEraser
+from outreach.services.failures import MessageNotAccepted
 from outreach.services.linking import UserLinker
 from outreach.services.mail_buttons import InvalidButtonLink
 from outreach.services.mailing import ProspectMailer
@@ -33,12 +47,15 @@ from outreach.services.prospect_csv import (
     ProspectCsvExporter,
     ProspectCsvImporter,
 )
+from outreach.services.prospect_export import ProspectDataExporter
+from outreach.services.scheduling import MailingScheduler
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from outreach.services.unsubscribe import ProspectUnsubscriber
 from outreach.sites import outreach_site
 
 STEP_PREVIEW = "preview"
 STEP_SEND = "send"
+STEP_TEST = "test"
 STEP_COMPOSE = "compose"
 STEP_SAVE_TEMPLATE = "save_template"
 FALSE_VALUES = ("", "0", "false")
@@ -54,10 +71,18 @@ class ProspectAdmin(admin.ModelAdmin):
     form = ProspectForm
     list_per_page = 20
     list_display = ["display_name", "email", "status_badge", "member", "last_mailed_at"]
-    list_filter = ["kind", "status", MemberFilter]
+    list_filter = ["kind", "status", MemberFilter, AudienceFilter]
     search_fields = ["email", "first_name", "last_name", "organization"]
     inlines = [ProspectEventInline]
-    actions = ["send_mail", "unsubscribe_selected", "link_users", "export_csv"]
+    actions = [
+        "send_mail",
+        "add_to_audience",
+        "remove_from_audience",
+        "unsubscribe_selected",
+        "erase_selected",
+        "link_users",
+        "export_csv",
+    ]
     change_list_template = "outreach/admin/change_list.html"
     change_form_template = "outreach/admin/change_form.html"
     delete_confirmation_template = "outreach/admin/delete_confirmation.html"
@@ -108,6 +133,7 @@ class ProspectAdmin(admin.ModelAdmin):
             "status",
             "last_mailed_at",
             "user",
+            "audiences",
             "created_at",
             "updated_at",
         ]
@@ -115,7 +141,14 @@ class ProspectAdmin(admin.ModelAdmin):
     def get_readonly_fields(
         self, request: HttpRequest, obj: Prospect | None = None
     ) -> list[str]:
-        readonly_fields = ["status", "last_mailed_at", "user", "created_at", "updated_at"]
+        readonly_fields = [
+            "status",
+            "last_mailed_at",
+            "user",
+            "audiences",
+            "created_at",
+            "updated_at",
+        ]
         if obj is not None:
             readonly_fields.append("email")
         return readonly_fields
@@ -135,8 +168,26 @@ class ProspectAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.process_import_view),
                 name="outreach_prospect_process_import",
             ),
+            path(
+                "<path:object_id>/export-data/",
+                self.admin_site.admin_view(self.export_data_view),
+                name="outreach_prospect_export_data",
+            ),
             *super().get_urls(),
         ]
+
+    def export_data_view(self, request: HttpRequest, object_id: str) -> HttpResponse:
+        if not self.has_view_permission(request):
+            raise PermissionDenied
+        prospect = self.get_object(request, object_id)
+        if prospect is None:
+            raise Http404
+        response = HttpResponse(
+            json.dumps(ProspectDataExporter().export(prospect), indent=2, ensure_ascii=False),
+            content_type="application/json; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="prospect-{prospect.pk}.json"'
+        return response
 
     def import_response(self, request: HttpRequest, **context: Any) -> HttpResponse:
         return TemplateResponse(
@@ -155,13 +206,18 @@ class ProspectAdmin(admin.ModelAdmin):
     def import_view(self, request: HttpRequest) -> HttpResponse:
         if not self.has_import_permission(request):
             raise PermissionDenied
-        form = OutreachImportForm(request.POST or None, request.FILES or None)
+        form = OutreachImportForm(
+            request.POST or None,
+            request.FILES or None,
+            can_update=self.has_change_permission(request),
+        )
         if request.method != "POST" or not form.is_valid():
             return self.import_response(request, form=form)
         upload = form.cleaned_data["import_file"]
+        update_existing = form.cleaned_data.get("update_existing", False)
         try:
             csv_text = upload.read().decode("utf-8-sig")
-            preview = ProspectCsvImporter().preview(csv_text)
+            preview = ProspectCsvImporter().preview(csv_text, update_existing)
         except UnicodeDecodeError:
             form.add_error("import_file", _("The file must be UTF-8 text."))
             return self.import_response(request, form=form)
@@ -171,7 +227,11 @@ class ProspectAdmin(admin.ModelAdmin):
         if preview.invalid_rows:
             return self.import_response(request, form=form, preview=preview)
         confirm_form = OutreachImportConfirmForm(
-            initial={"csv_text": csv_text, "file_name": upload.name}
+            initial={
+                "csv_text": csv_text,
+                "file_name": upload.name,
+                "update_existing": update_existing,
+            }
         )
         return self.import_response(
             request, form=form, preview=preview, confirm_form=confirm_form
@@ -184,27 +244,41 @@ class ProspectAdmin(admin.ModelAdmin):
         confirm_form = OutreachImportConfirmForm(request.POST or None)
         if request.method != "POST" or not confirm_form.is_valid():
             return HttpResponseRedirect(import_url)
+        update_existing = confirm_form.cleaned_data["update_existing"]
+        if update_existing and not self.has_change_permission(request):
+            raise PermissionDenied
         importer = ProspectCsvImporter()
         try:
-            preview = importer.preview(confirm_form.cleaned_data["csv_text"])
+            preview = importer.preview(confirm_form.cleaned_data["csv_text"], update_existing)
         except CsvImportError as error:
             self.message_user(request, str(error), messages.ERROR)
             return HttpResponseRedirect(import_url)
         if preview.invalid_rows:
-            return self.import_response(request, form=OutreachImportForm(), preview=preview)
-        created_count = importer.apply(preview, confirm_form.cleaned_data["file_name"])
-        message = ngettext(
-            "%(count)d prospect imported.", "%(count)d prospects imported.", created_count
+            form = OutreachImportForm(can_update=self.has_change_permission(request))
+            return self.import_response(request, form=form, preview=preview)
+        result = importer.apply(preview, confirm_form.cleaned_data["file_name"])
+        summary = [
+            ngettext(
+                "%(count)d prospect imported.", "%(count)d prospects imported.", result.created
+            )
+            % {"count": result.created}
+        ]
+        if result.updated:
+            summary.append(
+                ngettext(
+                    "%(count)d prospect updated.",
+                    "%(count)d prospects updated.",
+                    result.updated,
+                )
+                % {"count": result.updated}
+            )
+        summary.append(
+            ngettext(
+                "%(count)d row skipped.", "%(count)d rows skipped.", preview.skipped_count
+            )
+            % {"count": preview.skipped_count}
         )
-        skipped_message = ngettext(
-            "%(count)d row skipped.", "%(count)d rows skipped.", preview.skipped_count
-        )
-        self.message_user(
-            request,
-            f"{message % {'count': created_count}} "
-            f"{skipped_message % {'count': preview.skipped_count}}",
-            messages.SUCCESS,
-        )
+        self.message_user(request, " ".join(summary), messages.SUCCESS)
         return HttpResponseRedirect(reverse("outreach_admin:outreach_prospect_changelist"))
 
     def save_model(
@@ -222,15 +296,9 @@ class ProspectAdmin(admin.ModelAdmin):
     def send_mail(
         self, request: HttpRequest, queryset: QuerySet[Prospect]
     ) -> HttpResponse | None:
-        base_url = outreach_settings.base_url
-        if base_url is None:
-            self.message_user(
-                request,
-                _("OUTREACH_BASE_URL is not set, sending is disabled."),
-                messages.ERROR,
-            )
+        mailer = self.admin_site.mailer_for(request)
+        if mailer is None:
             return None
-        mailer = ProspectMailer(base_url=base_url, actor=request.user.get_username())
         step = request.POST.get("step")
         form = MessageForm(request.POST) if step else MessageForm()
         requested_step = step
@@ -253,6 +321,8 @@ class ProspectAdmin(admin.ModelAdmin):
                         "subject": selected_template.subject,
                         "header_text": selected_template.header_text,
                         "is_newsletter": selected_template.is_newsletter,
+                        "language": selected_template.language
+                        or outreach_settings.mail_language,
                         "body": selected_template.body_html,
                     }
                 )
@@ -280,40 +350,41 @@ class ProspectAdmin(admin.ModelAdmin):
             )
             step = None
 
+        message_fields = {}
+        if step in (STEP_PREVIEW, STEP_TEST, STEP_SEND):
+            message_fields = {
+                "header_text": form.cleaned_data["header_text"],
+                "is_newsletter": form.cleaned_data["is_newsletter"],
+                "language": form.cleaned_data["language"],
+            }
+
         if step == STEP_SEND:
             subject = form.cleaned_data["subject"]
-            report = mailer.send(
-                queryset,
-                subject,
-                form.cleaned_data["body"],
-                header_text=form.cleaned_data["header_text"],
-                is_newsletter=form.cleaned_data["is_newsletter"],
-            )
-            level = messages.WARNING if report.failed else messages.SUCCESS
-            self.message_user(
-                request,
-                _("%(sent)d sent, %(skipped)d skipped, %(failed)d failed.")
-                % {
-                    "sent": len(report.sent),
-                    "skipped": len(report.skipped),
-                    "failed": len(report.failed),
-                },
-                level,
-            )
+            send_at = form.cleaned_data.get("send_at")
+            if send_at:
+                report = MailingScheduler(mailer).schedule(
+                    queryset,
+                    subject,
+                    form.cleaned_data["body"],
+                    send_at=send_at,
+                    **message_fields,
+                )
+            else:
+                report = mailer.send(
+                    queryset, subject, form.cleaned_data["body"], **message_fields
+                )
+            self.message_user(request, *self.admin_site.report_message(report))
             return None
 
-        select_across = request.POST.get("select_across", "0").lower() not in FALSE_VALUES
         context = {
             **self.admin_site.each_context(request),
+            **self.selection_context(request),
             "title": _("Send a mail"),
             "subtitle": None,
             "opts": self.model._meta,
             "form": form,
             "plan": plan,
-            "queryset_ids": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
-            "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
-            "select_across": int(select_across),
-            "max_recipients": outreach_settings.max_recipients_per_send,
+            "max_recipients": outreach_settings.recipient_cap,
             "media": self.media,
             "email_templates": self.template_choices(permissions["view"]),
             "selected_template": selected_template,
@@ -322,7 +393,7 @@ class ProspectAdmin(admin.ModelAdmin):
             "can_save_template": permissions["add"],
             "can_overwrite_template": permissions["change"],
         }
-        if step == STEP_PREVIEW:
+        if step in (STEP_PREVIEW, STEP_TEST):
             recipients_by_pk = {str(prospect.pk): prospect for prospect in plan.recipients}
             preview_prospect = recipients_by_pk.get(
                 request.POST.get("preview_prospect", ""), plan.recipients[0]
@@ -333,24 +404,64 @@ class ProspectAdmin(admin.ModelAdmin):
                     preview_prospect,
                     subject,
                     form.cleaned_data["body"],
-                    header_text=form.cleaned_data["header_text"],
-                    is_newsletter=form.cleaned_data["is_newsletter"],
                     preview=True,
+                    **message_fields,
                 )
             except InvalidButtonLink as error:
                 form.add_error("body", str(error))
                 return TemplateResponse(request, "outreach/admin/compose.html", context)
+            if step == STEP_TEST:
+                self.send_test_mail(request, mailer, preview_prospect, form, message_fields)
             context.update(
                 preview_prospect=preview_prospect,
                 preview_html=rendered.html,
                 preview_subject=rendered.subject,
                 subject=subject,
+                send_at=form.cleaned_data.get("send_at"),
+                language_label=OutreachLanguage(form.cleaned_data["language"]).label,
                 preview_choices=[
                     (str(prospect.pk), prospect.display_name) for prospect in plan.recipients
                 ],
             )
             return TemplateResponse(request, "outreach/admin/preview.html", context)
         return TemplateResponse(request, "outreach/admin/compose.html", context)
+
+    def send_test_mail(
+        self,
+        request: HttpRequest,
+        mailer: ProspectMailer,
+        prospect: Prospect,
+        form: MessageForm,
+        message_fields: dict[str, Any],
+    ) -> None:
+        recipient_email = getattr(request.user, request.user.get_email_field_name(), "")
+        if not recipient_email:
+            self.message_user(
+                request,
+                _("Your account has no email address, so a test can not be sent."),
+                messages.ERROR,
+            )
+            return
+        try:
+            mailer.send_sample(
+                prospect,
+                form.cleaned_data["subject"],
+                form.cleaned_data["body"],
+                recipient_email,
+                **message_fields,
+            )
+        except (OSError, MessageNotAccepted):
+            self.message_user(
+                request,
+                _("The test could not be sent. Check the mail settings."),
+                messages.ERROR,
+            )
+            return
+        self.message_user(
+            request,
+            _("A test was sent to %(email)s.") % {"email": recipient_email},
+            messages.SUCCESS,
+        )
 
     def template_permissions(self, request: HttpRequest) -> dict[str, bool]:
         return {
@@ -413,10 +524,11 @@ class ProspectAdmin(admin.ModelAdmin):
                 name,
                 message_form.cleaned_data["subject"],
                 message_form.cleaned_data["body"],
-                request.user.get_username(),
+                request.user,
                 overwrite,
                 header_text=message_form.cleaned_data["header_text"],
                 is_newsletter=message_form.cleaned_data["is_newsletter"],
+                language=message_form.cleaned_data["language"],
             )
         except TemplateNameTaken:
             save_template_form.add_error(
@@ -425,6 +537,100 @@ class ProspectAdmin(admin.ModelAdmin):
             return None
         self.message_user(request, _("Template saved."), messages.SUCCESS)
         return saved.template
+
+    @admin.action(
+        description=gettext_lazy("Add the selected prospects to an audience"),
+        permissions=["change"],
+    )
+    def add_to_audience(
+        self, request: HttpRequest, queryset: QuerySet[Prospect]
+    ) -> HttpResponse | None:
+        return self.change_audience_members(request, queryset, adding=True)
+
+    @admin.action(
+        description=gettext_lazy("Remove the selected prospects from an audience"),
+        permissions=["change"],
+    )
+    def remove_from_audience(
+        self, request: HttpRequest, queryset: QuerySet[Prospect]
+    ) -> HttpResponse | None:
+        return self.change_audience_members(request, queryset, adding=False)
+
+    def selection_context(self, request: HttpRequest) -> dict[str, Any]:
+        select_across = request.POST.get("select_across", "0").lower() not in FALSE_VALUES
+        return {
+            "queryset_ids": request.POST.getlist(helpers.ACTION_CHECKBOX_NAME),
+            "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+            "select_across": int(select_across),
+        }
+
+    def change_audience_members(
+        self, request: HttpRequest, queryset: QuerySet[Prospect], adding: bool
+    ) -> HttpResponse | None:
+        form = AudienceChoiceForm(
+            request.POST if request.POST.get("apply") else None, creating=adding
+        )
+        if form.is_valid() and self.apply_audience_change(request, form, queryset, adding):
+            return None
+        context = {
+            **self.admin_site.each_context(request),
+            **self.selection_context(request),
+            "title": _("Add to an audience") if adding else _("Remove from an audience"),
+            "opts": self.model._meta,
+            "form": form,
+            "adding": adding,
+            "action_name": "add_to_audience" if adding else "remove_from_audience",
+            "selected_count": queryset.count(),
+            "media": self.media,
+        }
+        return TemplateResponse(request, "outreach/admin/audience_choice.html", context)
+
+    def apply_audience_change(
+        self,
+        request: HttpRequest,
+        form: AudienceChoiceForm,
+        queryset: QuerySet[Prospect],
+        adding: bool,
+    ) -> bool:
+        audience = form.cleaned_data["audience"]
+        is_new_audience = audience is None
+        members = AudienceMembers()
+        actor = request.user.get_username()
+        try:
+            with transaction.atomic():
+                if is_new_audience:
+                    audience = AudienceCreator().create(
+                        form.cleaned_data["new_audience_name"], request.user
+                    )
+                if adding:
+                    count = members.add(audience, queryset, actor)
+                else:
+                    count = members.remove(audience, queryset, actor)
+        except AudienceNameTaken:
+            form.add_error("new_audience_name", AUDIENCE_NAME_TAKEN)
+            return False
+        if is_new_audience:
+            self.message_user(
+                request,
+                _("The audience %(audience)s was created.") % {"audience": audience},
+                messages.SUCCESS,
+            )
+        if adding:
+            message = ngettext(
+                "%(count)d prospect added to %(audience)s.",
+                "%(count)d prospects added to %(audience)s.",
+                count,
+            )
+        else:
+            message = ngettext(
+                "%(count)d prospect removed from %(audience)s.",
+                "%(count)d prospects removed from %(audience)s.",
+                count,
+            )
+        self.message_user(
+            request, message % {"count": count, "audience": audience}, messages.SUCCESS
+        )
+        return True
 
     @admin.action(
         description=gettext_lazy("Unsubscribe the selected prospects"),
@@ -441,6 +647,33 @@ class ProspectAdmin(admin.ModelAdmin):
             "%(count)d prospect unsubscribed.", "%(count)d prospects unsubscribed.", count
         )
         self.message_user(request, message % {"count": count}, messages.SUCCESS)
+
+    @admin.action(
+        description=gettext_lazy("Erase and suppress the selected prospects"),
+        permissions=["delete"],
+    )
+    def erase_selected(
+        self, request: HttpRequest, queryset: QuerySet[Prospect]
+    ) -> HttpResponse | None:
+        if request.POST.get("apply"):
+            count = ProspectEraser().erase(queryset, request.user.get_username())
+            message = ngettext(
+                "%(count)d prospect erased and suppressed.",
+                "%(count)d prospects erased and suppressed.",
+                count,
+            )
+            self.message_user(request, message % {"count": count}, messages.SUCCESS)
+            return None
+        context = {
+            **self.admin_site.each_context(request),
+            **self.selection_context(request),
+            "title": _("Erase and suppress"),
+            "opts": self.model._meta,
+            "action_name": "erase_selected",
+            "selected_count": queryset.count(),
+            "media": self.media,
+        }
+        return TemplateResponse(request, "outreach/admin/erase_confirmation.html", context)
 
     @admin.action(
         description=gettext_lazy("Link to user accounts"),
