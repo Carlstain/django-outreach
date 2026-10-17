@@ -1,18 +1,21 @@
 # django-outreach
 
-A reusable Django app for prospect lists, reusable email templates and bulk mail. It runs on its own admin site, separate from `/admin/`, and brings its own models, templates, static files and French translation.
+A reusable Django app for prospect lists, reusable email templates and bulk mail. It runs on its own admin site, separate from `/admin/`, and brings its own models, templates, static files and translations (English, French, Spanish, Portuguese and Brazilian Portuguese).
 
 What it does:
 
 - Prospects (person or organisation) with an optional OneToOne link to the host project's user model.
-- Message variables such as `{{ first_name }}` and `{{ first_name | friend }}` (fallback when empty), taken from a fixed list.
+- Message variables such as `{{ first_name }}` and `{{ first_name | friend }}` (fallback when empty), from a fixed list plus the ones your project registers, and computed tags and buttons.
 - Rich text message body (Trix editor), sanitised with nh3.
 - Email templates: named subject and body pairs, shared by every staff member who has the permission, picked or saved from the compose page.
 - Audiences: named lists of prospects, managed in the admin, to mail the same set again.
 - A `Mailing` log for every send: subject, body as sent, sender, counts of sent, failed and skipped recipients.
 - One-click unsubscribe links (`List-Unsubscribe` headers included) and a suppression list that survives the deletion of a prospect.
-- CSV import with a preview step, and CSV export of selected prospects.
-- A built-in help page for the staff who use it, in English and French.
+- CSV import with a preview step that tells new, existing and repeated rows apart and can update existing prospects, and CSV export of selected prospects.
+- Sending in the admin request, or one Celery task per recipient with retries; scheduled send, a test send to yourself and a retry of failed deliveries.
+- Signals for your project (subscribed, unsubscribed, mail sent or failed, erased), a data download and an erase-and-suppress action for requests about a person.
+- A language for each mail and template, and a language menu for each staff member.
+- A built-in help page for the staff who use it.
 
 Documentation: https://django-outreach.readthedocs.io/
 
@@ -26,25 +29,25 @@ See `example/` for a runnable host project.
 
 ## Installation
 
-django-outreach is a beta published on PyPI as `django-outreach`. The import name and the app label are `outreach`. Beta versions are only installed when you ask for them.
+django-outreach is published on PyPI as `django-outreach`. The import name and the app label are `outreach`.
 
 With uv:
 
 ```
-uv add django-outreach --prerelease=allow
+uv add django-outreach
 ```
 
 With pip:
 
 ```
-pip install --pre django-outreach
+pip install django-outreach
 ```
 
-Pin an exact version in your own requirements, for example `django-outreach==0.1.0b3`, since the interface may still change before `0.1.0`. Every release also has its wheel and sdist attached to its [GitHub Release](https://github.com/Carlstain/django-outreach/releases).
+Pin a version range in your own requirements, for example `django-outreach>=0.1,<0.2`. Every release also has its wheel and sdist attached to its [GitHub Release](https://github.com/Carlstain/django-outreach/releases).
 
-### Beta
+### Status
 
-This is a beta: it is meant to be installed and tried, and the interface may still change before `0.1.0`. The initial migration `0001_initial` is frozen, so an installation can be upgraded without resetting its tables. Known limits: by default sending runs synchronously in the admin request with a per-send cap (Celery dispatch is available and recommended in production, see the documentation), and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
+The first release that is not a beta is `0.1.0`. Migrations are never edited once released, so an installation can be upgraded without resetting its tables. The Spanish and Portuguese catalogues are drafts that a native speaker has not reviewed yet. Known limits: by default sending runs synchronously in the admin request with a per-send cap (Celery dispatch is available and recommended in production, see the documentation), and Outlook desktop shows a button as a plain coloured link. See [SECURITY.md](SECURITY.md) for how to report a vulnerability and for the known limitations.
 
 ## Try the example project
 
@@ -73,7 +76,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-2. Middleware and template context processors: the same ones Django's admin requires (sessions, authentication, messages and CSRF middleware; the `request`, `auth` and `messages` context processors, with `APP_DIRS = True` or the app templates otherwise reachable). No `LocaleMiddleware` is needed, the app activates `OUTREACH_LANGUAGE` itself for its own pages.
+2. Middleware and template context processors: the same ones Django's admin requires (sessions, authentication, messages and CSRF middleware; the `request`, `auth` and `messages` context processors, with `APP_DIRS = True` or the app templates otherwise reachable). No `LocaleMiddleware` is needed, the app activates the language itself for its own pages.
 
 3. Mount the URLs under any prefix:
 
@@ -120,8 +123,13 @@ All settings are optional except `OUTREACH_BASE_URL` for sending. They are read 
 | `OUTREACH_SITE_NAME` | `"Outreach"` | Name shown in the header, the title, the mails and the public pages |
 | `OUTREACH_BASE_URL` | none | Absolute base URL put in front of unsubscribe links, for example `https://example.org`. Never taken from the request. Sending is refused while it is empty |
 | `OUTREACH_FROM_EMAIL` | `DEFAULT_FROM_EMAIL` | Sender address of the mails |
-| `OUTREACH_LANGUAGE` | `LANGUAGE_CODE` | Language of the Outreach pages, the unsubscribe pages and the mails |
-| `OUTREACH_MAX_RECIPIENTS_PER_SEND` | `100` | Recipients per send action, the rest are skipped as over the limit |
+| `OUTREACH_LANGUAGE` | `LANGUAGE_CODE` | Default language of the Outreach pages and the unsubscribe pages. Each staff member can pick another for their own screens |
+| `OUTREACH_MAIL_LANGUAGE` | `OUTREACH_LANGUAGE` | Language the compose page starts on. One of `en`, `fr`, `es`, `pt`, `pt-br` |
+| `OUTREACH_DISPATCH` | `"sync"` | `"sync"` sends inside the admin request, `"celery"` queues one task per recipient |
+| `OUTREACH_MAX_RECIPIENTS_PER_SEND` | `100` | Recipients per send action in sync mode, the rest are skipped as over the limit |
+| `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` | `5000` | Same limit in Celery mode |
+| `OUTREACH_CELERY_QUEUE` | none | Celery queue of the delivery tasks |
+| `OUTREACH_DELIVERY_MAX_RETRIES` | `3` | Retries of a delivery after a transient error, Celery mode only |
 | `OUTREACH_RESEND_COOLDOWN` | `timedelta(hours=24)` | A prospect mailed within this time is skipped |
 | `OUTREACH_MAX_IMPORT_ROWS` | `5000` | An import file with more rows is rejected |
 | `OUTREACH_MAX_IMPORT_BYTES` | `2000000` | An uploaded import file larger than this many bytes is rejected before it is parsed |
@@ -149,7 +157,7 @@ OUTREACH_IMPORT_HEADER_ALIASES = {
 }
 ```
 
-Import rules: rows whose email already exists are skipped, never updated. One invalid row stops the whole file. A blank `kind` means `individual`. An address on the suppression list is imported as unsubscribed.
+Import rules: rows whose email already exists are skipped, unless staff with the change permission tick the option to update them: a filled cell then replaces the stored value and an empty cell changes nothing. The email, status, account link and audiences are never changed. One invalid row stops the whole file. A blank `kind` means `individual`. An address on the suppression list is imported as unsubscribed.
 
 ## Loading users as prospects
 
@@ -215,16 +223,16 @@ OUTREACH_THEME = {
 
 ## Internationalisation
 
-- Message ids are English. A French catalogue ships in `src/outreach/locale/fr`.
+- Message ids are English. Catalogues ship in `src/outreach/locale` for French, Spanish, Portuguese and Brazilian Portuguese (`fr`, `es`, `pt`, `pt_BR`). The last three are drafts to be reviewed by a native speaker.
 - `USE_I18N` must be `True`, otherwise nothing is translated.
-- `OUTREACH_LANGUAGE` picks the language per request with `translation.override`, so the rest of your site is unaffected. Variable labels use the message context `mail variable`, examples `mail variable example`.
-- Compile the French catalogue after editing the `.po` (Babel is a dev dependency):
+- The language is picked per request with `translation.override`, so the rest of your site is unaffected: `OUTREACH_LANGUAGE` for the screens and the unsubscribe pages (each staff member can choose their own from the header menu), and the language chosen on the compose page for the footer, the greeting and the date tags of a mail. Your own text is never translated, see the documentation. Variable labels use the message context `mail variable`, examples `mail variable example`.
+- Compile the catalogues after editing a `.po` (Babel is a dev dependency):
 
 ```
 scripts/compile_messages.sh
 ```
 
-- Add a language by creating `src/outreach/locale/<code>/LC_MESSAGES/django.po` (copy the French one and translate), then compile it with `pybabel compile -d src/outreach/locale -D django -l <code>`. Only `fr` is checked in CI.
+- Add a language by creating `src/outreach/locale/<code>/LC_MESSAGES/django.po` (copy the French one and translate), add the code to `OutreachLanguage` and the two scripts, then compile it with `pybabel compile -d src/outreach/locale -D django -l <code>`. All four catalogues are checked in CI.
 
 ## Computed tags
 
@@ -234,7 +242,7 @@ Built-in tags:
 
 | Tag | Result |
 |---|---|
-| `{% today %}` or `{% today "j F Y" %}` | The send date, in `OUTREACH_LANGUAGE`. The optional argument is a Django date format |
+| `{% today %}` or `{% today "j F Y" %}` | The send date, in the language of the mail. The optional argument is a Django date format |
 | `{% greeting %}` | Good morning, afternoon or evening, from the server's local time at send |
 | `{% member_since %}` | The `date_joined` of the linked user, empty for a prospect with no user |
 

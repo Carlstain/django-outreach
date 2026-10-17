@@ -8,24 +8,23 @@
 
 ## Install the package
 
-django-outreach is a beta published on PyPI as `django-outreach`. The import name and the app
-label are `outreach`. Beta versions are only installed when you ask for them.
+django-outreach is published on PyPI as `django-outreach`. The import name and the app
+label are `outreach`.
 
 With uv:
 
 ```shell
-uv add django-outreach --prerelease=allow
+uv add django-outreach
 ```
 
 With pip:
 
 ```shell
-pip install --pre django-outreach
+pip install django-outreach
 ```
 
-Pin an exact version in your own requirements, for example `django-outreach==0.1.0b4`, since the
-interface may still change before `0.1.0`. Every release also has its wheel and sdist attached to
-its [GitHub Release](https://github.com/Carlstain/django-outreach/releases).
+Pin a version range in your own requirements, for example `django-outreach>=0.1,<0.2`. Every
+release also has its wheel and sdist attached to its [GitHub Release](https://github.com/Carlstain/django-outreach/releases).
 
 ## Configure the host project
 
