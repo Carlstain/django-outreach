@@ -2,12 +2,12 @@
 
 django-outreach is a reusable Django app for prospect lists, reusable email templates and bulk
 mail with one-click unsubscribe. It runs on its own admin site, separate from `/admin/`, and
-brings its own models, templates, static files and French translation.
+brings its own models, templates, static files and translations (English, French, Spanish, Portuguese and Brazilian Portuguese).
 
-:::{warning}
-This is a beta. It is meant to be installed and tried, and the interface may still change before
-`0.1.0`. The initial migration `0001_initial` is frozen, so an installation can be upgraded
-without resetting its tables.
+:::{note}
+Version `0.1.0` is the first release that is not a beta. Migrations are never edited once
+released, so an installation can be upgraded without resetting its tables. The Spanish and
+Portuguese catalogues are drafts that a native speaker has not reviewed yet.
 :::
 
 ## What it does
