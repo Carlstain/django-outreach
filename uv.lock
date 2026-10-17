@@ -368,7 +368,7 @@ wheels = [
 
 [[package]]
 name = "django-outreach"
-version = "0.1.0b6"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "django" },

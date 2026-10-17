@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-17
+
+The first release that is not a beta. It includes everything since `0.1.0b6`.
+
 ### Added
 
 - Mail language and Spanish and Portuguese: a *Language* field on the compose page and on templates picks the language of the footer, the unsubscribe page, `{% greeting %}`, `{% today %}` and `{% member_since %}` (staff text is never translated). A mailing keeps its language, the unsubscribe link carries `?lang=` when it differs from the site, and the new setting `OUTREACH_MAIL_LANGUAGE` (check `outreach.E004`) sets the compose default. Each staff member can pick the language of the screens in a header menu, stored in the `outreach_language` cookie. New catalogues `es`, `pt` and `pt_BR` (drafts, to be reviewed by a native speaker) next to `fr`. Migration `0010` adds `Mailing.language` and `EmailTemplate.language`. See the topic *Languages*.
@@ -30,6 +34,12 @@ All notable changes to this project are documented here. The format follows [Kee
 - `Prospect`, `MailingDelivery` and `EmailTemplate` share the abstract models `BaseModel` (uuid, `created_at`, `updated_at`) and `AuthoredModel` (adds `created_by`, `updated_by`). No schema change except the above.
 - Synchronous sending stays the default but is not recommended in production: `outreach.W001` reports it in `check --deploy`. Its behaviour and the `OUTREACH_MAX_RECIPIENTS_PER_SEND` limit (100) are unchanged.
 - `ProspectMailer.send` goes through the new `queue` and `deliver` steps, and `MailReport` has a `queued` list, filled in Celery mode.
+
+### Notes
+
+- Upgrading from `0.1.0b6`: run `migrate`. Migrations `0002` to `0010` are new. `0004` links template authors to users and drops the author of a template with no matching account, and `0009` blanks the details of old *mail failed* events.
+- The `es`, `pt` and `pt_BR` catalogues are drafts that no native speaker has reviewed yet.
+- Scheduled send needs Celery beat or cron to start a mailing, see the Celery topic.
 
 ## [0.1.0b6] - 2026-10-13
 
