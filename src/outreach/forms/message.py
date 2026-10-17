@@ -5,6 +5,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from outreach.choices import OutreachLanguage
 from outreach.conf import outreach_settings
 from outreach.forms.message_content import MessageContentForm
 from outreach.widgets import TrixWidget
@@ -16,6 +17,12 @@ class MessageForm(MessageContentForm, forms.Form):
     subject = forms.CharField(max_length=200, label=_("Subject"))
     header_text = forms.CharField(max_length=120, required=False, label=_("Header text"))
     is_newsletter = forms.BooleanField(required=False, initial=True, label=_("Newsletter"))
+    language = forms.ChoiceField(
+        required=False,
+        choices=OutreachLanguage.choices,
+        initial=lambda: outreach_settings.mail_language,
+        label=_("Language"),
+    )
     body = forms.CharField(max_length=100000, widget=TrixWidget, label=_("Message"))
     send_at = forms.DateTimeField(
         required=False,
@@ -33,6 +40,9 @@ class MessageForm(MessageContentForm, forms.Form):
         if send_at is not None and send_at <= timezone.now():
             raise forms.ValidationError(_("Choose a time in the future."))
         return send_at
+
+    def clean_language(self) -> str:
+        return self.cleaned_data["language"] or outreach_settings.mail_language
 
     def clean_body(self) -> str:
         return self.clean_body_content("body")

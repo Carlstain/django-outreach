@@ -17,7 +17,13 @@ from django.utils.translation import gettext_lazy, ngettext
 from outreach.admin.audience_filter import AudienceFilter
 from outreach.admin.member_filter import MemberFilter
 from outreach.admin.prospect_event_inline import ProspectEventInline
-from outreach.choices import ACTOR_SYSTEM, EventKind, ProspectKind, ProspectStatus
+from outreach.choices import (
+    ACTOR_SYSTEM,
+    EventKind,
+    OutreachLanguage,
+    ProspectKind,
+    ProspectStatus,
+)
 from outreach.conf import outreach_settings
 from outreach.forms import (
     AUDIENCE_NAME_TAKEN,
@@ -315,6 +321,8 @@ class ProspectAdmin(admin.ModelAdmin):
                         "subject": selected_template.subject,
                         "header_text": selected_template.header_text,
                         "is_newsletter": selected_template.is_newsletter,
+                        "language": selected_template.language
+                        or outreach_settings.mail_language,
                         "body": selected_template.body_html,
                     }
                 )
@@ -347,6 +355,7 @@ class ProspectAdmin(admin.ModelAdmin):
             message_fields = {
                 "header_text": form.cleaned_data["header_text"],
                 "is_newsletter": form.cleaned_data["is_newsletter"],
+                "language": form.cleaned_data["language"],
             }
 
         if step == STEP_SEND:
@@ -409,6 +418,7 @@ class ProspectAdmin(admin.ModelAdmin):
                 preview_subject=rendered.subject,
                 subject=subject,
                 send_at=form.cleaned_data.get("send_at"),
+                language_label=OutreachLanguage(form.cleaned_data["language"]).label,
                 preview_choices=[
                     (str(prospect.pk), prospect.display_name) for prospect in plan.recipients
                 ],
@@ -518,6 +528,7 @@ class ProspectAdmin(admin.ModelAdmin):
                 overwrite,
                 header_text=message_form.cleaned_data["header_text"],
                 is_newsletter=message_form.cleaned_data["is_newsletter"],
+                language=message_form.cleaned_data["language"],
             )
         except TemplateNameTaken:
             save_template_form.add_error(

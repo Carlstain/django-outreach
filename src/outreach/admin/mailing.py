@@ -25,6 +25,7 @@ class MailingAdmin(admin.ModelAdmin):
     list_display = [
         "subject",
         "sender",
+        "language",
         "created_at",
         "scheduled_for",
         "pending_count",

@@ -29,6 +29,8 @@ Fill in:
 - **Subject**: a single line. Variables and tags work, buttons do not.
 - **Header text**: shown at the top of the message. Empty means the site name. A single line, no variables.
 - **Newsletter**: ticked by default. See below.
+- **Language**: the language of the unsubscribe link and page, the greeting and the dates. Your own
+  text is not translated, see {doc}`../topics/languages`. It starts on the site's mail language.
 - **Message**: the rich text editor. Allowed formatting is paragraphs, bold, italic, strike
   through, a heading, bullet and numbered lists, quotes and links. Anything else is removed.
 

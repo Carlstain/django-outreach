@@ -4,7 +4,7 @@ from typing import Any
 from django.conf import settings
 from django.core.checks import CheckMessage, Error, Warning
 
-from outreach.choices import DispatchMode
+from outreach.choices import DispatchMode, OutreachLanguage
 from outreach.conf import outreach_settings
 from outreach.theme import OutreachTheme
 
@@ -25,6 +25,16 @@ def check_dispatch(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
                 hint="Install it with: pip install django-outreach[celery]",
                 id="outreach.E003",
             )
+        ]
+    return []
+
+
+def check_mail_language(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
+    configured = outreach_settings.configured_mail_language
+    if configured and OutreachLanguage.parse(configured) is None:
+        choices = ", ".join(OutreachLanguage.values)
+        return [
+            Error(f"OUTREACH_MAIL_LANGUAGE must be one of: {choices}.", id="outreach.E004")
         ]
     return []
 

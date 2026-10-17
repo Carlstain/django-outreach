@@ -3,6 +3,8 @@ import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from outreach.choices import OutreachLanguage
+
 
 class Mailing(models.Model):
     """One send action that had at least one recipient.
@@ -18,6 +20,12 @@ class Mailing(models.Model):
     body_html = models.TextField(verbose_name=_("message"))
     header_text = models.CharField(max_length=120, blank=True, verbose_name=_("header text"))
     is_newsletter = models.BooleanField(default=True, verbose_name=_("newsletter"))
+    language = models.CharField(
+        max_length=7,
+        blank=True,
+        choices=OutreachLanguage.choices,
+        verbose_name=_("language"),
+    )
     sender = models.CharField(max_length=150, verbose_name=_("sender"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"))
     scheduled_for = models.DateTimeField(

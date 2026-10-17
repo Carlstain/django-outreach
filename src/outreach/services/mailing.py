@@ -16,6 +16,7 @@ from django.db.models.functions import Greatest
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone, translation
+from django.utils.http import urlencode
 
 from outreach.choices import (
     DeliveryStatus,
@@ -159,9 +160,12 @@ class ProspectMailer:
                 mail_plan.recipients.append(prospect)
         return mail_plan
 
-    def unsubscribe_url(self, prospect: Prospect) -> str:
+    def unsubscribe_url(self, prospect: Prospect, language: str = "") -> str:
         path = reverse("outreach:unsubscribe", args=[self.tokens.make(prospect)])
-        return f"{self.base_url}{path}"
+        url = f"{self.base_url}{path}"
+        if language and language != outreach_settings.language:
+            return f"{url}?{urlencode({'lang': language})}"
+        return url
 
     def render(
         self,
@@ -173,6 +177,7 @@ class ProspectMailer:
         is_newsletter: bool = True,
         preview: bool = False,
         unsubscribe_url: str | None = None,
+        language: str = "",
     ) -> RenderedMail:
         """Render the subject and body for one prospect, as text and HTML.
 
@@ -182,11 +187,11 @@ class ProspectMailer:
         variables = MailVariables()
         sanitizer = MailBodySanitizer()
         if unsubscribe_url is None:
-            unsubscribe_url = self.unsubscribe_url(prospect)
+            unsubscribe_url = self.unsubscribe_url(prospect, language)
         values = variables.values_for(
             prospect, preview=preview, extra={"unsubscribe_url": unsubscribe_url}
         )
-        with translation.override(outreach_settings.language):
+        with translation.override(language or outreach_settings.language):
             tagged_subject = mail_tag_library.render(
                 subject, prospect, values, html=False, preview=preview
             )
@@ -236,6 +241,7 @@ class ProspectMailer:
         *,
         header_text: str = "",
         is_newsletter: bool = True,
+        language: str = "",
     ) -> MailReport:
         """Send the mail to every prospect that passes the plan, or queue it for Celery.
 
@@ -244,7 +250,9 @@ class ProspectMailer:
         stop the others. With ``OUTREACH_DISPATCH = "celery"`` the deliveries are queued and
         ``MailReport.queued`` lists their prospects, with ``sent`` and ``failed`` left empty.
         """
-        queued_mailing = self.queue(prospects, subject, body_html, header_text, is_newsletter)
+        queued_mailing = self.queue(
+            prospects, subject, body_html, header_text, is_newsletter, language
+        )
         report = MailReport(
             mailing=queued_mailing.mailing, skipped=list(queued_mailing.plan.skipped)
         )
@@ -369,6 +377,7 @@ class ProspectMailer:
         body_html: str,
         header_text: str,
         is_newsletter: bool,
+        language: str = "",
         send_at: datetime | None = None,
     ) -> QueuedMailing:
         """Create the mailing with one delivery per recipient, and claim the recipients.
@@ -393,6 +402,7 @@ class ProspectMailer:
                 body_html=MailBodySanitizer().clean(body_html),
                 header_text=header_text,
                 is_newsletter=is_newsletter,
+                language=language or outreach_settings.mail_language,
                 sender=self.actor[: Mailing._meta.get_field("sender").max_length],
                 skipped_count=len(mail_plan.skipped),
                 skipped_reasons=mail_plan.skipped_counts,
@@ -467,6 +477,7 @@ class ProspectMailer:
                     mail_connection,
                     mailing.header_text,
                     is_newsletter,
+                    mailing.language,
                 )
             except Exception as error:
                 mail_connection.close()
@@ -579,14 +590,22 @@ class ProspectMailer:
         connection: BaseEmailBackend,
         header_text: str,
         is_newsletter: bool,
+        language: str = "",
     ) -> None:
+        unsubscribe_url = self.unsubscribe_url(prospect, language)
         rendered = self.render(
-            prospect, subject, body_html, header_text=header_text, is_newsletter=is_newsletter
+            prospect,
+            subject,
+            body_html,
+            header_text=header_text,
+            is_newsletter=is_newsletter,
+            unsubscribe_url=unsubscribe_url,
+            language=language,
         )
         headers = {}
         if is_newsletter:
             headers = {
-                "List-Unsubscribe": f"<{self.unsubscribe_url(prospect)}>",
+                "List-Unsubscribe": f"<{unsubscribe_url}>",
                 "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
             }
         self.send_rendered(rendered, prospect.email, headers=headers, connection=connection)
@@ -621,6 +640,7 @@ class ProspectMailer:
         *,
         header_text: str = "",
         is_newsletter: bool = True,
+        language: str = "",
     ) -> None:
         """Send one copy of a mail to ``recipient_email`` only, rendered for ``prospect``.
 
@@ -641,6 +661,7 @@ class ProspectMailer:
             is_newsletter=is_newsletter,
             preview=True,
             unsubscribe_url=f"{self.base_url}/",
+            language=language,
         )
         self.send_rendered(rendered, recipient_email, subject_prefix="[Test] ")
 

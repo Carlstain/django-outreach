@@ -64,6 +64,7 @@
             <label class="check">{{ form.is_newsletter }} {% trans "Newsletter" %}</label>
             <span class="hint">{% trans "A newsletter carries an unsubscribe link and skips people who unsubscribed. Untick it for a notice, which goes to members only." %}</span>
           </div>
+          {% include "outreach/admin/includes/language_field.html" %}
           {% if form.send_at %}
             <div class="f wide">
               {{ form.send_at.label_tag }}

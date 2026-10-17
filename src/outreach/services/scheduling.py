@@ -35,6 +35,7 @@ class MailingScheduler:
         send_at: datetime,
         header_text: str = "",
         is_newsletter: bool = True,
+        language: str = "",
     ) -> MailReport:
         """Store a mailing to start at ``send_at``. ``MailReport.scheduled`` lists the recipients.
 
@@ -46,7 +47,13 @@ class MailingScheduler:
         """
         self.require_celery()
         queued_mailing = self.mailer.queue(
-            prospects, subject, body_html, header_text, is_newsletter, send_at=send_at
+            prospects,
+            subject,
+            body_html,
+            header_text,
+            is_newsletter,
+            language,
+            send_at=send_at,
         )
         return MailReport(
             mailing=queued_mailing.mailing,

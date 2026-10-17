@@ -2559,3 +2559,20 @@ label.f {
   border: 1px solid var(--line);
   border-radius: 8px;
 }
+
+.language-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.language-form select {
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
+.language-form .btn {
+  padding: 2px 8px;
+  font-size: 12px;
+}

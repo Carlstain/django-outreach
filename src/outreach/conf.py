@@ -6,7 +6,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.utils.module_loading import import_string
 
-from outreach.choices import DispatchMode
+from outreach.choices import DispatchMode, OutreachLanguage
 from outreach.theme import OutreachTheme
 
 
@@ -25,7 +25,20 @@ class OutreachSettings:
 
     @property
     def language(self) -> str:
-        return getattr(settings, "OUTREACH_LANGUAGE", None) or settings.LANGUAGE_CODE
+        configured = getattr(settings, "OUTREACH_LANGUAGE", None) or settings.LANGUAGE_CODE
+        return OutreachLanguage.parse(configured) or configured
+
+    @property
+    def configured_mail_language(self) -> str | None:
+        return getattr(settings, "OUTREACH_MAIL_LANGUAGE", None) or None
+
+    @property
+    def mail_language(self) -> str:
+        return (
+            OutreachLanguage.parse(self.configured_mail_language)
+            or OutreachLanguage.parse(self.language)
+            or OutreachLanguage.EN.value
+        )
 
     @property
     def max_recipients_per_send(self) -> int:

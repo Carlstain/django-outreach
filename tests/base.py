@@ -1,7 +1,9 @@
 from collections.abc import Callable
 from datetime import datetime, timezone
+from unittest import skipUnless
 from unittest.mock import Mock, patch
 
+from django.conf import settings
 from django.dispatch import Signal
 from django.test import TestCase, TransactionTestCase, override_settings
 
@@ -13,6 +15,10 @@ from outreach.services.scheduling import MailingScheduler
 from outreach.tasks import deliver_mail
 
 MAIL_BASE_URL = "https://outreach.example.test"
+
+requires_translations = skipUnless(
+    settings.USE_I18N, "Nothing is translated when USE_I18N is False."
+)
 
 
 class OutreachTestCase(TestCase):
