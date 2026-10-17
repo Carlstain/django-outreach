@@ -125,7 +125,7 @@ class SendMailActionTests(OutreachTestCase):
         unsubscribed = ProspectFactory(status=ProspectStatus.UNSUBSCRIBED)
         suppressed = ProspectFactory()
         SuppressionList().add(suppressed.email)
-        cooling_down = ProspectFactory(last_mailed_at=timezone.now() - timedelta(hours=1))
+        cooling_down = ProspectFactory(last_mailed_at=timezone.now() - timedelta(seconds=1))
         prospects = [eligible, unsubscribed, suppressed, cooling_down]
 
         compose_response = self.post_action(prospects)
@@ -312,7 +312,7 @@ class SendMailActionTests(OutreachTestCase):
     def test_send_creates_a_mailing_with_counts_and_skipped_reasons(self) -> None:
         sent_to = ProspectFactory()
         unsubscribed = ProspectFactory(status=ProspectStatus.UNSUBSCRIBED)
-        cooling_down = ProspectFactory(last_mailed_at=timezone.now() - timedelta(hours=1))
+        cooling_down = ProspectFactory(last_mailed_at=timezone.now() - timedelta(seconds=1))
 
         self.post_send([sent_to, unsubscribed, cooling_down])
 

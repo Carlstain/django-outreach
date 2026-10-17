@@ -18,7 +18,7 @@ The recipients panel counts who will receive the message and lists who is skippe
 | Unsubscribed | The prospect unsubscribed (newsletters only) |
 | Suppressed | The address is on the suppression list (newsletters only) |
 | Not a member | The prospect is not linked to a user (notices only) |
-| Contacted recently | Mailed within the resend cooldown (24 hours by default) |
+| Contacted recently | Mailed within the resend cooldown (10 seconds by default) |
 | Over the send limit | Beyond the maximum for one send (100 by default) |
 
 The dashboard shows the limits of your installation under *Before you send*. If the page says
