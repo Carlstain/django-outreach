@@ -1758,3 +1758,28 @@ msgid "%(count)d prospect updated."
 msgid_plural "%(count)d prospects updated."
 msgstr[0] "%(count)d prospect mis à jour."
 msgstr[1] "%(count)d prospects mis à jour."
+
+msgid "language"
+msgstr "langue"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Mail default"
+msgstr "Langue par défaut des mails"
+
+msgid "Language of the unsubscribe link and page, the greeting and the dates. Your own text is not translated."
+msgstr "Langue du lien et de la page de désinscription, de la formule de politesse et des dates. Votre propre texte n’est pas traduit."
+
+msgid "Mail language: %(language)s."
+msgstr "Langue du mail : %(language)s."
+
+msgid "Language: %(language)s."
+msgstr "Langue : %(language)s."
+
+msgid "Interface language"
+msgstr "Langue de l’interface"
+
+msgctxt "interface language"
+msgid "Change"
+msgstr "Changer"

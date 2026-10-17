@@ -2,4 +2,6 @@
 set -eu
 
 cd "$(dirname "$0")/.."
-pybabel compile -d src/outreach/locale -D django -l fr
+for locale in fr es pt pt_BR; do
+  pybabel compile -d src/outreach/locale -D django -l "$locale"
+done
