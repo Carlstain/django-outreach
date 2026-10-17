@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 from django.core import mail
+from django.core.signing import TimestampSigner
 from django.test import override_settings
 
 from outreach.services.mailing import ProspectMailer
@@ -10,6 +13,9 @@ from tests.factories import ProspectFactory, UserFactory
 class MailNoticeRenderingTests(OutreachTestCase):
     def setUp(self) -> None:
         super().setUp()
+        signed_at = patch.object(TimestampSigner, "timestamp", return_value="1xFixed")
+        signed_at.start()
+        self.addCleanup(signed_at.stop)
         self.mailer = ProspectMailer(MAIL_BASE_URL, "staff")
         self.member = ProspectFactory(user=UserFactory())
 
