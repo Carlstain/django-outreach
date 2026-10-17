@@ -41,7 +41,7 @@
     <div class="card">
       <h3>{% trans "Before you send" %}</h3>
       <ul class="skiplist">
-        <li><span>{% blocktrans with hours=cooldown_hours %}Same address mailed within {{ hours }} hours{% endblocktrans %}</span><span class="badge prospect">{% trans "skipped" %}</span></li>
+        <li><span>{% blocktrans with window=cooldown_label %}Same address mailed within {{ window }}{% endblocktrans %}</span><span class="badge prospect">{% trans "skipped" %}</span></li>
         <li><span>{% trans "Unsubscribed or suppressed address" %}</span><span class="badge unsub">{% trans "never mailed" %}</span></li>
         <li><span>{% trans "Recipients per send" %}</span><strong>{% blocktrans with maximum=max_recipients %}{{ maximum }} max{% endblocktrans %}</strong></li>
       </ul>

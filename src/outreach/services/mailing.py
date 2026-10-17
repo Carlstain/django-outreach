@@ -122,10 +122,15 @@ class ProspectMailer:
         return cls(base_url=base_url, actor=actor)
 
     @staticmethod
-    def is_in_cooldown(last_mailed_at: datetime | None, now: datetime) -> bool:
-        return bool(
-            last_mailed_at and last_mailed_at > now - outreach_settings.resend_cooldown
-        )
+    def cooldown_ends_at(last_mailed_at: datetime | None) -> datetime | None:
+        if last_mailed_at is None:
+            return None
+        return last_mailed_at + outreach_settings.resend_cooldown
+
+    @classmethod
+    def is_in_cooldown(cls, last_mailed_at: datetime | None, now: datetime) -> bool:
+        ends_at = cls.cooldown_ends_at(last_mailed_at)
+        return ends_at is not None and ends_at > now
 
     def plan(self, prospects: Iterable[Prospect], *, is_newsletter: bool = True) -> MailPlan:
         """Split prospects into recipients and skipped ones.

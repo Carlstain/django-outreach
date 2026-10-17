@@ -15,7 +15,7 @@ from django.utils.decorators import method_decorator
 from django.utils.formats import date_format
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.timezone import template_localtime
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import never_cache
 
@@ -29,6 +29,7 @@ from outreach.services.prospect_csv import ProspectCsvColumns
 from outreach.services.variables import MailVariables
 
 RECENT_EVENTS_LIMIT = 8
+SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR = 3600
 LANGUAGE_COOKIE_NAME = "outreach_language"
 LANGUAGE_COOKIE_MAX_AGE = 365 * 24 * SECONDS_PER_HOUR
@@ -187,8 +188,17 @@ class OutreachAdminSite(AdminSite):
             *super().get_urls(),
         ]
 
-    def cooldown_hours(self) -> int:
-        return int(outreach_settings.resend_cooldown.total_seconds() // SECONDS_PER_HOUR)
+    def cooldown_label(self) -> str:
+        seconds = int(outreach_settings.resend_cooldown.total_seconds())
+        if seconds and seconds % SECONDS_PER_HOUR == 0:
+            hours = seconds // SECONDS_PER_HOUR
+            return ngettext("%(count)d hour", "%(count)d hours", hours) % {"count": hours}
+        if seconds and seconds % SECONDS_PER_MINUTE == 0:
+            minutes = seconds // SECONDS_PER_MINUTE
+            return ngettext("%(count)d minute", "%(count)d minutes", minutes) % {
+                "count": minutes
+            }
+        return ngettext("%(count)d second", "%(count)d seconds", seconds) % {"count": seconds}
 
     def help_view(self, request: HttpRequest) -> TemplateResponse:
         context = {
@@ -197,7 +207,7 @@ class OutreachAdminSite(AdminSite):
             "variables": MailVariables().catalog(),
             "mail_tags": mail_tag_library.catalog(),
             "max_recipients": outreach_settings.recipient_cap,
-            "cooldown_hours": self.cooldown_hours(),
+            "cooldown_label": self.cooldown_label(),
             "import_columns": ProspectCsvColumns().with_aliases(),
         }
         return TemplateResponse(request, "outreach/admin/help.html", context)
@@ -207,7 +217,7 @@ class OutreachAdminSite(AdminSite):
         context = {
             "recent_events": recent_events,
             "max_recipients": outreach_settings.recipient_cap,
-            "cooldown_hours": self.cooldown_hours(),
+            "cooldown_label": self.cooldown_label(),
             **(extra_context or {}),
         }
         return super().index(request, context)

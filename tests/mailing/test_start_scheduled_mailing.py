@@ -33,7 +33,7 @@ class StartScheduledMailingTests(CeleryMailTestCase):
         self.assertIsNotNone(self.first_prospect.last_mailed_at)
 
     def test_a_recipient_mailed_since_the_schedule_is_skipped_and_counted(self) -> None:
-        self.second_prospect.last_mailed_at = timezone.now() - timedelta(hours=1)
+        self.second_prospect.last_mailed_at = timezone.now() - timedelta(seconds=1)
         self.second_prospect.save()
 
         with self.captureOnCommitCallbacks(execute=True):

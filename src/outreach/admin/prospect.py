@@ -10,7 +10,10 @@ from django.forms import ModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import URLPattern, path, reverse
+from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.html import format_html
+from django.utils.timezone import template_localtime
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
 
@@ -107,9 +110,21 @@ class ProspectAdmin(admin.ModelAdmin):
     @admin.display(description=gettext_lazy("Status"), ordering="status")
     def status_badge(self, prospect: Prospect) -> str:
         badge_class = STATUS_BADGE_CLASSES[prospect.status]
-        return format_html(
+        status_badge = format_html(
             '<span class="badge {}">{}</span>', badge_class, prospect.get_status_display()
         )
+        if not ProspectMailer.is_in_cooldown(prospect.last_mailed_at, timezone.now()):
+            return status_badge
+        return format_html(
+            '{} <span class="badge prospect">{}</span>', status_badge, _("cooldown")
+        )
+
+    @admin.display(description=gettext_lazy("Can be mailed again"))
+    def mailable_again_at(self, prospect: Prospect) -> str:
+        ends_at = ProspectMailer.cooldown_ends_at(prospect.last_mailed_at)
+        if ends_at is None or ends_at <= timezone.now():
+            return _("Now")
+        return date_format(template_localtime(ends_at), "DATETIME_FORMAT")
 
     @admin.display(description=gettext_lazy("Member"), ordering="user")
     def member(self, prospect: Prospect) -> str:
@@ -132,6 +147,7 @@ class ProspectAdmin(admin.ModelAdmin):
         return editable_fields + [
             "status",
             "last_mailed_at",
+            "mailable_again_at",
             "user",
             "audiences",
             "created_at",
@@ -144,6 +160,7 @@ class ProspectAdmin(admin.ModelAdmin):
         readonly_fields = [
             "status",
             "last_mailed_at",
+            "mailable_again_at",
             "user",
             "audiences",
             "created_at",

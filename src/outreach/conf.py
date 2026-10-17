@@ -72,7 +72,7 @@ class OutreachSettings:
 
     @property
     def resend_cooldown(self) -> timedelta:
-        return getattr(settings, "OUTREACH_RESEND_COOLDOWN", timedelta(hours=24))
+        return getattr(settings, "OUTREACH_RESEND_COOLDOWN", timedelta(seconds=10))
 
     @property
     def max_import_rows(self) -> int:

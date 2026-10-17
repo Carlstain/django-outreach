@@ -835,10 +835,6 @@ msgstr ""
 "désinscrits des newsletters les reçoivent quand même."
 
 #, python-format
-msgid "Prospects mailed within the last %(hours)s hours."
-msgstr "Les prospects contactés dans les %(hours)s dernières heures."
-
-#, python-format
 msgid ""
 "Anyone past the first %(maximum)s recipients of one send. Send again later "
 "for the rest."
@@ -1015,10 +1011,6 @@ msgstr "Activité récente"
 
 msgid "Before you send"
 msgstr "Avant d’envoyer"
-
-#, python-format
-msgid "Same address mailed within %(hours)s hours"
-msgstr "Même adresse contactée dans les dernières %(hours)s heures"
 
 msgid "Unsubscribed or suppressed address"
 msgstr "Adresse désinscrite ou supprimée"
@@ -1783,3 +1775,38 @@ msgstr "Langue de l’interface"
 msgctxt "interface language"
 msgid "Change"
 msgstr "Changer"
+
+#, python-format
+msgid "Prospects mailed within the last %(window)s."
+msgstr "Prospects contactés il y a moins de %(window)s."
+
+#, python-format
+msgid "Same address mailed within %(window)s"
+msgstr "Même adresse contactée il y a moins de %(window)s"
+
+#, python-format
+msgid "%(count)d hour"
+msgid_plural "%(count)d hours"
+msgstr[0] "%(count)d heure"
+msgstr[1] "%(count)d heures"
+
+#, python-format
+msgid "%(count)d minute"
+msgid_plural "%(count)d minutes"
+msgstr[0] "%(count)d minute"
+msgstr[1] "%(count)d minutes"
+
+#, python-format
+msgid "%(count)d second"
+msgid_plural "%(count)d seconds"
+msgstr[0] "%(count)d seconde"
+msgstr[1] "%(count)d secondes"
+
+msgid "cooldown"
+msgstr "délai d’attente"
+
+msgid "Can be mailed again"
+msgstr "Peut être contacté à nouveau"
+
+msgid "Now"
+msgstr "Maintenant"
