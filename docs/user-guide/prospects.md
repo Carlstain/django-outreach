@@ -41,16 +41,25 @@ prospect, `change_prospect` to edit one and `delete_prospect` to delete one.
 ## Importing a file
 
 *Import CSV* on the dashboard takes a CSV file in UTF-8 with a header row. It needs
-`add_prospect`. You first see a preview of the new and the skipped rows, then confirm.
+`add_prospect`. You first see a preview of the rows, with a count of each kind, then confirm.
 
 - The columns are `email`, `first_name`, `last_name`, `organization`, `city`, `country` and
   `kind`. Headers are lower-cased and stripped, and your developer may have added aliases. The
   *How to use* page lists what your site accepts.
-- A row whose email already exists is skipped, never updated.
+- The preview tells each row apart: *New* (will be created), *Skipped* (the email already exists and
+  the row changes nothing), *Will update* (see below) and *Repeated in the file* (the same email as an
+  earlier row, which is the one imported).
+- **Updating existing prospects.** Tick *Update the prospects that already exist* before the preview. It
+  needs `change_prospect`. A row whose email exists then becomes *Will update* when a filled cell
+  differs from the stored value, and the preview shows each change as old to new. A filled cell replaces
+  the stored value, an empty cell changes nothing, and a column the file does not have changes nothing
+  either. The email, status, account link, last mailed date and audiences are never changed, and an
+  unsubscribed prospect stays unsubscribed. Each update adds an *Edited* event by `import` to the
+  history, with the names of the fields. Without the option an existing prospect is never changed. A
+  stale file can overwrite newer data, so read the preview first.
 - One invalid row stops the whole file. Nothing is imported until every row is valid.
 - A blank `kind` means individual.
 - An address on the suppression list is imported as unsubscribed.
-- A repeated email in the same file is imported once.
 - A file over the row or size limit is rejected.
 
 ## Exporting

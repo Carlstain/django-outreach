@@ -1367,7 +1367,12 @@ fieldset.module > .fieldset-heading,
   background: var(--st-user-bg);
 }
 
-.import-preview tr.skipped {
+.import-preview tr.update {
+  background: var(--st-contacted-bg);
+}
+
+.import-preview tr.skipped,
+.import-preview tr.repeated {
   background: var(--line-soft);
 }
 

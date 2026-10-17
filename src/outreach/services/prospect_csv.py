@@ -46,6 +46,7 @@ class ImportRow:
     values: dict[str, str]
     status: ImportRowStatus = ImportRowStatus.NEW
     errors: list[str] = field(default_factory=list)
+    changes: dict[str, tuple[str, str]] = field(default_factory=dict)
 
     @property
     def cells(self) -> list[str]:
@@ -60,23 +61,50 @@ class ImportPreview:
     def invalid_rows(self) -> list[ImportRow]:
         return [row for row in self.rows if row.errors]
 
+    def rows_with(self, status: ImportRowStatus) -> list[ImportRow]:
+        return [row for row in self.rows if row.status == status]
+
     @property
     def new_rows(self) -> list[ImportRow]:
-        return [row for row in self.rows if row.status == ImportRowStatus.NEW]
+        return self.rows_with(ImportRowStatus.NEW)
+
+    @property
+    def update_rows(self) -> list[ImportRow]:
+        return self.rows_with(ImportRowStatus.UPDATE)
+
+    @property
+    def kept_rows(self) -> list[ImportRow]:
+        return self.rows_with(ImportRowStatus.SKIPPED)
+
+    @property
+    def repeated_rows(self) -> list[ImportRow]:
+        return self.rows_with(ImportRowStatus.REPEATED)
 
     @property
     def skipped_count(self) -> int:
-        return len(self.rows) - len(self.new_rows)
+        return len(self.kept_rows) + len(self.repeated_rows)
+
+
+@dataclass
+class ImportResult:
+    created: int
+    updated: int
 
 
 class ProspectCsvImporter:
     """Reads a CSV file of prospects and creates the ones that do not exist yet.
 
     Headers are stripped, lower-cased and mapped through ``OUTREACH_IMPORT_HEADER_ALIASES``.
-    A row whose email exists, or repeats an earlier row, is skipped and never updated.
+    A row that repeats an earlier row of the file is never imported. A row whose email exists
+    is skipped, unless the import updates existing prospects: then each filled cell that
+    differs from the stored value replaces it, and an empty cell, or a column the file does not
+    have, changes nothing. The email, status, account link, last mailed date and audiences of
+    an existing prospect are never changed.
     """
 
-    def preview(self, text: str) -> ImportPreview:
+    EMAIL_LOOKUP_CHUNK = 500
+
+    def preview(self, text: str, update_existing: bool = False) -> ImportPreview:
         """Validate every row without saving anything.
 
         Raises:
@@ -100,22 +128,29 @@ class ProspectCsvImporter:
                 % {"count": len(records), "limit": maximum}
             )
         preview = ImportPreview()
+        row_values = [self.row_values(record) for record in records]
+        existing_by_email = self.existing_prospects([values["email"] for values in row_values])
         seen_emails: set[str] = set()
-        for index, record in enumerate(records, start=2):
-            values = self.row_values(record)
+        for index, (record, values) in enumerate(
+            zip(records, row_values, strict=True), start=2
+        ):
             row = ImportRow(line=index, values=values)
             email = values["email"]
-            if email in seen_emails or Prospect.objects.filter(email=email).exists():
-                row.status = ImportRowStatus.SKIPPED
+            if email in seen_emails:
+                row.status = ImportRowStatus.REPEATED
+            elif email in existing_by_email:
+                self.compare_with_existing(
+                    row, record, existing_by_email[email], update_existing
+                )
             else:
                 row.errors = self.validation_errors(values)
-                seen_emails.add(email)
+            seen_emails.add(email)
             preview.rows.append(row)
         return preview
 
-    def apply(self, preview: ImportPreview, file_name: str) -> int:
-        """Create the new rows of a preview that has no error, and return how many."""
-        created_count = 0
+    def apply(self, preview: ImportPreview, file_name: str) -> ImportResult:
+        """Create the new rows and update the changed ones of a preview that has no error."""
+        result = ImportResult(created=0, updated=0)
         with transaction.atomic():
             for row in preview.new_rows:
                 if Prospect.objects.filter(email=row.values["email"]).exists():
@@ -125,13 +160,68 @@ class ProspectCsvImporter:
                 ProspectEvent.record(
                     prospect, EventKind.IMPORTED, ACTOR_IMPORT, detail=file_name
                 )
-                created_count += 1
-        return created_count
+                result.created += 1
+            for row in preview.update_rows:
+                prospect = (
+                    Prospect.objects.select_for_update()
+                    .filter(email=row.values["email"])
+                    .first()
+                )
+                if prospect is None:
+                    continue
+                changed = {
+                    field_name: new_value
+                    for field_name, (_old_value, new_value) in row.changes.items()
+                    if getattr(prospect, field_name) != new_value
+                }
+                if not changed:
+                    continue
+                for field_name, new_value in changed.items():
+                    setattr(prospect, field_name, new_value)
+                prospect.save(update_fields=[*changed, "updated_at"])
+                ProspectEvent.record(
+                    prospect, EventKind.EDITED, ACTOR_IMPORT, detail=", ".join(changed)
+                )
+                result.updated += 1
+        return result
+
+    def existing_prospects(self, emails: list[str]) -> dict[str, dict[str, str]]:
+        existing_by_email: dict[str, dict[str, str]] = {}
+        unique_emails = sorted(set(emails))
+        for start in range(0, len(unique_emails), self.EMAIL_LOOKUP_CHUNK):
+            chunk = unique_emails[start : start + self.EMAIL_LOOKUP_CHUNK]
+            for stored in Prospect.objects.filter(email__in=chunk).values(
+                *ProspectCsvColumns.NAMES
+            ):
+                existing_by_email[stored["email"]] = stored
+        return existing_by_email
+
+    def compare_with_existing(
+        self,
+        row: ImportRow,
+        record: dict[str, str | None],
+        stored: dict[str, str],
+        update_existing: bool,
+    ) -> None:
+        row.status = ImportRowStatus.SKIPPED
+        if not update_existing:
+            return
+        for field_name in ProspectCsvColumns.NAMES:
+            file_value = self.cell_value(record, field_name)
+            if field_name != "email" and file_value and file_value != stored[field_name]:
+                row.changes[field_name] = (stored[field_name], file_value)
+        if row.changes:
+            row.status = ImportRowStatus.UPDATE
+            merged = {**stored, **{name: change[1] for name, change in row.changes.items()}}
+            row.errors = self.validation_errors(merged)
+
+    def cell_value(self, record: dict[str, str | None], name: str) -> str:
+        value = (record.get(name) or "").strip()
+        return value.lower() if name in ("email", "kind") else value
 
     def row_values(self, record: dict[str, str | None]) -> dict[str, str]:
-        values = {name: (record.get(name) or "").strip() for name in ProspectCsvColumns.NAMES}
-        values["email"] = values["email"].lower()
-        values["kind"] = values["kind"].lower() or ProspectKind.INDIVIDUAL
+        values = {name: self.cell_value(record, name) for name in ProspectCsvColumns.NAMES}
+        values["kind"] = values["kind"] or ProspectKind.INDIVIDUAL
         return values
 
     def validation_errors(self, values: dict[str, str]) -> list[str]:

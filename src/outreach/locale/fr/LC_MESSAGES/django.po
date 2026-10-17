@@ -1727,3 +1727,34 @@ msgstr "Il n’y a aucune audience dont retirer les prospects."
 
 msgid "On that page you can also type the name of a new audience instead of choosing one. It is created and the selected prospects are added to it."
 msgstr "Sur cette page, vous pouvez aussi saisir le nom d’une nouvelle audience au lieu d’en choisir une. Elle est créée et les prospects sélectionnés y sont ajoutés."
+
+msgid "Will update"
+msgstr "Sera mis à jour"
+
+msgid "Repeated in the file"
+msgstr "Répété dans le fichier"
+
+msgid "Update the prospects that already exist"
+msgstr "Mettre à jour les prospects qui existent déjà"
+
+msgid ""
+"A filled cell of the file replaces the stored value, an empty cell changes "
+"nothing. The email, status, account link and audiences are never changed."
+msgstr ""
+"Une cellule remplie du fichier remplace la valeur enregistrée, une cellule "
+"vide ne change rien. L'e-mail, le statut, le lien avec le compte et les "
+"audiences ne changent jamais."
+
+#, python-format
+msgid ""
+"%(new)s new, %(update)s to update, %(kept)s kept as they are, %(repeated)s "
+"repeated in the file."
+msgstr ""
+"%(new)s nouveaux, %(update)s à mettre à jour, %(kept)s conservés tels quels, "
+"%(repeated)s répétés dans le fichier."
+
+#, python-format
+msgid "%(count)d prospect updated."
+msgid_plural "%(count)d prospects updated."
+msgstr[0] "%(count)d prospect mis à jour."
+msgstr[1] "%(count)d prospects mis à jour."
