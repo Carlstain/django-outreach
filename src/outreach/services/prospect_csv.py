@@ -10,7 +10,8 @@ from django.utils.translation import gettext as _
 
 from outreach.choices import ACTOR_IMPORT, EventKind, ImportRowStatus, ProspectKind
 from outreach.conf import outreach_settings
-from outreach.models import Prospect, ProspectEvent
+from outreach.models import Audience, Prospect, ProspectEvent
+from outreach.services.audiences import AudienceMembers
 
 FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
 
@@ -81,6 +82,10 @@ class ImportPreview:
         return self.rows_with(ImportRowStatus.REPEATED)
 
     @property
+    def audience_rows(self) -> list[ImportRow]:
+        return [row for row in self.rows if row.status != ImportRowStatus.REPEATED]
+
+    @property
     def skipped_count(self) -> int:
         return len(self.kept_rows) + len(self.repeated_rows)
 
@@ -89,6 +94,7 @@ class ImportPreview:
 class ImportResult:
     created: int
     updated: int
+    added_to_audience: int = 0
 
 
 class ProspectCsvImporter:
@@ -99,7 +105,8 @@ class ProspectCsvImporter:
     is skipped, unless the import updates existing prospects: then each filled cell that
     differs from the stored value replaces it, and an empty cell, or a column the file does not
     have, changes nothing. The email, status, account link, last mailed date and audiences of
-    an existing prospect are never changed.
+    an existing prospect are never changed. The rows of a chosen set of lines can join an
+    audience, whether they were created, updated or kept.
     """
 
     EMAIL_LOOKUP_CHUNK = 500
@@ -148,8 +155,18 @@ class ProspectCsvImporter:
             preview.rows.append(row)
         return preview
 
-    def apply(self, preview: ImportPreview, file_name: str) -> ImportResult:
-        """Create the new rows and update the changed ones of a preview that has no error."""
+    def apply(
+        self,
+        preview: ImportPreview,
+        file_name: str,
+        audience: Audience | None = None,
+        audience_lines: set[int] | None = None,
+    ) -> ImportResult:
+        """Create the new rows and update the changed ones of a preview that has no error.
+
+        When an audience is given, the rows of ``audience_lines`` that are not repeated rows
+        are added to it.
+        """
         result = ImportResult(created=0, updated=0)
         with transaction.atomic():
             for row in preview.new_rows:
@@ -183,7 +200,24 @@ class ProspectCsvImporter:
                     prospect, EventKind.EDITED, ACTOR_IMPORT, detail=", ".join(changed)
                 )
                 result.updated += 1
+            if audience is not None:
+                result.added_to_audience = self.add_to_audience(
+                    preview, audience, audience_lines or set()
+                )
         return result
+
+    def add_to_audience(
+        self, preview: ImportPreview, audience: Audience, lines: set[int]
+    ) -> int:
+        emails = [row.values["email"] for row in preview.audience_rows if row.line in lines]
+        members = AudienceMembers()
+        added = 0
+        for start in range(0, len(emails), self.EMAIL_LOOKUP_CHUNK):
+            chunk = emails[start : start + self.EMAIL_LOOKUP_CHUNK]
+            added += members.add(
+                audience, Prospect.objects.filter(email__in=chunk), ACTOR_IMPORT
+            )
+        return added
 
     def existing_prospects(self, emails: list[str]) -> dict[str, dict[str, str]]:
         existing_by_email: dict[str, dict[str, str]] = {}

@@ -1539,3 +1539,15 @@ msgctxt "interface language"
 msgid "Change"
 msgstr "Alterar"
 
+
+msgid "Add the imported rows to an audience"
+msgstr "Adicionar as linhas importadas a uma audiência"
+
+msgid "Add line %(line)s to the audience"
+msgstr "Adicionar a linha %(line)s à audiência"
+
+msgid "Tick the rows that join the audience. Prospects already in it are left as they are. Unsubscribed prospects can be members, but are never mailed."
+msgstr "Marque as linhas que entram na audiência. Os prospects que já estão nela não mudam. Os prospects que cancelaram a inscrição podem ser membros, mas nunca recebem e-mail."
+
+msgid "Creates the audience. Choose an audience or type a new name, not both."
+msgstr "Cria a audiência. Escolha uma audiência ou digite um nome novo, não ambos."

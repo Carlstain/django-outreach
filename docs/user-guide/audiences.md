@@ -39,5 +39,6 @@ to the selected prospects*. The mail steps are the same as for any selection, se
 {doc}`sending-mail`: unsubscribed and suppressed prospects, the resend cooldown and the send
 limit all apply.
 
-The CSV import does not choose an audience. To put an imported file in an audience, import it, then
-filter the list for the new prospects and add them.
+The CSV import can fill an audience too, see {doc}`prospects`. On its preview step, choose an
+existing audience or type the name of a new one, and untick the rows that should not join. Without
+a choice the import changes no audience.
