@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-19
+
+### Added
+
+- The CSV import preview can add the rows to an audience, an existing one or a new name. Each new, updated or kept row has a checkbox, ticked by default, and a file of existing rows can still be confirmed to fill the audience. It needs `change_prospect`.
+
 ## [0.1.0] - 2026-10-17
 
 It includes everything since `0.1.0b6`. django-outreach is at version 0.x: use it in production with caution, since a minor version before 1.0 may change the interface.
