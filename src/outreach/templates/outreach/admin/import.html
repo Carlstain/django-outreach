@@ -61,6 +61,7 @@
       <table class="import-preview">
         <thead>
           <tr>
+            {% if confirm_form.fields.audience_lines %}<th>{% trans "Audience" %}</th>{% endif %}
             <th></th>
             {% for column in columns %}<th>{{ column }}</th>{% endfor %}
           </tr>
@@ -68,6 +69,13 @@
         <tbody>
           {% for row in preview.rows %}
             <tr class="{{ row.status.value }}">
+              {% if confirm_form.fields.audience_lines %}
+                <td>
+                  {% if row.status.value != "repeated" %}
+                    <input type="checkbox" name="audience_lines" value="{{ row.line }}" form="import-confirm" aria-label="{% blocktrans with line=row.line %}Add line {{ line }} to the audience{% endblocktrans %}"{% if row.line in checked_lines %} checked{% endif %}>
+                  {% endif %}
+                </td>
+              {% endif %}
               <td>
                 {{ row.status.label }}
                 {% for field_name, change in row.changes.items %}<br><small>{{ field_name }}: {{ change.0|default:"-" }} &rarr; {{ change.1 }}</small>{% endfor %}
@@ -77,10 +85,31 @@
           {% endfor %}
         </tbody>
       </table>
-      {% if preview.new_rows or preview.update_rows %}
-        <form method="post" action="{% url 'outreach_admin:outreach_prospect_process_import' %}">
+      {% if preview.new_rows or preview.update_rows or confirm_form.fields.audience_lines and preview.audience_rows %}
+        <form id="import-confirm" method="post" action="{% url 'outreach_admin:outreach_prospect_process_import' %}">
           {% csrf_token %}
-          {{ confirm_form }}
+          {% for field in confirm_form.hidden_fields %}{{ field }}{% endfor %}
+          {% if confirm_form.fields.audience_lines %}
+            <div class="form">
+              {% if confirm_form.non_field_errors %}
+                <div class="notice err wide" role="alert">
+                  {% for error in confirm_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+              {% endif %}
+              <div class="f wide">
+                {{ confirm_form.audience.errors }}
+                {{ confirm_form.audience.label_tag }}
+                {{ confirm_form.audience }}
+                <span class="hint">{% trans "Tick the rows that join the audience. Prospects already in it are left as they are. Unsubscribed prospects can be members, but are never mailed." %}</span>
+              </div>
+              <div class="f wide">
+                {{ confirm_form.new_audience_name.errors }}
+                {{ confirm_form.new_audience_name.label_tag }}
+                {{ confirm_form.new_audience_name }}
+                <span class="hint">{% trans "Creates the audience. Choose an audience or type a new name, not both." %}</span>
+              </div>
+            </div>
+          {% endif %}
           <p>{% trans "If you are satisfied with the preview, confirm the import." %}</p>
           <button class="btn fill" type="submit">{% trans "Confirm import" %}</button>
         </form>

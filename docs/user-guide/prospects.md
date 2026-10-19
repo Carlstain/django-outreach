@@ -57,6 +57,13 @@ prospect, `change_prospect` to edit one and `delete_prospect` to delete one.
   unsubscribed prospect stays unsubscribed. Each update adds an *Edited* event by `import` to the
   history, with the names of the fields. Without the option an existing prospect is never changed. A
   stale file can overwrite newer data, so read the preview first.
+- **Adding the file to an audience.** With `change_prospect`, the preview offers *Add the imported rows
+  to an audience*: pick an existing audience or type the name of a new one, not both. Every row
+  except a repeated one has a checkbox, ticked by default, so new, updated and kept rows all join
+  unless you untick them. Prospects already in the audience are left as they are, and unsubscribed
+  prospects can join but are never mailed. Each addition adds an *Added to an audience* event by
+  `import`. When every row already exists you can still confirm, to fill the audience. Without a
+  choice, no audience changes.
 - One invalid row stops the whole file. Nothing is imported until every row is valid.
 - A blank `kind` means individual.
 - An address on the suppression list is imported as unsubscribed.

@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "django-outreach"
-version = "0.1.1"
+version = "0.2.0"
 description = "Prospects, reusable email templates and bulk mail with unsubscribe links for Django projects."
 readme = "README.md"
 requires-python = ">=3.10"
