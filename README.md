@@ -132,7 +132,7 @@ All settings are optional except `OUTREACH_BASE_URL` for sending. They are read 
 | `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` | `5000` | Same limit in Celery mode |
 | `OUTREACH_CELERY_QUEUE` | none | Celery queue of the delivery tasks |
 | `OUTREACH_DELIVERY_MAX_RETRIES` | `3` | Retries of a delivery after a transient error, Celery mode only |
-| `OUTREACH_RESEND_COOLDOWN` | `timedelta(hours=24)` | A prospect mailed within this time is skipped |
+| `OUTREACH_RESEND_COOLDOWN` | `timedelta(seconds=10)` | A prospect mailed within this time is skipped. `timedelta(0)` turns it off |
 | `OUTREACH_MAX_IMPORT_ROWS` | `5000` | An import file with more rows is rejected |
 | `OUTREACH_MAX_IMPORT_BYTES` | `2000000` | An uploaded import file larger than this many bytes is rejected before it is parsed |
 | `OUTREACH_LOGO_STATIC_PATH` | none | Static path of a logo (light). Without it the site name is shown as text |

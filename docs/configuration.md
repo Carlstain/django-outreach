@@ -17,7 +17,7 @@ so `override_settings` works in tests.
 | `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` | `5000` | Same limit in Celery mode |
 | `OUTREACH_CELERY_QUEUE` | none | Celery queue of the delivery tasks. Without it the default queue is used |
 | `OUTREACH_DELIVERY_MAX_RETRIES` | `3` | Retries of a delivery after a transient error, Celery mode only |
-| `OUTREACH_RESEND_COOLDOWN` | `timedelta(hours=24)` | A prospect mailed within this time is skipped |
+| `OUTREACH_RESEND_COOLDOWN` | `timedelta(seconds=10)` | A prospect mailed within this time is skipped. `timedelta(0)` turns it off |
 | `OUTREACH_MAX_IMPORT_ROWS` | `5000` | An import file with more rows is rejected |
 | `OUTREACH_MAX_IMPORT_BYTES` | `2000000` | An uploaded import file larger than this many bytes is rejected before it is parsed |
 | `OUTREACH_LOGO_STATIC_PATH` | none | Static path of a logo (light). Without it the site name is shown as text |
@@ -68,7 +68,8 @@ Import rules:
 - `OUTREACH_MAX_RECIPIENTS_PER_SEND` caps one synchronous action. A send takes about 0.3 s per
   SMTP message, so the default of 100 fits under a typical 60 s proxy timeout.
   `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` caps one action in Celery mode.
-- `OUTREACH_RESEND_COOLDOWN` stops a double submit and an accidental second mailing.
+- `OUTREACH_RESEND_COOLDOWN` stops a double submit. It is short by default (10 seconds); set a
+  longer `timedelta` to also block an accidental second mailing to the same people.
 
 The full rules are in {doc}`user-guide/sending-mail`.
 

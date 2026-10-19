@@ -697,10 +697,6 @@ msgid "Notices skip prospects who are not members. Members who unsubscribed from
 msgstr "Los avisos omiten a los prospectos que no son miembros. Los miembros que se dieron de baja de los boletines los siguen recibiendo."
 
 #, python-format
-msgid "Prospects mailed within the last %(hours)s hours."
-msgstr "Prospectos que recibieron un correo en las últimas %(hours)s horas."
-
-#, python-format
 msgid "Anyone past the first %(maximum)s recipients of one send. Send again later for the rest."
 msgstr "Quienes superan los primeros %(maximum)s destinatarios de un envío. Envíe de nuevo más tarde para el resto."
 
@@ -828,10 +824,6 @@ msgstr "Actividad reciente"
 
 msgid "Before you send"
 msgstr "Antes de enviar"
-
-#, python-format
-msgid "Same address mailed within %(hours)s hours"
-msgstr "Misma dirección con envío en las últimas %(hours)s horas"
 
 msgid "Unsubscribed or suppressed address"
 msgstr "Dirección dada de baja o suprimida"
@@ -1538,6 +1530,41 @@ msgstr "Idioma de la interfaz"
 msgctxt "interface language"
 msgid "Change"
 msgstr "Cambiar"
+
+#, python-format
+msgid "Prospects mailed within the last %(window)s."
+msgstr "Prospectos contactados hace menos de %(window)s."
+
+#, python-format
+msgid "Same address mailed within %(window)s"
+msgstr "Misma dirección contactada hace menos de %(window)s"
+
+#, python-format
+msgid "%(count)d hour"
+msgid_plural "%(count)d hours"
+msgstr[0] "%(count)d hora"
+msgstr[1] "%(count)d horas"
+
+#, python-format
+msgid "%(count)d minute"
+msgid_plural "%(count)d minutes"
+msgstr[0] "%(count)d minuto"
+msgstr[1] "%(count)d minutos"
+
+#, python-format
+msgid "%(count)d second"
+msgid_plural "%(count)d seconds"
+msgstr[0] "%(count)d segundo"
+msgstr[1] "%(count)d segundos"
+
+msgid "cooldown"
+msgstr "en espera"
+
+msgid "Can be mailed again"
+msgstr "Se puede contactar de nuevo"
+
+msgid "Now"
+msgstr "Ahora"
 
 
 msgid "Add the imported rows to an audience"

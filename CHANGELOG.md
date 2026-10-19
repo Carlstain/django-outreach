@@ -10,6 +10,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - The CSV import preview can add the rows to an audience, an existing one or a new name. Each new, updated or kept row has a checkbox, ticked by default, and a file of existing rows can still be confirmed to fill the audience. It needs `change_prospect`.
 
+## [0.1.1] - 2026-10-17
+
+### Changed
+
+- `OUTREACH_RESEND_COOLDOWN` now defaults to 10 seconds instead of 24 hours, which still stops a double submit. A host that relied on the 24 hour window must set `OUTREACH_RESEND_COOLDOWN = timedelta(hours=24)`. The help page and the dashboard show the window in seconds, minutes or hours.
+
+### Added
+
+- The prospect list shows a *Cooldown* badge, and the prospect page shows when the prospect can be mailed again, while the resend cooldown applies.
+
 ## [0.1.0] - 2026-10-17
 
 It includes everything since `0.1.0b6`. django-outreach is at version 0.x: use it in production with caution, since a minor version before 1.0 may change the interface.

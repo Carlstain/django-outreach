@@ -103,7 +103,7 @@
         <ul>
           <li>{% trans "Newsletters skip prospects who unsubscribed, and addresses that unsubscribed before and were imported again." %}</li>
           <li>{% trans "Notices skip prospects who are not members. Members who unsubscribed from newsletters still receive them." %}</li>
-          <li>{% blocktrans with hours=cooldown_hours %}Prospects mailed within the last {{ hours }} hours.{% endblocktrans %}</li>
+          <li>{% blocktrans with window=cooldown_label %}Prospects mailed within the last {{ window }}.{% endblocktrans %}</li>
           <li>{% blocktrans with maximum=max_recipients %}Anyone past the first {{ maximum }} recipients of one send. Send again later for the rest.{% endblocktrans %}</li>
         </ul>
         <p>{% trans "The compose page lists who is skipped and why before you send." %}</p>
