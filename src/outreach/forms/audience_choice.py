@@ -19,6 +19,8 @@ class AudienceChoiceForm(forms.Form):
         label=_("Or create a new audience"),
     )
 
+    audience_required = True
+
     def __init__(self, *args: Any, creating: bool = False, **kwargs: Any) -> None:
         kwargs.setdefault("label_suffix", "")
         super().__init__(*args, **kwargs)
@@ -42,7 +44,7 @@ class AudienceChoiceForm(forms.Form):
         has_name = bool(cleaned_data["new_audience_name"])
         if has_audience and has_name:
             raise forms.ValidationError(_("Choose an audience or type a new name, not both."))
-        if not has_audience and not has_name:
+        if self.audience_required and not has_audience and not has_name:
             raise forms.ValidationError(
                 _("Choose an audience, or type the name of a new one.")
             )

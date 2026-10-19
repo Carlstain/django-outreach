@@ -133,7 +133,10 @@ class ProspectImportTests(OutreachTestCase):
         self.assertEqual(statuses, [ImportRowStatus.SKIPPED, ImportRowStatus.NEW])
         self.assertEqual(Prospect.objects.count(), 1)
 
-    def test_a_preview_of_only_existing_rows_offers_no_confirmation(self) -> None:
+    def test_a_preview_of_only_existing_rows_offers_no_confirmation_without_an_audience(
+        self,
+    ) -> None:
+        self.client.force_login(create_outreach_staff_user(["add_prospect", "view_prospect"]))
         ProspectFactory(email="same@test.com")
 
         response = self.upload_csv("email\nsame@test.com\n")

@@ -243,23 +243,39 @@ class ProspectAdmin(admin.ModelAdmin):
             return self.import_response(request, form=form)
         if preview.invalid_rows:
             return self.import_response(request, form=form, preview=preview)
+        can_choose_audience = self.has_change_permission(request)
         confirm_form = OutreachImportConfirmForm(
             initial={
                 "csv_text": csv_text,
                 "file_name": upload.name,
                 "update_existing": update_existing,
-            }
+            },
+            can_choose_audience=can_choose_audience,
         )
         return self.import_response(
-            request, form=form, preview=preview, confirm_form=confirm_form
+            request,
+            form=form,
+            preview=preview,
+            confirm_form=confirm_form,
+            checked_lines={row.line for row in preview.audience_rows},
         )
 
     def process_import_view(self, request: HttpRequest) -> HttpResponse:
         if not self.has_import_permission(request):
             raise PermissionDenied
         import_url = reverse("outreach_admin:outreach_prospect_import")
-        confirm_form = OutreachImportConfirmForm(request.POST or None)
-        if request.method != "POST" or not confirm_form.is_valid():
+        can_choose_audience = self.has_change_permission(request)
+        confirm_form = OutreachImportConfirmForm(
+            request.POST or None, can_choose_audience=can_choose_audience
+        )
+        if not confirm_form.is_bound:
+            return HttpResponseRedirect(import_url)
+        chose_audience = request.POST.get("audience") or request.POST.get("new_audience_name")
+        if chose_audience and not can_choose_audience:
+            raise PermissionDenied
+        confirm_form.is_valid()
+        file_fields = {"csv_text", "file_name", "update_existing", "audience_lines"}
+        if file_fields & set(confirm_form.errors):
             return HttpResponseRedirect(import_url)
         update_existing = confirm_form.cleaned_data["update_existing"]
         if update_existing and not self.has_change_permission(request):
@@ -273,7 +289,33 @@ class ProspectAdmin(admin.ModelAdmin):
         if preview.invalid_rows:
             form = OutreachImportForm(can_update=self.has_change_permission(request))
             return self.import_response(request, form=form, preview=preview)
-        result = importer.apply(preview, confirm_form.cleaned_data["file_name"])
+        checked_lines = set(confirm_form.cleaned_data.get("audience_lines", []))
+        if confirm_form.errors:
+            return self.import_response(
+                request,
+                form=OutreachImportForm(can_update=can_choose_audience),
+                preview=preview,
+                confirm_form=confirm_form,
+                checked_lines=checked_lines,
+            )
+        audience = confirm_form.cleaned_data.get("audience")
+        new_audience_name = confirm_form.cleaned_data.get("new_audience_name")
+        try:
+            with transaction.atomic():
+                if new_audience_name:
+                    audience = AudienceCreator().create(new_audience_name, request.user)
+                result = importer.apply(
+                    preview, confirm_form.cleaned_data["file_name"], audience, checked_lines
+                )
+        except AudienceNameTaken:
+            confirm_form.add_error("new_audience_name", AUDIENCE_NAME_TAKEN)
+            return self.import_response(
+                request,
+                form=OutreachImportForm(can_update=can_choose_audience),
+                preview=preview,
+                confirm_form=confirm_form,
+                checked_lines=checked_lines,
+            )
         summary = [
             ngettext(
                 "%(count)d prospect imported.", "%(count)d prospects imported.", result.created
@@ -296,6 +338,23 @@ class ProspectAdmin(admin.ModelAdmin):
             % {"count": preview.skipped_count}
         )
         self.message_user(request, " ".join(summary), messages.SUCCESS)
+        if new_audience_name:
+            self.message_user(
+                request,
+                _("The audience %(audience)s was created.") % {"audience": audience},
+                messages.SUCCESS,
+            )
+        if audience is not None:
+            self.message_user(
+                request,
+                ngettext(
+                    "%(count)d prospect added to %(audience)s.",
+                    "%(count)d prospects added to %(audience)s.",
+                    result.added_to_audience,
+                )
+                % {"count": result.added_to_audience, "audience": audience},
+                messages.SUCCESS,
+            )
         return HttpResponseRedirect(reverse("outreach_admin:outreach_prospect_changelist"))
 
     def save_model(
