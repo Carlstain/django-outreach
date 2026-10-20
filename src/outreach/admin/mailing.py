@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from outreach.choices import DeliveryStatus, EventKind
 from outreach.models import Mailing
 from outreach.services.scheduling import MailingScheduler
+from outreach.services.send_gate import SendGate
 from outreach.sites import outreach_site
 
 
@@ -121,6 +122,16 @@ class MailingAdmin(admin.ModelAdmin):
         self.message_user(request, *self.admin_site.report_message(report))
         return HttpResponseRedirect(detail_url)
 
+    def send_gate_context(self, mailing: Mailing | None) -> dict[str, Any]:
+        if mailing is None or not SendGate.is_active():
+            return {"send_gate_active": False}
+        waiting_total = SendGate.waiting_deliveries().filter(mailing=mailing).count()
+        return {
+            "send_gate_active": True,
+            "waiting_total": waiting_total,
+            "next_release_at": SendGate.next_release_at() if waiting_total else None,
+        }
+
     def change_view(
         self,
         request: HttpRequest,
@@ -153,6 +164,7 @@ class MailingAdmin(admin.ModelAdmin):
                 delivery.status == DeliveryStatus.SCHEDULED for delivery in deliveries
             ),
             "skipped_reasons": skipped_reasons,
+            **self.send_gate_context(mailing),
             **(extra_context or {}),
         }
         return super().change_view(request, object_id, form_url, context)

@@ -117,13 +117,43 @@ minute schedule means up to a minute late.
 To use a separate queue, set `OUTREACH_CELERY_QUEUE = "outreach"` and start a worker for it
 with `celery -A mysite worker -Q outreach`.
 
-Outreach has no rate limit setting. Celery fixes a task's rate limit when the task is defined,
-so set it in your own Celery configuration, for example to stay under the limit of your mail
-provider:
+Celery fixes a task's own `rate_limit` when the task is defined, and counts it per worker. If
+you want that kind of limit, set it in your own Celery configuration:
 
 ```python
 CELERY_TASK_ANNOTATIONS = {"outreach.deliver_mail": {"rate_limit": "10/s"}}
 ```
+
+To stay under a quota of your mail provider, such as a number of mails per hour, use the
+settings below instead.
+
+## Respecting a provider limit
+
+Some providers refuse mail once an hourly quota is used. Declare it and Outreach waits instead
+of failing the surplus:
+
+```python
+OUTREACH_SEND_LIMIT_PER_HOUR = 200
+OUTREACH_SEND_DELAY = timedelta(seconds=2)  # optional, a fixed gap between two mails
+```
+
+Both are `None` by default and are ignored in synchronous mode.
+
+- A delivery is *released* to a worker when fewer than the limit were released in the last
+  60 minutes, whatever happened to them, and at least the delay has passed since the last
+  release. The others stay `pending` and nothing is marked failed.
+- One task, `outreach.release_deliveries`, releases what fits, oldest first and across all
+  mailings, then schedules itself again, in steps of at most five minutes, until nothing waits.
+  Sends, retries and scheduled starts start it. You do not schedule it.
+- The dashboard shows the limit filling, the preview step says how many mails go now and how
+  many wait, and the mailing page counts the mails *Waiting for the hourly limit*.
+- A waiting prospect is already claimed, so it shows as contacted, and an unsubscribe before
+  its turn still wins.
+- Outreach counts only its own mail. Other mail sent from the same account is not seen.
+- A failed delivery that staff retry stops counting for its first release, so a retry within the hour of that release can go over the limit by as many mails as were retried.
+- If the wake-up is lost, for example when the broker is flushed, the next send starts it
+  again, or `outreach_resume_deliveries` does. Run that command from cron now and then.
+- Nothing is released while no Celery worker runs.
 
 ## When a worker dies
 

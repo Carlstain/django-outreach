@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="gauge">
+  <div class="gauge-head">
+    <span>{% trans "Hourly limit" %}</span>
+    <strong>{{ usage.released }} / {{ usage.limit }}</strong>
+  </div>
+  <meter class="gauge-meter" min="0" max="{{ usage.limit }}" value="{{ usage.released }}" aria-label="{% trans 'Mails released in the last hour' %}">{{ usage.percent }}%</meter>
+  <small>
+    {% if usage.free_at %}
+      {% blocktrans with time=usage.free_at|time:"TIME_FORMAT" %}A slot frees up at {{ time }}.{% endblocktrans %}
+    {% else %}
+      {% blocktrans count counter=usage.remaining %}{{ counter }} left this hour.{% plural %}{{ counter }} left this hour.{% endblocktrans %}
+    {% endif %}
+  </small>
+</div>

@@ -45,6 +45,7 @@
         <li><span>{% trans "Unsubscribed or suppressed address" %}</span><span class="badge unsub">{% trans "never mailed" %}</span></li>
         <li><span>{% trans "Recipients per send" %}</span><strong>{% blocktrans with maximum=max_recipients %}{{ maximum }} max{% endblocktrans %}</strong></li>
       </ul>
+      {% if send_usage %}{% include "outreach/admin/includes/send_gauge.html" with usage=send_usage %}{% endif %}
     </div>
   </div>
 {% endblock %}

@@ -32,6 +32,7 @@ from outreach.services.body import MailBodySanitizer
 from outreach.services.failures import FailureClassifier, MessageNotAccepted
 from outreach.services.mail_buttons import mail_buttons
 from outreach.services.mail_tags import mail_tag_library
+from outreach.services.send_gate import SendGate
 from outreach.services.unsubscribe import SuppressionList, UnsubscribeTokens
 from outreach.services.variables import MailVariables
 from outreach.signals import mail_failed, mail_sent, send_after_commit
@@ -312,10 +313,18 @@ class ProspectMailer:
             delivery.attempts = 0
             delivery.failure_kind = ""
             delivery.previous_mailed_at = delivery.prospect.last_mailed_at
+            delivery.released_at = None
             delivery.updated_at = claimed_at
         MailingDelivery.objects.bulk_update(
             deliveries,
-            ["status", "attempts", "failure_kind", "previous_mailed_at", "updated_at"],
+            [
+                "status",
+                "attempts",
+                "failure_kind",
+                "previous_mailed_at",
+                "released_at",
+                "updated_at",
+            ],
         )
         Prospect.objects.filter(
             pk__in=[delivery.prospect_id for delivery in deliveries]
@@ -329,7 +338,7 @@ class ProspectMailer:
         abandon: Callable[[MailingDelivery], None],
     ) -> None:
         if outreach_settings.dispatch == DispatchMode.CELERY:
-            self.enqueue(delivery.pk for delivery in deliveries)
+            self.submit(delivery.pk for delivery in deliveries)
             report.queued = [delivery.prospect for delivery in deliveries]
             return
         self.deliver_all(deliveries, report, is_newsletter, abandon)
@@ -430,11 +439,36 @@ class ProspectMailer:
         return QueuedMailing(plan=mail_plan, mailing=mailing, deliveries=deliveries)
 
     @staticmethod
-    def enqueue(delivery_pks: Iterable[object]) -> None:
+    def submit(delivery_pks: Iterable[object]) -> None:
+        """Queue the deliveries, or leave them waiting for the send gate when it is on.
+
+        Deliveries that were already released are queued again. The others wait, and one
+        ``outreach.release_deliveries`` task is started to release what fits.
+        """
+        submitted_pks = list(delivery_pks)
+        if not SendGate.is_active():
+            ProspectMailer.enqueue(submitted_pks)
+            return
+        released_pks = list(
+            MailingDelivery.objects.filter(
+                pk__in=submitted_pks, released_at__isnull=False
+            ).values_list("pk", flat=True)
+        )
+        ProspectMailer.enqueue(released_pks)
+        if len(released_pks) < len(submitted_pks):
+            SendGate.kick()
+
+    @staticmethod
+    def enqueue(delivery_pks: Iterable[object], released_at: datetime | None = None) -> None:
         from outreach.tasks import deliver_mail
 
         queue_name = outreach_settings.celery_queue
-        for delivery_pk in delivery_pks:
+        pending_pks = list(delivery_pks)
+        stamp = released_at or timezone.now()
+        MailingDelivery.objects.filter(pk__in=pending_pks, released_at__isnull=True).update(
+            released_at=stamp, updated_at=stamp
+        )
+        for delivery_pk in pending_pks:
             transaction.on_commit(
                 partial(deliver_mail.apply_async, args=[str(delivery_pk)], queue=queue_name)
             )

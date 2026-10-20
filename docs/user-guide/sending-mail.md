@@ -21,7 +21,7 @@ The recipients panel counts who will receive the message and lists who is skippe
 | Contacted recently | Mailed within the resend cooldown (10 seconds by default) |
 | Over the send limit | Beyond the maximum for one send (100 by default) |
 
-The dashboard shows the limits of your installation under *Before you send*. If the page says
+The dashboard shows the limits of your installation under *Before you send*. When your developer declared an hourly sending limit, a bar there shows how much of it is used, and the preview step says how many mails go now and how many wait. The waiting ones go out by themselves. If the page says
 that sending is disabled, ask your developer to set `OUTREACH_BASE_URL`.
 
 Fill in:

@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-21
+
+### Added
+
+- `OUTREACH_SEND_LIMIT_PER_HOUR` and `OUTREACH_SEND_DELAY` (both `None` by default, Celery mode only). Over the limit, deliveries stay pending instead of failing, and the task `outreach.release_deliveries` releases them as the hourly window frees up.
+- The dashboard shows the hourly limit filling, the send preview says how many mails go now and how many wait, and the mailing page has a *Waiting for the hourly limit* tile.
+- Migration `0011` adds `MailingDelivery.released_at`. `outreach_resume_deliveries` leaves waiting deliveries to the gate.
+
 ## [0.2.1] - 2026-10-20
 
 ### Changed

@@ -13,6 +13,7 @@ from django.urls import URLPattern, path, reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.html import format_html
+from django.utils.timesince import timesince
 from django.utils.timezone import template_localtime
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext
@@ -52,6 +53,7 @@ from outreach.services.prospect_csv import (
 )
 from outreach.services.prospect_export import ProspectDataExporter
 from outreach.services.scheduling import MailingScheduler
+from outreach.services.send_gate import SendGate
 from outreach.services.templates import EmailTemplates, TemplateNameTaken
 from outreach.services.unsubscribe import ProspectUnsubscriber
 from outreach.sites import outreach_site
@@ -488,7 +490,18 @@ class ProspectAdmin(admin.ModelAdmin):
                 return TemplateResponse(request, "outreach/admin/compose.html", context)
             if step == STEP_TEST:
                 self.send_test_mail(request, mailer, preview_prospect, form, message_fields)
+            send_at = form.cleaned_data.get("send_at")
+            send_forecast = None
+            send_wait_label = ""
+            if SendGate.is_active() and not send_at:
+                now = timezone.now()
+                send_forecast = SendGate.forecast(len(plan.recipients), now)
+                if send_forecast.finishes_in is not None:
+                    send_wait_label = timesince(now, now + send_forecast.finishes_in)
             context.update(
+                send_forecast=send_forecast,
+                send_wait_label=send_wait_label,
+                send_usage=SendGate.usage() if send_forecast else None,
                 preview_prospect=preview_prospect,
                 preview_html=rendered.html,
                 preview_subject=rendered.subject,
