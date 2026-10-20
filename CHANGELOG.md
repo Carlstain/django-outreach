@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-21
+
 ### Added
 
 - `OUTREACH_SEND_LIMIT_PER_HOUR` and `OUTREACH_SEND_DELAY` (both `None` by default, Celery mode only). Over the limit, deliveries stay pending instead of failing, and the task `outreach.release_deliveries` releases them as the hourly window frees up.
