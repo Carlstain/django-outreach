@@ -1,0 +1,25 @@
+name: Question
+description: Ask how to use or configure django-outreach.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check the [documentation](https://django-outreach.readthedocs.io/) first, your answer may already be there.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What did you try?
+      description: Settings, code or pages of the documentation you already looked at.
+  - type: input
+    id: version
+    attributes:
+      label: django-outreach version
+      placeholder: "0.2.0"

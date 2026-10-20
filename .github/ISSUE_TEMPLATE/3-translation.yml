@@ -1,0 +1,52 @@
+name: Translation
+description: Fix a wrong or missing translation, or offer a new language.
+title: "[Translation]: "
+labels: ["translation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The Spanish and Portuguese catalogues are drafts that a native speaker has not reviewed yet, so corrections are very welcome.
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - French (fr)
+        - Spanish (es)
+        - Portuguese (pt)
+        - Brazilian Portuguese (pt_BR)
+        - English (en)
+        - A new language
+    validations:
+      required: true
+  - type: input
+    id: new-language
+    attributes:
+      label: New language
+      description: Only if you chose "A new language" above.
+      placeholder: German (de)
+  - type: input
+    id: location
+    attributes:
+      label: Where does the text appear?
+      description: The page or screen, or the email (subject, unsubscribe page, help page...).
+      placeholder: Compose page, "Send a test to yourself" button
+  - type: textarea
+    id: current
+    attributes:
+      label: Current text
+      description: The English source and the current translation, if any.
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested text
+    validations:
+      required: true
+  - type: checkboxes
+    id: native
+    attributes:
+      label: About you
+      options:
+        - label: I am a native speaker of this language.
+        - label: I would like to review the whole catalogue for this language.

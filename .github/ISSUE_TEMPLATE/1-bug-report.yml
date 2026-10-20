@@ -1,0 +1,106 @@
+name: Bug report
+description: Something does not work as the documentation says.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search the [existing issues](https://github.com/Carlstain/django-outreach/issues?q=is%3Aissue) first.
+        Do **not** report a security problem here, see [SECURITY.md](https://github.com/Carlstain/django-outreach/blob/main/SECURITY.md).
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest set of steps, settings or data that shows the problem.
+      placeholder: |
+        1. Open the outreach admin
+        2. Select three prospects
+        3. Run "Send an email"
+        4. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of django-outreach is affected?
+      options:
+        - Sending (mailing, Celery, scheduled send)
+        - Prospects
+        - CSV import or export
+        - Audiences
+        - Email templates, variables, tags and buttons
+        - Unsubscribe and suppression list
+        - Data download and erase (GDPR)
+        - Admin interface and theme
+        - Host project integration (settings, signals, URLs)
+        - Other or not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: django-outreach version
+      placeholder: "0.2.0"
+    validations:
+      required: true
+  - type: input
+    id: django-version
+    attributes:
+      label: Django version
+      placeholder: "5.2"
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.13"
+    validations:
+      required: true
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - PostgreSQL
+        - SQLite
+        - MySQL or MariaDB
+        - Other
+  - type: dropdown
+    id: dispatch
+    attributes:
+      label: Sending mode (OUTREACH_DISPATCH)
+      options:
+        - Synchronous (default)
+        - Celery
+        - Not related to sending
+  - type: textarea
+    id: logs
+    attributes:
+      label: Traceback or logs
+      description: Paste the full traceback if there is one. Remove email addresses and other personal data first.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true
