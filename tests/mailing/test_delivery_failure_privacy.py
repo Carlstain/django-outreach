@@ -1,4 +1,4 @@
-from smtplib import SMTPRecipientsRefused, SMTPServerDisconnected
+from smtplib import SMTPDataError, SMTPRecipientsRefused, SMTPServerDisconnected
 from unittest.mock import patch
 
 from django.core.mail import EmailMultiAlternatives
@@ -51,6 +51,29 @@ class DeliveryFailurePrivacyTests(OutreachTestCase):
         self.assertNotIn("private.person", message)
         self.assertNotIn("mailbox", message)
         self.assertIsNone(logs.records[0].exc_info)
+
+    def test_the_log_carries_the_smtp_code_and_still_none_of_the_reply_text(self) -> None:
+        with self.assertLogs("outreach", level="WARNING") as logs:
+            self.fail_with(SMTPDataError(554, b"rejected for private.person@example.org"))
+
+        message = logs.records[0].getMessage()
+        self.assertTrue(message.endswith("(SMTPDataError) smtp 554"))
+        self.assertNotIn("private.person", message)
+        self.assertNotIn("rejected", message)
+
+    def test_the_log_carries_the_code_of_a_recipient_refusal(self) -> None:
+        with self.assertLogs("outreach", level="WARNING") as logs:
+            self.fail_with(self.refusal)
+
+        self.assertTrue(
+            logs.records[0].getMessage().endswith("(SMTPRecipientsRefused) smtp 550")
+        )
+
+    def test_a_non_smtp_failure_logs_no_code(self) -> None:
+        with self.assertLogs("outreach", level="WARNING") as logs:
+            self.fail_with(ValueError("bad button"))
+
+        self.assertTrue(logs.records[0].getMessage().endswith("(ValueError)"))
 
     def test_a_retry_after_a_transient_error_carries_the_kind_only(self) -> None:
         with self.assertRaises(TransientDeliveryError) as raised:

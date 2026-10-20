@@ -523,11 +523,13 @@ class ProspectMailer:
     def fail_delivery(
         self, delivery: MailingDelivery, error: Exception, failure_kind: FailureKind
     ) -> None:
+        smtp_codes = FailureClassifier().smtp_codes(error)
         logger.warning(
-            "Delivery %s failed: %s (%s)",
+            "Delivery %s failed: %s (%s)%s",
             delivery.pk,
             failure_kind.value,
             type(error).__name__,
+            f" smtp {smtp_codes}" if smtp_codes else "",
         )
         self.release(delivery.prospect, delivery.previous_mailed_at)
         self.settle(delivery, DeliveryStatus.FAILED, failure_kind)

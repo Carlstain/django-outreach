@@ -29,3 +29,13 @@ class FailureClassifier:
         if isinstance(error, OSError):
             return FailureKind.SERVER
         return FailureKind.CONTENT
+
+    def smtp_codes(self, error: Exception) -> str:
+        """Return the numeric SMTP reply codes of an error, never the text that came with them."""
+        if isinstance(error, smtplib.SMTPRecipientsRefused):
+            codes = {code for code, _ in error.recipients.values()}
+        elif isinstance(error, smtplib.SMTPResponseException):
+            codes = {error.smtp_code}
+        else:
+            codes = set()
+        return ",".join(str(code) for code in sorted(codes))
