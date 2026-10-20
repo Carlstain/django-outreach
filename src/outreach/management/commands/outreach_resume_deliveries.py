@@ -33,5 +33,5 @@ class Command(BaseCommand):
         if options["dry_run"]:
             self.stdout.write(f"Dry run, nothing queued. Stale deliveries: {len(stale_pks)}.")
             return
-        ProspectMailer.enqueue(stale_pks)
+        ProspectMailer.submit(stale_pks)
         self.stdout.write(f"Deliveries queued: {len(stale_pks)}.")

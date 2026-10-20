@@ -22,6 +22,12 @@
         <p>{% blocktrans count counter=recipient_count %}This is what the recipient will get, with their own details filled in.{% plural %}This is what each of the {{ counter }} recipients will get, with their own details filled in.{% endblocktrans %}</p>
         <p>{% blocktrans with language=language_label %}Mail language: {{ language }}.{% endblocktrans %}</p>
         {% if send_at %}<p>{% blocktrans with when=send_at|date:"DATETIME_FORMAT" %}It will go out on {{ when }}{% endblocktrans %}</p>{% endif %}
+        {% if send_forecast and send_forecast.waiting %}
+          <div class="notice">
+            <p>{% blocktrans with go_now=send_forecast.go_now waiting=send_forecast.waiting wait=send_wait_label %}{{ go_now }} will be sent now, {{ waiting }} will wait for the hourly limit and go out by themselves (about {{ wait }}).{% endblocktrans %}</p>
+            {% if send_usage %}{% include "outreach/admin/includes/send_gauge.html" with usage=send_usage %}{% endif %}
+          </div>
+        {% endif %}
         <p class="hint">{% blocktrans with name=preview_prospect.display_name %}A test goes to your own address only, with the details of {{ name }}.{% endblocktrans %}{% if form.is_newsletter.value %} {% trans "Its unsubscribe link does nothing." %}{% endif %}</p>
       </div>
       <div class="actions">

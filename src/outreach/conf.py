@@ -71,6 +71,20 @@ class OutreachSettings:
         return getattr(settings, "OUTREACH_DELIVERY_MAX_RETRIES", 3)
 
     @property
+    def send_limit_per_hour(self) -> int | None:
+        return getattr(settings, "OUTREACH_SEND_LIMIT_PER_HOUR", None)
+
+    @property
+    def send_delay(self) -> timedelta | None:
+        return getattr(settings, "OUTREACH_SEND_DELAY", None)
+
+    @property
+    def send_gate_enabled(self) -> bool:
+        has_limit = self.send_limit_per_hour is not None
+        has_delay = self.send_delay is not None
+        return self.uses_celery and (has_limit or has_delay)
+
+    @property
     def resend_cooldown(self) -> timedelta:
         return getattr(settings, "OUTREACH_RESEND_COOLDOWN", timedelta(seconds=10))
 

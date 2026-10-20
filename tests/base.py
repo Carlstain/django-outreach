@@ -12,7 +12,7 @@ from outreach.services.mail_tags import mail_tag_library
 from outreach.services.mail_variables import mail_variable_library
 from outreach.services.mailing import ProspectMailer, RenderedMail
 from outreach.services.scheduling import MailingScheduler
-from outreach.tasks import deliver_mail
+from outreach.tasks import deliver_mail, release_deliveries
 
 MAIL_BASE_URL = "https://outreach.example.test"
 
@@ -44,6 +44,9 @@ class CeleryMailTestCase(OutreachTestCase):
         publisher = patch.object(deliver_mail, "apply_async")
         self.apply_async = publisher.start()
         self.addCleanup(publisher.stop)
+        release_publisher = patch.object(release_deliveries, "apply_async")
+        self.release_apply_async = release_publisher.start()
+        self.addCleanup(release_publisher.stop)
 
 
 class OutreachMailTagTestCase(OutreachTestCase):

@@ -99,7 +99,7 @@ class MailingScheduler:
                 ProspectMailer.skip_in_mailing(
                     mailing, SkipReason.COOLDOWN, len(held_deliveries)
                 )
-        ProspectMailer.enqueue(delivery.pk for delivery in ready_deliveries)
+        ProspectMailer.submit(delivery.pk for delivery in ready_deliveries)
         return len(ready_deliveries)
 
     @classmethod

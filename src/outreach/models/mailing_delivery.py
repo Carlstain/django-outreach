@@ -39,6 +39,8 @@ class MailingDelivery(BaseModel):
         max_length=10, choices=FailureKind.choices, blank=True, verbose_name=_("failure")
     )
 
+    released_at = models.DateTimeField(null=True, blank=True, verbose_name=_("released at"))
+
     class Meta:
         ordering = ["created_at", "pk"]
         verbose_name = _("mailing delivery")
@@ -46,6 +48,7 @@ class MailingDelivery(BaseModel):
         indexes = [
             models.Index(fields=["mailing", "status"], name="outreach_dlv_mailing_status"),
             models.Index(fields=["status", "updated_at"], name="outreach_dlv_status_age"),
+            models.Index(fields=["released_at"], name="outreach_dlv_released_at"),
         ]
         constraints = [
             models.UniqueConstraint(

@@ -1578,3 +1578,29 @@ msgstr "Marque as linhas que entram na audiência. Os prospetos que já estão n
 
 msgid "Creates the audience. Choose an audience or type a new name, not both."
 msgstr "Cria a audiência. Escolha uma audiência ou escreva um nome novo, não ambos."
+
+msgid "released at"
+msgstr "liberado em"
+
+msgid "Hourly limit"
+msgstr "Limite por hora"
+
+msgid "Mails released in the last hour"
+msgstr "E-mails liberados na última hora"
+
+msgid "A slot frees up at %(time)s."
+msgstr "Uma vaga abre às %(time)s."
+
+msgid "%(counter)s left this hour."
+msgid_plural "%(counter)s left this hour."
+msgstr[0] "Resta %(counter)s nesta hora."
+msgstr[1] "Restam %(counter)s nesta hora."
+
+msgid "%(go_now)s will be sent now, %(waiting)s will wait for the hourly limit and go out by themselves (about %(wait)s)."
+msgstr "%(go_now)s serão enviados agora, %(waiting)s aguardarão o limite por hora e sairão sozinhos (cerca de %(wait)s)."
+
+msgid "Waiting for the hourly limit"
+msgstr "Aguardando o limite por hora"
+
+msgid "Next mail goes out at %(time)s."
+msgstr "O próximo e-mail sai às %(time)s."

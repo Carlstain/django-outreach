@@ -2,7 +2,7 @@ import factory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 
-from outreach.models import Audience, EmailTemplate, Mailing, Prospect
+from outreach.models import Audience, EmailTemplate, Mailing, MailingDelivery, Prospect
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -29,6 +29,14 @@ class MailingFactory(factory.django.DjangoModelFactory):
     subject = factory.Sequence(lambda sequence_number: f"Mailing subject {sequence_number}")
     body_html = "<p>Hello from the mailing</p>"
     sender = "staff"
+
+
+class MailingDeliveryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = MailingDelivery
+
+    mailing = factory.SubFactory(MailingFactory)
+    prospect = factory.SubFactory(ProspectFactory)
 
 
 class AudienceFactory(factory.django.DjangoModelFactory):

@@ -17,6 +17,8 @@ so `override_settings` works in tests.
 | `OUTREACH_CELERY_MAX_RECIPIENTS_PER_SEND` | `5000` | Same limit in Celery mode |
 | `OUTREACH_CELERY_QUEUE` | none | Celery queue of the delivery tasks. Without it the default queue is used |
 | `OUTREACH_DELIVERY_MAX_RETRIES` | `3` | Retries of a delivery after a transient error, Celery mode only |
+| `OUTREACH_SEND_LIMIT_PER_HOUR` | none | The most mails Outreach releases in any rolling hour, Celery mode only. The surplus waits and goes out by itself, see {doc}`topics/sending-with-celery`. A positive integer, checked by `outreach.E005` |
+| `OUTREACH_SEND_DELAY` | none | Minimum gap between two mails, a `timedelta`, Celery mode only. Checked by `outreach.E006` |
 | `OUTREACH_RESEND_COOLDOWN` | `timedelta(seconds=10)` | A prospect mailed within this time is skipped. `timedelta(0)` turns it off |
 | `OUTREACH_MAX_IMPORT_ROWS` | `5000` | An import file with more rows is rejected |
 | `OUTREACH_MAX_IMPORT_BYTES` | `2000000` | An uploaded import file larger than this many bytes is rejected before it is parsed |

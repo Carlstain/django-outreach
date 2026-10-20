@@ -1,3 +1,4 @@
+from datetime import timedelta
 from importlib.util import find_spec
 from typing import Any
 
@@ -35,6 +36,34 @@ def check_mail_language(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
         choices = ", ".join(OutreachLanguage.values)
         return [
             Error(f"OUTREACH_MAIL_LANGUAGE must be one of: {choices}.", id="outreach.E004")
+        ]
+    return []
+
+
+def check_send_limit(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
+    limit = outreach_settings.send_limit_per_hour
+    if limit is None:
+        return []
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+        return [
+            Error(
+                "OUTREACH_SEND_LIMIT_PER_HOUR must be a positive integer or None.",
+                id="outreach.E005",
+            )
+        ]
+    return []
+
+
+def check_send_delay(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
+    delay = outreach_settings.send_delay
+    if delay is None:
+        return []
+    if not isinstance(delay, timedelta) or delay <= timedelta(0):
+        return [
+            Error(
+                "OUTREACH_SEND_DELAY must be a positive timedelta or None.",
+                id="outreach.E006",
+            )
         ]
     return []
 

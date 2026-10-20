@@ -37,8 +37,11 @@
 {% endblock %}
 
 {% block content %}
-  <div class="tiles three">
+  <div class="tiles{% if not send_gate_active %} three{% endif %}">
     <div class="tile"><b>{{ original.sent_count }}</b><span>{% trans "Sent" context "tile" %}</span></div>
+    {% if send_gate_active %}
+      <div class="tile"><b>{{ waiting_total }}</b><span>{% trans "Waiting for the hourly limit" %}</span>{% if next_release_at %}<small>{% blocktrans with time=next_release_at|time:"TIME_FORMAT" %}Next mail goes out at {{ time }}.{% endblocktrans %}</small>{% endif %}</div>
+    {% endif %}
     <div class="tile"><b>{{ original.failed_count }}</b><span>{% trans "Failed" context "tile" %}</span></div>
     <div class="tile"><b>{{ original.skipped_count }}</b><span>{% trans "Skipped" context "tile" %}</span></div>
   </div>

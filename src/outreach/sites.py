@@ -26,6 +26,7 @@ from outreach.models import Audience, EmailTemplate, Mailing, Prospect, Prospect
 from outreach.services.mail_tags import mail_tag_library
 from outreach.services.mailing import MailReport, ProspectMailer
 from outreach.services.prospect_csv import ProspectCsvColumns
+from outreach.services.send_gate import SendGate
 from outreach.services.variables import MailVariables
 
 RECENT_EVENTS_LIMIT = 8
@@ -218,6 +219,7 @@ class OutreachAdminSite(AdminSite):
             "recent_events": recent_events,
             "max_recipients": outreach_settings.recipient_cap,
             "cooldown_label": self.cooldown_label(),
+            "send_usage": SendGate.usage(),
             **(extra_context or {}),
         }
         return super().index(request, context)
