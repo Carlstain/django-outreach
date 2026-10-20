@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-20
+
 ### Changed
 
 - The warning logged for a failed delivery now ends with the numeric SMTP reply code (`smtp 554`) when the error carries one. The reply text is still never logged or stored.
