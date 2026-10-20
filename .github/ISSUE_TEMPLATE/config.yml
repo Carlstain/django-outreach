@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Carlstain/django-outreach/security/advisories/new
+    about: Do not open a public issue for a security problem. Report it privately, see SECURITY.md.
+  - name: Read the documentation
+    url: https://django-outreach.readthedocs.io/
+    about: Installation, configuration and the user guide for staff.

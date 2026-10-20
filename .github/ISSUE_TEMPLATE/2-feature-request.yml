@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest a new feature or a change to an existing one.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        django-outreach is a small project, so a request that starts from a real need is the easiest one to accept.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve?
+      description: Describe what you are trying to do and what stops you today.
+      placeholder: When I send to an audience, I cannot ...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like?
+      description: How you picture the feature working, for staff users or for the host project.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Workarounds you use today, settings, signals or other packages.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Sending (mailing, Celery, scheduled send)
+        - Prospects
+        - CSV import or export
+        - Audiences
+        - Email templates, variables, tags and buttons
+        - Unsubscribe and suppression list
+        - Data download and erase (GDPR)
+        - Admin interface and theme
+        - Host project integration (settings, signals, URLs)
+        - Other or not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to open a pull request for this.
