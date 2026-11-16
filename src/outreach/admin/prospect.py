@@ -22,7 +22,6 @@ from outreach.admin.audience_filter import AudienceFilter
 from outreach.admin.member_filter import MemberFilter
 from outreach.admin.prospect_event_inline import ProspectEventInline
 from outreach.choices import (
-    ACTOR_SYSTEM,
     EventKind,
     OutreachLanguage,
     ProspectKind,
@@ -772,9 +771,7 @@ class ProspectAdmin(admin.ModelAdmin):
         linker = UserLinker()
         count = 0
         for prospect in queryset.filter(user__isnull=True):
-            if linker.link(prospect):
-                prospect.save(update_fields=["user", "updated_at"])
-                ProspectEvent.record(prospect, EventKind.LINKED, ACTOR_SYSTEM)
+            if linker.link_and_record(prospect):
                 count += 1
         message = ngettext("%(count)d prospect linked.", "%(count)d prospects linked.", count)
         self.message_user(request, message % {"count": count}, messages.SUCCESS)

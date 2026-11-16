@@ -139,6 +139,8 @@ All settings are optional except `OUTREACH_BASE_URL` for sending. They are read 
 | `OUTREACH_LOGO_DARK_STATIC_PATH` | none | Static path of the logo used in dark mode |
 | `OUTREACH_IMPORT_HEADER_ALIASES` | `{}` | Extra import column names, see below |
 | `OUTREACH_USER_PROSPECT_FIELDS` | none | Dotted path of a callable `(user) -> dict` giving extra prospect fields to `outreach_load_users`, see Loading users |
+| `OUTREACH_SYNC_USERS` | `False` | `False`, `"link"` or `"create"`. Syncs each newly created user with the prospects, see Loading users |
+| `OUTREACH_SYNC_USERS_FILTER` | none | Dotted path of a callable `(user) -> bool`. In `"create"` mode, `False` stops a prospect being created for that user |
 | `OUTREACH_THEME` | neutral palette | Colours and font, see Theming |
 
 Settings the app relies on from Django:

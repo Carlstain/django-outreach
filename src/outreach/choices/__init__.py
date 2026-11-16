@@ -8,6 +8,7 @@ from outreach.choices.outreach_language import OutreachLanguage
 from outreach.choices.prospect_kind import ProspectKind
 from outreach.choices.prospect_status import ProspectStatus
 from outreach.choices.skip_reason import SkipReason
+from outreach.choices.sync_users_mode import SyncUsersMode
 
 __all__ = [
     "ACTOR_IMPORT",
@@ -22,4 +23,5 @@ __all__ = [
     "ProspectKind",
     "ProspectStatus",
     "SkipReason",
+    "SyncUsersMode",
 ]

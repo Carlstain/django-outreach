@@ -28,6 +28,8 @@ so `override_settings` works in tests.
 | `OUTREACH_EMAIL_LOGO_IN_FOOTER` | `False` | Put `OUTREACH_LOGO_STATIC_PATH` at the start of the footer of mails |
 | `OUTREACH_IMPORT_HEADER_ALIASES` | `{}` | Extra import column names, see {ref}`import-aliases` |
 | `OUTREACH_USER_PROSPECT_FIELDS` | none | Dotted path of a callable `(user) -> dict` giving extra prospect fields to `outreach_load_users`, see {doc}`topics/loading-users` |
+| `OUTREACH_SYNC_USERS` | `False` | `False`, `"link"` or `"create"`. Syncs each newly created user with the prospects, see {doc}`topics/loading-users` |
+| `OUTREACH_SYNC_USERS_FILTER` | none | Dotted path of a callable `(user) -> bool`. In `"create"` mode, `False` stops a prospect being created for that user |
 | `OUTREACH_THEME` | neutral palette | Colours and font, see {doc}`topics/theming` |
 
 ## Settings from Django
