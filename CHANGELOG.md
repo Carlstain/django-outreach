@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- `OUTREACH_SYNC_USERS` (`False` by default, or `"link"` / `"create"`) syncs each newly created host user with the prospects, after commit: a matching prospect is linked, and in `"create"` mode a prospect is created for an active user. `OUTREACH_SYNC_USERS_FILTER` lets the host refuse creation, for example when the user did not consent. System checks `outreach.E007`, `E008` and `W002` validate both settings.
+
 ## [0.3.0] - 2026-10-21
 
 ### Added

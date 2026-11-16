@@ -6,7 +6,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.utils.module_loading import import_string
 
-from outreach.choices import DispatchMode, OutreachLanguage
+from outreach.choices import DispatchMode, OutreachLanguage, SyncUsersMode
 from outreach.theme import OutreachTheme
 
 
@@ -132,6 +132,24 @@ class OutreachSettings:
     @property
     def user_prospect_fields(self) -> Callable[[Any], dict[str, Any]] | None:
         dotted_path = getattr(settings, "OUTREACH_USER_PROSPECT_FIELDS", None)
+        return import_string(dotted_path) if dotted_path else None
+
+    @property
+    def configured_sync_users(self) -> Any:
+        return getattr(settings, "OUTREACH_SYNC_USERS", False)
+
+    @property
+    def sync_users(self) -> str | None:
+        configured = self.configured_sync_users
+        return configured if configured in SyncUsersMode.values else None
+
+    @property
+    def sync_users_filter_path(self) -> str | None:
+        return getattr(settings, "OUTREACH_SYNC_USERS_FILTER", None) or None
+
+    @property
+    def sync_users_filter(self) -> Callable[[Any], bool] | None:
+        dotted_path = self.sync_users_filter_path
         return import_string(dotted_path) if dotted_path else None
 
 

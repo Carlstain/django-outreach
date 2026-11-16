@@ -4,8 +4,9 @@ from typing import Any
 
 from django.conf import settings
 from django.core.checks import CheckMessage, Error, Warning
+from django.utils.module_loading import import_string
 
-from outreach.choices import DispatchMode, OutreachLanguage
+from outreach.choices import DispatchMode, OutreachLanguage, SyncUsersMode
 from outreach.conf import outreach_settings
 from outreach.theme import OutreachTheme
 
@@ -75,6 +76,40 @@ def check_sync_dispatch_in_production(app_configs: Any, **kwargs: Any) -> list[C
                 "Mail is sent synchronously inside the admin request.",
                 hint='Set OUTREACH_DISPATCH = "celery" for production.',
                 id="outreach.W001",
+            )
+        ]
+    return []
+
+
+def check_sync_users(app_configs: Any, **kwargs: Any) -> list[CheckMessage]:
+    configured = outreach_settings.configured_sync_users
+    if configured not in (False, None, *SyncUsersMode.values):
+        choices = ", ".join(f'"{value}"' for value in SyncUsersMode.values)
+        return [
+            Error(
+                f"OUTREACH_SYNC_USERS must be False or one of: {choices}.",
+                id="outreach.E007",
+            )
+        ]
+    filter_path = outreach_settings.sync_users_filter_path
+    if filter_path is None:
+        return []
+    try:
+        user_filter = import_string(filter_path)
+    except ImportError:
+        return [
+            Error(
+                "OUTREACH_SYNC_USERS_FILTER can not be imported.",
+                id="outreach.E008",
+            )
+        ]
+    if not callable(user_filter):
+        return [Error("OUTREACH_SYNC_USERS_FILTER must be callable.", id="outreach.E008")]
+    if outreach_settings.sync_users != SyncUsersMode.CREATE:
+        return [
+            Warning(
+                'OUTREACH_SYNC_USERS_FILTER only applies when OUTREACH_SYNC_USERS is "create".',
+                id="outreach.W002",
             )
         ]
     return []
